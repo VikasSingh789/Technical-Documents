@@ -1,0 +1,145 @@
+1) What is the difference between List and Set
+A) 
+List:-
+------
+a) Allows Duplicate Objects
+b) List works on index based
+c) Use List, when we want to frequently access/get/fetch the elements by using index
+
+Set:-
+-----
+a) Does not Allow Duplicate Objects.
+b) Maintains Unique Object.
+c) Set works on Hash based mechanism
+
+ex-1: ArrayList<String> arrayList = new ArrayList<>();
+ex-2: List<String> list = new ArrayList<>();
+Always better to use "ex-2" syntax over "ex-1". By this way, we are avoiding tight coupling.
+The above line "ex-2" is called as RunTime Polymorphism. With the Help of parent refernce, we are creating object of child class.
+
+"<String>" will be a generic type. Always recommended to use Type Generic. So that List will allow only String Object.
+By this, No "Type Cast" Issue will face in future, if we maintain the generic.
+
+2) How can i write Custom ArrayList where i dont  want to allow duplicate
+A) class CustomArrayList extends ArrayList{
+	
+	@Override
+	public boolean add(Object o){
+	if(this.contains(o)){
+		return true;
+	} else {
+		return super.add(o);
+	}
+} 
+
+	PSVM(String[] args){
+	CustomArrayList list = new CustomArrayList();
+	list.add(1);
+	list.add(1);
+	list.add(2);
+	}
+	
+	System.out.println(list);
+}
+
+Output:-
+--------
+[1,2]
+
+3) Why Set doesn't allow duplicate element.
+A) Inside set.add(), it internally use map Object to store the value.
+ex:- public boolean add(E e){
+	return map.put(e, PRESENT) == null;
+}
+consider passed arg as a key in map.put(), and value as a "PRESENT" which is a dummy Object.
+ex:- private static final Object PRESENT = new Object();
+
+In Set, if we are using set with primitive, then no need to override "hashcode and equals()", Set Rule will work properly. (doesn't allow duplicates)
+But if we are using any Custom Object like "Employee", Set rule may not work properly. Then in this scenario or to overcome this problem, we must need to override "hashcode and equals()".
+
+4) What is the difference between fail fast and fail safe iterator
+A) fail fast:- Iterator which fail fast when we do  any modification while iterating a collection is called fail fast iterator.
+ex:- ( ArrayList, HashMap and Vector )
+fail safe:- Iterator who allows us to modify in middle while iterating a collection is called fail safe iterator.
+ex:- ( CopyOnWriteArrayList, CopyOnWriteArraySet, ConcurrentHashMap ).
+
+FailFast:-
+----------
+Internally Iterator uses a "modCount". So any changes in the collection, It will be reflected in the "modCount".
+Consider a scenario, while iterating a collection, initial modCount value will be "0", and if we add something while Iterating like "add()", then modCount value will gets changed to "1". Any difference found in modCount, then it will throw the "ConcurrentModificationException".
+
+Fail Safe:-
+-----------
+So instead of using "new ArrayList<>()" will use "new CopyOnWriteArrayList<>()". In this way we can achieve fail safe iterator. In this it will check the "modCount" as well, but if there is differencein modCount, immediately it will create a clone copy of our collection and any update happen, then changes will affect in cloned collection and not in actual collection.
+
+The added value will not get Added/printed/stored in actual collection, because added value will get stored/add in copy of list Object.
+
+FailFastMap:-
+-------------
+While Iterating, if we add/modify using map.put(), then will get ConcurrentModificationException.
+
+FailSafeMap:-
+-------------
+To avoid above FailFastMap or "ConcurrentModificationException", we can use "ConcurrentHashMap".
+In this ConcurrentHashMap. its not using clone copy of collection. since we are using map, there will be no copy of collection.
+
+
+5) What is the need of ConcurrentHashMap and how it is different from HashMap
+A)
+HashMap:-
+---------
+a) HashMap is non-Synchronized.
+b) HashMap is not Thread-Safe.
+c) It is fail-fast and throws an Exception during iteration.
+d) It allows storing null keys and values.
+e) HashMap is faster compared to ConcurrentHashMap
+
+ConcurrentHashMap:-
+-------------------
+a) ConcurrentHashMap is Synchronized.
+b) ConcurrentHashMap is Thread-Safe.
+c) It is fail-safe and performs iteration by multiple threads.
+d) It does not allow to store null keys/values.
+e) ConcurrentHashMap is Slower than compared to HashMap.
+
+In ConcurrentHashMap, if we pass put(null,null), then it will throw NullPointerException.
+Because Internally,  Implementation of put() checks "if(key == null || value == null) throw new NullPointerException".
+
+
+6) If we have HashTable which is already  synchronized then why we need ConcurrentHashMap
+A) Locking Mechanism still same as per HashMap. ( locks whole Object or Locks whole Underlying DS ).
+Will have Segment or Bucket Level Locking in ConcurrentHashMap, which is not there in Hashtable.
+Its always preferable to use ConcurrentHashMap over HashTable.
+
+7) We can Synchronize a HashMap using Collections then why can't we use HashMap instead using ConcurrentHashMap.
+A) if we used Collections.synchronizedMap(map), it will act as a synchronized Hashtable only. Where again Locking mechanism is different.
+
+8) How Hashmap works internally
+A) Map<Employee, String> map = new HashMap<>();
+when we create a hashmap object, internally it creates a bucket Structure say 0-15(16). Since initial capacity of Map is 16, it will create 16 Buckets. Each Bucket internally uses a LinkedList. Every Bucket considered as a linkedList. LinkedList conatins a Node. 
+Each Bucket can have n no. of Nodes. Node conatins internally "key,value,hash,next". 
+
+map.put(e1,"Dev")
+put(key,value)
+hash(key)
+index = hash & (n-1)
+
+Assume the above put method, evaluates the index = 6, Now this entry or node will get and stored on "Bucket 6". Here Bucket is nothing but a LinkedList. And now it stores 1 Node as "e1,Dev,1011,null". "Null" Because there is no element to point further.
+
+map.put(e2,"QA") and index = 9
+
+map.put(e3,"UI") and index = 6. Note, Here index is 6 and we already have a node created in that bucket  with "e1,Dev,1011,null".
+In same entry/LinkedList/Bucket, if we find multiple Nodes then its called as "Hashing Collision".
+Since Both having the Same Hash, Immediately map checks for "e1.equals(e3)" method to check the content if both are same. If it find difference, then it will get stored in same bucket as "next node". Now on 6th position we have 2 nodes. (e1 and e3).
+
+Note:- if in hash collision, map checks for "e1.equals(e3)". And if value is already present in existing node, then the whole node will get replaced by New Node. i.e:- e3.
+
+Consider a Scenario, where in put(key,value), key is null, then it will get placed in 0th position of bucket.
+
+
+9) What is Enhancement done on hashMap in Java 8
+A) Initially, in HashMap, Each Bucket is used as a LinkedList, but on certain threshHold it will convert it to the Balanced tree mechanism.
+
+10) How TreeMap Internally works.
+A) If we use treeMap, any Object we add as a key, will preserve the default natural Sorting Order. Then How its doing the DNSO ?
+Internally it uses Comparable interface which uses compareTo() to perform DNSO.
