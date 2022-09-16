@@ -1,0 +1,110 @@
+Plan:-
+-------
+Company(Organization) MicroService
+Employee MicroService
+MySql DB ( JPA )
+Lombok
+Exception Handling
+Multiple relations between Organization and Employee
+String to Json (or) Json to String Conversion
+Rest Template
+loggers
+AspectJ Logging (Centralized Logging)
+Profiles
+Junit Test cases
+Jacoco Report
+Sonar Lint
+
+
+Core Java:-
+-----------
+Streams (Sort and Filter)
+Java 8 features
+Collections
+
+------------------------------------------------------------------------------------------------------------------------------------------
+Git Commands:-
+--------------
+git checkout -b US4108333-SMAHTML
+git push -u origin US4108333-SMAHTML
+-------------------------------------
+git clone {repourl} -b {branchName}  or git clone {branchName}
+git pull origin dev
+git pull
+git push
+git checkout {branchName}
+----------------------------
+git stash
+git pull
+git stash pop
+git reset --hard
+----------------------------
+Fork Repository:-
+-----------------
+git clone {forkRepository}
+git remote -v
+git remote add upstream {actualRepository} 
+git pull upstream dev
+--------------------------------------------
+git cherry-pick 890efb6f8c8ef5bc65d20893885c75eee10a3bd0
+git cherry-pick {commit-id}
+----------------------------------------------------------------------------------------------------------------------------------------
+Test Cases:-
+-------------
+when(enrollmentRepository.findByConfirmationIDAndDeleted(Mockito.anyString(), Mockito.anyBoolean())).thenReturn(enrollment); (or)
+doReturn(e).when(enrollmentRepository).findByConfirmationIDAndDeleted(e.getConfirmationID(), false);   --> Method Returns
+when(feinProviderService.getFEIN(Mockito.anyString())).thenThrow(NotFoundException.class);             --> Method Returns and throws Exception
+doNothing().when(enrollmentUnitService).restoreRelatedEUsFromArchive(Mockito.anyString());			   --> Void Method
+doThrow(new SystemException()).when(enrollmentHTMLManager).generateSubmissionHTMLOnSMASubmit(Mockito.any());  --> Void Method and throws Exception
+EX:- For Throw Exception in test case
+@Test(expected = NotFoundException.class)  --> declare on top of test method
+when(enrollmentRepository.findByConfirmationIDAndDeleted(Mockito.anyString(), Mockito.anyBoolean())).thenReturn(null);
+
+https://javapointers.com/java/unit-test/difference-between-spy-and-mock-in-mockito/
+---------------------------------------------------------------------------------------------------------------------------------------
+
+
+Spring Boot Application Workflow
+https://www.geeksforgeeks.org/spring-boot-architecture/
+How we can look/evaluate when we get a spring boot project at first time
+How to deploy project in live environment – Deployment concept 
+How to achieve Abstraction in a Java Program
+Spring MVC workflow 
+Spring Boot Architect flow.
+Sort employee objects based on salary
+What are microservice
+Mvn clean command
+In test case we pass the variable or not?
+Which method we call if other microservice is down
+Bean life cycle in spring boot
+MVC architecture in details with exaple
+Explain @Entity annotation & @qualifier annotation
+Encapsulation:- https://www.geeksforgeeks.org/encapsulation-in-java/
+Bean Lifecycle in Spring:- https://www.geeksforgeeks.org/bean-life-cycle-in-java-spring
+When 1 Microservice is down:- https://stackoverflow.com/questions/50562495/how-to-handle-microservice-interaction-when-one-of-the-microservice-is-down
+https://www.interviewbit.com/microservices-interview-questions/
+Streams:- https://www.geeksforgeeks.org/functional-programming-in-java-8-using-the-stream-api-with-example/
+Adding json file for junit test cases coverage.
+Hashcode and Equals Method:- https://howtodoinjava.com/java/basics/java-hashcode-equals-methods/
+
+
+
+Spring Boot Tutorial:
+---------------------
+https://www.educba.com/spring-boot-ehcache/?source=leftnav
+
+
+Programs:-
+-----------
+Write the code to sort collection Using Stream API on the basis of student address.
+class student{
+id
+name
+address
+}
+https://stackabuse.com/java-8-how-to-sort-list-with-stream-sorted/
+
+write a program which will print a list using Lamda.
+https://stackoverflow.com/questions/23324782/how-to-use-javas-lambda-expressions-to-print-an-array
+
+Write a programe which will print a list object and while printing append Hello as prefix using Lamda
