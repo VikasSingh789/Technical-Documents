@@ -1,0 +1,218 @@
+Lambda Expressions
+Stream API
+Default Methods in Interface
+Static methods
+Functional Interface
+Method Reference 
+
+1) What are all features of java 8  did you used
+A)  a) Functional Interface (include default and static Method)
+	b) Lambda Expressions
+	c) Stream
+	d) CompletableFuture
+	e) Java DateTime API
+	
+2) What is Functional Interface
+3) List of Functional Interface which is already there before Java 8
+A)  a)Runnable (void run)
+	b)Callable (call)
+	c)Comparator (int compare(a1,a2)
+Note:- In Comparator Interface, it contains 2 abstract Methods, compare and equals Methods. But Equals Methods belongs from Java.lang.Object and it directly overrides from Object Class. so though we have 2 abstract methods here, we can still say its an Functional Interface because equals Method directly belongs from Object class.
+4) Can you Write 1 Functional Interface
+
+5) can we extend Functional Interface from another Functional Interface
+A) Yes we can Extend. But our Functional Interface will no longer be an Functional Interface, Because the Functional Interface extends other FI, will now have 2 abstract methods and now it can't be called as an FI.
+
+6) What are all Functional Interface introduced in Java 8
+A)  a)Function (R apply(T t))
+	b)Predicate (boolean test(T t))
+	c)Consumer (void accept(T t))
+	d)Supplier (T get())
+
+7) What is Lambda Expressions
+A) Below are the syntax and examples:-
+ 
+a)Runnable run = ()->{};
+
+b)Runnable th = ()-> System.out.println{"run method"};
+new Thread(th).start();
+
+c)interface MyFunction{
+	String test(String s1,String s2);
+}
+
+MyFunction function = (s1,s2)->s1+":"+s2;
+System.out.println(function.test("abc","def"));
+
+d)Function<Integer,String> function = (t)->"output:"+t;
+System.out.println(function.apply(88));
+
+The above d:example, apply() will take input as Integer and return String because we have given Type as <integer,String>
+
+8) Advantages and DisAdvantages of Lambda Expressions
+A)  a)Avoid Writing anoymous impl
+	b)it saves or reduces lot of code
+	c)The code is directly  readable without interpretation.
+
+a)Hard to use without an IDE
+b)complex to Debug
+
+9) What is Stream API
+
+10) What is Stream in Java 8
+A) List<Integer> list = Arrays.asList(23,4,6,8,9,1,2,10);
+//print > 4
+//sort the inputs
+list.stream().filter(t->t>4).sorted().forEach(t-> System.out.println(t));
+The above example can be replaced with the method reference
+ex:- list.stream().filter(t->t>4).sorted().forEach(System.out::println);
+
+11) What is Method refernce in java 8
+A) 2 types of Method reference in java 8
+
+1) static
+2) instance
+
+1) static Example of Method refernce
+
+public static void printElement(int i){
+ System.out.println(i);
+}
+
+list.stream().filter(t->t>4).sorted().forEach(Test::printElement);
+
+2) instance Example of Method refernce
+
+public void printElement(int i){
+ System.out.println(i);
+}
+
+Test test = new Test();
+list.stream().filter(t->t>4).sorted().forEach(test::printElement);
+
+Note:- Test is a Class, in which we are writing static and non-static Methods. ex:- printElement(int i)
+
+12) Spell few Stream methods used in project
+A)  a)filter
+	b)forEach
+	c)sorted
+	d)map
+	e)flatMap
+	f)collect
+	
+13) When to use map and flatMap
+A) 
+public class User{
+private String name;
+private String phone;
+private List<String> email;
+}
+
+Add list of Users
+-----------------
+List<User> users = Stream.of(
+	new User("user1","123",Arrays.asList("abc@gmail.com","def@gmail.com")),
+	new User("user2","456",Arrays.asList("ghi@gmail.com","xyz@gmail.com")))
+.collect(Collecters.toList());
+
+Now, to get only phoneNumbers of all users, we can use map(). below is the example
+List<String> phoneNumbers = users.stream().map(User::getPhone).collect(Collectors.toList());  (Same for name)
+System.out.println(phoneNumbers);
+
+Now, we can see in Users Class, we have multiple emails. So in "1 to many" scenario, we can use flatMap. consider a scenario by fetching getEmail by using map,
+List<List<String>> emails = users.stream().map(User::getEmail).collect(Collectors.toList());
+System.out.println(emails);
+
+output:-
+---------
+[[abc@gmail.com,def@gmail], [ghi@gmail, xyz@gmail]]
+
+The Above you can see, the return type is List<List<String>> "List in List" and output we can see as "List in List" format. To avoid this, if we want to display emails in a single list, in that case if we have "1 to many", its recommend to use flatMap. Below is the example of flatMap,
+List<String> emails = users.stream().flatMap(u->u.getEmail().stream()).collect(Collectors.toList());
+System.out.println(emails);
+
+To Fetch single element/attribute in a class, we can use map(). if we have 1 User where it contains multiple emails or "1 to many" scenario then we can use flatMap.
+
+14) WAP using stream to Find frequency  of each character in a given String
+A) String input = "Basant";
+Map<String, Long> countMap = Arrays.stream(input.split(""))
+								          .collect( groupingBy(
+														  Function.identity(),counting()
+												  ));
+System.out.println(countMap);	
+
+output:-
+--------
+{a=2,B=1,s=1,t=1,n=1}		
+
+
+15) Assume you have list  of employee in various dept, WAP  to find  highest paid employee from each dept
+A) public class Employee{
+	private Long id;
+	private String name;
+	private String dept;
+	private Long salary;
+}						  
+
+List<Employee> employees = Stream.of(
+	new Employee(1,"user1","Dev",50000),
+	new Employee(3,"user3","QA",80000),
+	new Employee(9,"user9","QA",70000),
+	new Employee(5,"user5","Dev",60000),
+	new Employee(4,"user4","TESTER",40000))
+.collect(Collecters.toList());
+
+The Below step is for performing grouping by dept, and need to fetch the recorde based on highest salary in each department,
+
+Approach-1
+----------
+Comparator<Employee>  compareBySalary = Comparator.comparing(Employee::getSalary);
+Map<String, Optional<Employee>> employeeMap = employees.stream().
+			collect(
+					groupingBy(Employee::getDept,
+						Collecters.reducing(BinaryOperator.maxBy(compareBySalary)))
+			);
+System.out.println(employeeMap);
+
+Approach-2
+----------
+Map<String, Employee> employeeMap = employees.stream().
+				collect(
+					groupingBy(
+						Employee::getDept,
+						collectingAndThen(maxBy(Comparator.comparingDouble(Employee::getSalary)), Optional::get)	
+				));
+System.out.println(employeeMap);
+
+16) Stream vs Parallel Stream
+A) The flow of execution is sequence in Stream where as flow of execution is parallel.
+Stream:- It uses single core and execution will be in sequence manner. All the execution will happen on Main-Thread. ALl Threads will be using the single core. ex:- core 1, core 2..etc.
+Parallel Stream:- It uses multiple core. It gets thread and joins the Threadpool and starts executing. 1 will be executing on the main and other's from the Thread of Thread Pool.
+
+Ex:-
+-----
+IntStream.rangeClosed(1,10).forEach(t-> System.out.println(Thread.currentThread().getName()+t));
+System.out.println("==============");
+IntStream.rangeClosed(1,10).parallel().forEach(t-> System.out.println(Thread.currentThread().getName()+" : "+t));
+
+Output:-
+--------
+main : 1
+main : 2
+main : 3
+main : 4
+....
+main : 10
+==========
+ForkJoinPool.commonpool-worker-1 : 3
+ForkJoinPool.commonpool-worker-2 : 2
+ForkJoinPool.commonpool-worker-3 : 5
+ForkJoinPool.commonpool-worker-1 : 1
+ForkJoinPool.commonpool-worker-1 : 10
+main : 7
+
+Note:- Observe the order of execution, its not in sequence. We are getting Random 1 to 10 execution. 1 will be executing on the main-method and other's from the Thread of Thread Pool.
+
+Since Parallel Stream is using Multiple core's, if we compare the time of execution, will get the better time execution in parallel Stream.
+
+17) WAP to print even and odd using 2 Threads
