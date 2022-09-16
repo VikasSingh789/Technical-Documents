@@ -1,0 +1,343 @@
+MicroService:-
+--------------
+https://www.youtube.com/watch?v=5s9pR9UUtAU Microservices Logging | ELK Stack | Elastic Search | Logstash | Kibana | JavaTechie
+https://www.youtube.com/watch?v=kJl1bE1oI1s MS Interview Questions part-1
+https://www.youtube.com/watch?v=no65NmNZWz0 MS Interview Questions part-2
+https://www.youtube.com/watch?v=G0waumbpK48 MS Interview Questions and Answers
+https://www.youtube.com/watch?v=_4n7NpdCECg MS Most Asked Architecture Interview Questions
+https://www.youtube.com/watch?v=vZQMoY_2_AA MS Logging
+https://www.youtube.com/watch?v=tljuDMmfJz8 MS using Spring Cloud and Spring Boot
+https://www.youtube.com/watch?v=_PQd6aZ-ANk MS Crash course for Beginners
+https://www.youtube.com/watch?v=BnknNTN8icw Microservices using SpringBoot | Full Example * (1h 30m)
+https://www.youtube.com/watch?v=b6R4dElDtRc Microservice | Resilience4J Circuit Breaker Implementation on Spring Boot | Java Techie
+https://www.youtube.com/watch?v=niqew7GPP4k Adding Hystrix to a Spring Boot app - Spring Boot Microservices Level 2
+https://www.youtube.com/watch?v=jZABh-gG6fM Hystrix circuit breaker And Fault Tolerance in Microservices Spring boot
+https://www.youtube.com/watch?v=O5ou6lBwWYw ELK Stack + Spring Boot Microservice Hello World Example
+https://www.youtube.com/watch?v=Nj57wpe_vEg Core Java, Spring Boot, Microservice Interview Questions | Cognizant L1 Technical Interview
+
+
+Spring Boot:-
+-------------
+https://www.youtube.com/watch?v=2YC5pIXR7e4 Spring Boot - @Autowired, @Qualifier, @Primary, @Required | Simple Programming
+https://www.youtube.com/watch?v=qlygg_H1M20 How Spring Boot works internally
+https://www.youtube.com/watch?v=htyq-mER0AE Spring Boot Annotations Interview QA
+https://www.youtube.com/watch?v=2x9G8daUM8A Spring Cloud Hystrix Circuit Breaker with spring boot | Java Techie
+https://www.youtube.com/watch?v=htyq-mER0AE Interview QA | 40+ Spring & Spring Boot Annotations Everyone Should Know | JavaTechie * (1h)
+https://www.youtube.com/watch?v=NKhNnBvufGI Annotations in Spring boot with Explanation| Spring boot Interview Questions and Answers Code Decode
+https://www.youtube.com/watch?v=95kxPSbHzVg Spring Boot | Spring Data JPA Transaction Management | @Transactional | JavaTechie
+https://www.youtube.com/watch?v=gPnd-hzM_6A Spring Boot | REST API Request Validation & Exception Handling Realtime Example | JavaTechie
+
+Java:-
+------
+https://www.youtube.com/watch?v=k7fNLXoVCYg Java 8 Interview Questions and Answers
+https://www.youtube.com/watch?v=KfoNYoVUBJI Java collections framework interview questions | [MOST ASKED COLLECTIONS INTERVIEW QUESTION]  (27)
+https://www.youtube.com/watch?v=GO67C7V-IbQ Java Collection Interview Questions & Answers | Tricky Q&A | Freshers | Experience | JavaTechie (59)
+https://www.youtube.com/watch?v=fFnuer3AD8Q Frequently Asked Java Interview Q&A | Tricky Questions | Freshers | Experience | Part-1| JavaTechie
+https://www.youtube.com/watch?v=oUdENE7ljjw&t=25s Java 8 new features || Java 8 Interview Questions and Answers ( Live Demo with Examples ) (20)
+https://www.youtube.com/watch?v=Tapz6_T5oHY Java -8 Consumer , Supplier & Predicate Interface With Example | Java Techie (26)
+
+Microservice orchestration:-
+----------------------------
+Microservice orchestration, the orchestrator (central controller) handles all the microservice interactions. It transmits the events and responds to it. The microservice Orchestration is more like a centralized service. It calls one service and waits for the response before calling the next service.
+
+Challeges with Micro Service:-
+------------------------------
+Bounded context:- what is the right context to build the MS. (boundary of MS and what to do with each MS).
+Configuration Management:- 
+Dynamic Scale Up and Scale Down:- Distribute the load of Instances. 1 MS can have 1 env with multiples Instances.
+Visibility:- Which MS caused the problem. Identify which MS's are down.
+FaultTolerance:- If a service is down.
+
+SpringCloudConfigServer:- (Problem solver for Configuration Management)
+--------------------------
+SpringCloudConfigServer provides an approach, where we can store all the configurations for all the different env's of all the MS's in a git repo(Centralized Location). SpringCloudConfigServer can be used to expose the configurations to all the microservices. This makes hepl to put all configurations in 1 place and easy to maintain the configuration for all the microservices.
+
+Ribbon Load Balancing:- (Problem solver for Dynamic Scale Up and Scale Down)
+-----------------------
+Ribbon can be used to distribute the load between all the instances. Checks dynamically available instance to distribute the load among all of them.
+Ribbon can be used for client side load balancing. So that load can be equally distributed among the existance Instances.
+
+Hystrix:- (Problem solver for FaultTolerance)
+---------
+If a service is down, Hystrix helps us to configure a default response.
+
+Eureka Server:-
+---------------
+Eureka Server is an application that holds the information about all client-service applications. Every Micro service will register into the Eureka server and Eureka server knows all the client applications running on each port and IP address. Eureka Server is also known as Discovery Server.
+
+
+MS's are solution for monolith Application.
+
+
+Setter Injections are not mandatory Injection whereas Constructor injections are mandatory dependency(injection).
+@Autowired(required = false) doesn't have any impact on Constructor
+
+
+ServiceRegistry:-
+-----------------
+We use ServiceRegistry to manage all vast details, Scale Up and maintain all ports and URI information of all MS. ServiceRegistry Will maintain all the MS's. All the MS's will be connected to this ServiceRegistry and will get all the information regarding all the services.
+ex:- status update, what are the port info and URL etc.
+
+Dependencies for Creating ServiceRegistry MS:-
+----------------------------------------------
+Eureka Server (Spring Cloud Discovery)
+
+Default port no. for eureka server is 8761.
+
+Below is the eureka client we need to provide for client registry in ServiceRegistry MS
+
+For ServiceRegistry MS ( In application.yml )
+----------------------------------------------
+eureka:
+  client:
+    register-with-eureka: false
+	fetch-registry: false
+	
+Note:-
+------
+register-with-eureka and fetch-registry are false because "ServiceRegistry MS" itself is a server and we dont have to go to eureka server for registering itself.
+
+
+In User and Department MS, we need to implement Eureka client. And "register-with-eureka" and "fetch-registry" will be true, so that User and Department can be considered as client and these MS's can be connect with the Eureka Server.
+
+Some configuration Changes in User and Department MS's:-
+---------------------------------------------------------
+pom.xml:- we need to add the dependencies here.
+
+Search for Eureka Discovery client in start.spring.io and click on it and click on explore.
+
+a) copy the "spring.cloud.version" from properties tag and paste it in to Department Service pom.xml file under properties tag.
+ex:- <spring.cloud.version> Hoxton.SR8 <spring.cloud.version>
+
+b) copy the dependency tag which states "spring-cloud-starter-netflix-eureka-client" and paste in to Department Service pom.xml file under dependency section.
+
+c) Add/copy the "dependency Management" and "build" tag and paste it in Department Service pom.xml file post "Dependencies" tag.
+Note:- Build info should be replaced with existing build in Department Service.
+
+The Above 3 points needs to be perform in User MS as well.
+
+
+In User Service/MS (9002), Need to add configuration Details in application.yml.
+Below is the example of configuration Details:-
+-----------------------------------------------
+eureka:
+  client:
+    register-with-eureka: true
+	fetch-registry: true
+	service-url:
+	  default-zone: http://localhost:8761/eureka/
+  instance:
+   hostname: localhost
+   
+Note:- "register-with-eureka" and "fetch-registry" are true because this can go ahead and connect to the service registry but where ?? So for that we have given the URL. "service-url" and "default-zone" with port 8761, is the same port which we have given in service registry MS.
+"hostname" can be replaced by the production url.
+
+Add Name of the Application:-
+-----------------------------
+spring:
+  application:
+    name: User-Service
+	
+The Above steps can be added in Department Service (9001) as well. ( line no. 101 )
+
+
+Start Service Registry MS and go to browser and type url "localhost:8761" and press enter. Will see Spring Eureka Page in browser.
+
+Start User and Department Service, and will be able to see both the Services are registered to my Service registry under "Instances currently registered with Eureka" in Spring Eureka Page.
+
+In User Service we have called the Department Service with localhost URL. Now consider we have multiple instances of the services are working on a different ports and different URL's then it would be difficult to get the correct URI Information with the "localhost" hostname. So in order to avoid this complexity, we can change the host information like URI Information and will give the application name.
+Consider a Scenario, where i need to connect to User Service Application, so i should not be worried about any host information. I should be connecting to User Service with the help of application name and not with local url(which avoids complexity).
+
+Replace "http://localhost:9001/departments/" with "application.name" value in "UserService.java" because we would be calling Department data from User Service.
+ex:- Replace "http://localhost:9001/departments/" with "http://DEPARTMENT-SERVICE/departments/".
+Note:- DEPARTMENT-SERVICE is the application name we will provide in application.yml file. ex:- spring.application.name: "DEPARTMENT-SERVICE" in Department Microservice.
+We are avoiding or removing the complexity of calling url:localhost:9001 to simply "DEPARTMENT-SERVICE" which is an application name in Department MS. So whereever this application is working  either in any port or any other service, if its connected to service registry then i should get the info for that particular api call. in our case, "DEPARTMENT-SERVICE" could be running on any port or any other service, by simply calling url with "http://DEPARTMENT-SERVICE/departments/", we should be getting the appropriate result.
+
+Now if we try to fetch the user details by userid, we would be getting the error. This is because we need to tell the rest template as well that "We are connected to service registry, so u need to load balance ur request". So In order to work this, we need to add "@LoadBalanced" on top of restTemplate() method. so by adding this, if multiple services available connected to service registry then it will load balance the request for us.
+
+Post this if we try to fetch the user details by userid again, this would be working and we will see "user" and "department" data. And Now this is directly getting the deparrment from the "DEPARTMENT-SERVICE" application name and not from hostname and port information. So this is Service registry helping us to identify which are all MS's are up and running and we can directly connect to different MS's with the Spring Application Name  itself.
+
+
+API-Gateway / Routing Configuration / Cloud Gateway:- (9191)
+------------------------------------------------------------
+Create a separate MS visiting "start.spring.io" and add dependencies.
+a) Eureka discovery client:- Need to register to my Service Registry.
+b) gateway
+c) actuator
+
+In application.yml, provide below configuration,
+
+a) application name. ("API-GATEWAY")
+b) eureka-client registry. ( Same we used for User MS )
+c) cloud gateway
+
+ex:-
+----
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      routes:
+        - id: USER-SERVICE
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+        - id: DEPARTMENT-SERVICE
+          uri: lb://DEPARTMENT-SERVICE
+          predicates:
+            - Path=/departments/**
+			
+Use of API Gateway is initially we were calling directly url of specific MS to get or post the data, by using Routing Mechanism (added configuration in yml), all the api request are been travered through API Gateway and not calling directly url of specific MS.
+
+Circuit-Breaker:-
+-----------------
+Circuit-Breaker will identify the Services/MS's which are not running and it will run the fallback methods available and it will notify the users like "The Specific Service is not running/working". As a circuit-breaker, will be implementing the Hystrix library and will implement the Hystrix-dashboard so that we can identify which are all the MS's are running and which all MS's are not running.
+
+Will implement the Hystrix in Cloud gateway Service
+
+Add Dependencies:-
+------------------
+a) Hystrix. ( circuit breaker  with Spring Cloud Netflix Hystrix ).
+click on explore and copy the dependency tag which states "spring-cloud-starter-netflix-hystrix" and add it in cloud gateway pom.xml file under dependencies section tag.
+b) @Enablehystrix on top of main method. @EnableEurekaClient
+
+In Cloud Gateway MS, Create a controller Name "FallBackMethodController" and add a method for UserService with @GetMapping("/userServiceFallBack") with return type as String stating "User Service is taking Longer than Expected. Please Try Again". Same for DepartmentService as well.
+
+Now we need to provide the configuration where User/Department Service is taking longer time to respond.
+
+Below is the configuration we need to add in application.yml file (need to append):-
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      routes:
+        - id: USER-SERVICE
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: USER-SERVICE
+                fallbackuri: forward:/userServiceFallBack
+        - id: DEPARTMENT-SERVICE
+          uri: lb://DEPARTMENT-SERVICE
+          predicates:
+            - Path=/departments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: DEPARTMENT-SERVICE
+                fallbackuri: forward:/departmentServiceFallBack
+				
+				
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+			
+			
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+			
+Above is the Hystrix configuration has been added. And Also added configuration for actuators, Enabling Hystrix.stream, so that we can use this info in Hystrix dashboard.
+				
+Adding timeout in MilliSeconds as 4 secs. If i am not getting the response from either of the service with in 4 secs then my request will be forwarded to either "userServiceFallBack" or "departmentServiceFallBack" which ever is down.
+
+Create MS for Hystrix Dashboard:-( 9295 )
+------------------------------------------
+Add Dependencies:-
+
+a) Eureka Discovery Client
+b) hystrix dashboard
+
+configurations:-
+----------------
+a) provide application name in yml file as "HYSTRIX-DASHBOARD".
+b) Enable "Hystrix-Dashboard" by using "@EnableHystrixDashboard" on top of main method.
+c) Also Enable Eureka-Client by using "@EnableEurekaClient"
+d) Add Eureka-Client configuration in yml file ( Same as USER-SERVICE )
+e) Add Hystrix-Dashboard configuration
+ex:-
+----
+hystrix:
+  dashboard:
+    proxy-stream-allow-list: "*"
+	
+		
+Create a MS name as cloud-config-server:-
+-----------------------------------------
+For Eureka Client, As of now we have configured eureka client "service-url.default-zone" and "hostname" with same value in each and every MS. So this info is available in all the MS. Suppose there is change in any of the "default-zone" or "hostname" or any of the properties then we have to go and change in every places. so this is not feasible when we are working with 100's or 1000's of MS's. so we need to externalise/centralize or need to create 1 Configuration Server and from there we will be able to get all the configuration and we can use in all our MS's.
+Will add all our configuration in github repo or any other place so that will be our external configuration and all our MS will be talking to this Configuration.
+
+Dependencies:-
+--------------
+a) Eureka Discovery Client. ( So that we can register to our service-registry )
+b) config server
+
+Add configurations:- ( 9296 )
+------------------------------
+a) Add "@EnableEurekaClient" on top of main method.
+b) Add "@EnableConfigServer" on top of main method to enable config server.
+c) In yml file, add spring application name as "CONFIG-SERVER"
+
+Now will create 1 git repository and there will create 1 application.yml file and  will store all our default configurations.
+
+Go to github "github.com", click on new and provide Repository name as "config-server" and click on create-repository.
+click on "create a new file" and will name as "application.yml". In this yml file, will store all our default configurations.
+Below is the configuration, that has been used in all our MS's for eureka client.
+
+eureka:
+  client:
+    register-with-eureka: true
+	fetch-registry: true
+	service-url:
+	  default-zone: http://localhost:8761/eureka/
+  instance:
+   hostname: localhost
+   
+copy above configuration and paste in github yml file which we have create recently in github.
+
+And click on "commit new file".
+
+Now we need to do this configuration for this particular github repository.
+
+Below is the configuration we need provide in yml file of "cloud-config-server" MS.
+
+spring:
+  application:
+    name: CONFIG-SERVER
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/shabbirdwd53/config-server
+          clone-on-start: true
+		  
+Now above file is our config server. Now in all our other MS's we need to talk to this config-server. Need to enable the config-client over there (Other MS) and we need to point to this particular URL over here.
+Now add dependencies and configurations in all over MS.
+
+Configurations in DEPARTMENT-SERVICE:-
+--------------------------------------
+a) In pom.xml file, Add "Spring-cloud-starter-config" dependency. ( Same in other MS )
+b) create bootstrap.yml file and add below configuration that file, so that we can directly talk to our config-server.
+
+spring:
+  cloud:
+    config:
+      enabled: true
+	  uri: http://localhost:9296
+	  
+And Also remove eureka-client registry from all MS, since we have added this configuration in github application.yml file as a default configuration.
+Add this bootstrap.yml file in all other MS. (User, Department, Cloud-Gateway, Hystrix-Dashboard, Cloud-config-server).
+
+1st will start the Registry, then config-server, then API-Gateway, then all other MS.
