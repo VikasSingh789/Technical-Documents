@@ -1,0 +1,212 @@
+Q) What is @SpringBootApplication
+A) @SpringBootApplication contains / combines 3 other Annotations,
+
+a) @ComponentScan:- It will scan our bean, so that it can be visible to IOC Container.
+Helps us to scan our package or bean, to be registered in IOC Container.
+ex:- if we want to load a specific package and class to IOC Container then we can use @ComponentScan and can provide base package or base class.
+
+b) @EanbleAutoConfiguration:- Automatically configures the SpringAnnotations based on Jar Dependency that we have added in out POM.xml.
+ex:- If H2 DB jar is present in class path and we have not configured any beans related to DB manually, then SB AutoConfiguration feature automatically configure in out project.
+
+c) @Configuration:- We use @Configuration for java based configuration where we can define the bean definitions inside this class so that Spring IOC can load it.
+
+Q) SteroType Annotations
+A)  @Component
+	@Service
+	@RestController / @Controller
+	@Repository
+	
+These Annotations are used to create Spring Bean automatically in the Application Context. If we annotate any of these annotation on top of Spring Bean / class, then Spring will scan that Bean and manage its lifecycle begins from Object creation to Object Destroy.
+
+@Component is the root / parent Sterotype annotation. and others are just derived from @Component. To define the role of a class we use other 3 annotations.
+
+Q) Spring Core Annotations
+A) 
+a) @Configuration:- This @Configuration can be used when we want to use java based configuration. "Java Based Configuration" means we dont want to handle the spring bean life cycle either using annotation or xml.
+b) @Bean
+c) @Autowired:- Inject the Object in a class whereever we want to use.
+d) @Qualifier
+e) @Primary:- If we dont want to use qualifier, and always u want to give the priority to a single bean. then we can use this @primary.
+f) @Lazy:- As we know by default, Spring Boot is eager loading. I mean if u define Bean in your application then Spring IOC by default will create its Object doesn't matter whether you are using the bean or not which really increases the Heap. To avoid this, we can use @lazy annotation. By this we can tell to Spring, to create or load the bean on demand only otherwise keep quiet, dont do anything.
+
+ex:-
+----
+@Component
+public class EagerLoadingBean {
+
+    public EagerLoadingBean() {
+        System.out.println("EagerLoadingBean object created ..");
+    }
+}
+
+@Component
+@Lazy
+public class LazyLoadingBean {
+
+    public LazyLoadingBean() {
+        System.out.println("LazyLoadingBean object created ..");
+    }
+}
+
+Above, created 2 class and used annotations like @Component and @Lazy. By running above 2 classes, we will see only "EagerLoadingBean" have been executed cos of eager loading and SB created its Object and "LazyLoadingBean" class haven't been executed because we have used "@Lazy" on top of bean. This happened because we have not Injected its Dependency nor created its Object.
+
+Note:- use @Autowired on top of LazyLoadingBean class(Inject the Dependency), then will see, the Object will be created by SB.
+
+
+g) @value:- When we want to read the key, value pair from properties file we can use "@value" annotation. Need to pass key as a argument in @value to load the data/value.
+ex:-
+----
+application.properties file
+---------------------------
+mail.from =test@test.com
+mail.host =test@test.com
+mail.port =25
+
+Contoller Class
+---------------
+@Value("${mail.from}")
+private String from;
+@Value("${mail.host}")
+private String host;
+@Value("${mail.port}")
+private String port;
+
+h) @PropertySource:- By Above, defining in application.properties file, SB automatically load this. But if we define in our own custom.properties file, SB wont load this "custom.properties" automatically . we need to use @PropertySource("classpath:custom.properties") on top of class.
+ex:-
+-----
+custom.properties (File in resource path)
+-----------------------------------------
+message = loading from external props
+
+Controller
+----------
+@PropertySource("classpath:custom.properties")
+public class StudentController {
+
+	@Value("${message}")
+    private String message;
+	
+	SOP(message);
+	
+}
+
+i) @ConfigurationProperties:- Lets say we have bunch of key and value pairs in properties file, rather than load it one by one, we can create DataSource properties where all fields can be bind in to a DTO Class, in a single Bean class and map those key to particular detail.
+ex:-
+----
+Create a DTO class name as MailProperties and define "@ConfigurationProperties" on top of class, with "prefix" as an argument, like below
+
+DTO Class:-
+------------
+@ConfigurationProperties(prefix = "mail")
+@Component
+public class MailProps {
+
+    private String from;
+    private String host;
+    private String port;
+}
+
+application.properties file
+---------------------------
+mail.from =test@test.com
+mail.host =test@test.com
+mail.port =25
+
+Contoller:-
+-----------
+@ConfigurationProperties(prefix = "mail")
+@Data
+@Component
+public class StudentController {
+
+	@Autowired
+    private MailProps mailProps;
+	
+	System.out.println("mail properties : "+ mailProps);
+	
+}
+
+Note:- Based on "prefix", it will load keys and value from properties file.
+
+j) @profile:- We use this annotation Specially when we want to load some configuration specific to environment (dev,test,prod..etc). lets take an example, we use DB in our project and for each env, DB properties are different based on env like username and pwd for DB are different for dev and test env.
+ex:-
+-----
+application-dev.properties
+---------------------------
+# DEVELOPMENT DB config properties
+
+db.driverClass= dev db driver class
+db.url= dev db url
+db.username= dev db username
+db.password=dev db encrypted password
+
+application-prod.properties
+---------------------------
+# PROD DB config properties
+
+db.driverClass= prod db driver class
+db.url= prod db url
+db.username= prod db username
+db.password=prod db encrypted password
+
+application.properties
+-----------------------
+spring.profiles.active=prod
+
+Above, we have 2 custom Application Properties file (total 3), and inorder to load a specific custom application.properties file, we need to add "spring.profiles.active=prod" in application.properties file.
+
+k) @Scope:- This annotation defines the scope of a bean like Singleton, prototype, session or request. We can define @Scope on top of Bean class.
+ex:-
+----
+Controller:-
+-------------
+@Scope("singleton")
+public class StudentController {
+	public StudentController() {
+        System.out.println("controller object created ....");
+    }
+}
+
+If we run the above controller by using any api, we would see the output as "controller object created ....". Try to hit the api many times, you will see there is no further statement or ouput about "controller object created ....". Because the Object will create once because we have define "@Scope("singleton")", the Object will be created only once and it stored in application context, thats what the Spring re-uesd it.
+
+By using "@Scope("prototype")", as many time we hit the api, those many times the Controller Object will be created.
+
+
+Q) Spring Boot Internal Work
+A) We are using Pre-Configured Jar provided by SB. The Jar available in Build Path (Maven Dependency)
+
+Starter POM:-
+-------------
+a) It will build all the jar for certain type of project or application(stand or web). Once we have jar in our build path, it internally contains Spring.factories. Folder Structure is "META-INF/Spring.factories".
+b) Inside "Spring.factories" SB mentioned, what should be "enable" or "disable" at run time. The Entire process is dynamically.
+c) Inside "Spring.factories" there are some properties, based on the dependency (or) based on the jar in the build path, It will enable few of the components to build our application and those components will be "enable" or "disable" based on the condition. 
+d) That's why it internally use @Conditional and @Configuration. (Introduced in v4).
+
+Q) How SpringBoot kickoff our ApplicationContext. How it helps us to execute our application.
+A) @SpringBootApplication Annotation helps us to scan our bean, thats y it contains @ComponentScan and it enables the Components at RunTime, thats y it contains @AutoConfiguration.
+-> We need Main Method as the Executions starts from main method then only "Executable Jar" can be deployed in "Spring Boot Embedded Tomcat". Thats y -> we need Main Method in our SpringBoot Application.
+"SpringApplication.run" helps us to UP our "ApplicationContext", and it will initialize and instantiate all the required Beans to Up our application.
+-> From the Main Method, the main application context is kicked off which in turns searches for the classes annotated with "@Configuration", initializes all the declared beans in those configuration classes, and stores those beans in JVM, Specifically in a space inside JVM which is known as IOC container. After creation all the beans, automatically configures the dispatcher servlet and registers the default handler mappings and all other basec things.
+
+.run(...) Internal Flow:-
+-------------------------
+a) create application context
+b) create Application Type
+c) register the annotated class beans with the context.
+d) creates an instance of "TomcatEmbeddedServletContainer" and adds the context.
+
+
+Q) LifeCycle Methods in Spring
+A) When Spring creates a Bean, it provides 2 important methods to every bean,
+1) public void init()
+2) pulic void destroy()
+Note:- we can change the name of "init" and "destroy" method, but we cant change the syntax/signature.
+
+init() method:- it can be used for initialization of code loading, config, connecting DB and Webservices etc.
+"Initialization" means, any code that we write to connect to DB, or loading configuration File or connecting to Webservices etc. These Initialization code must be written in init() method.
+
+destroy():- clean up code. End the DB connection code.
+
+ 
+
+
