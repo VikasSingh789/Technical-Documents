@@ -16,6 +16,11 @@ https://www.youtube.com/watch?v=O5ou6lBwWYw ELK Stack + Spring Boot Microservice
 https://www.youtube.com/watch?v=Nj57wpe_vEg Core Java, Spring Boot, Microservice Interview Questions | Cognizant L1 Technical Interview
 
 
+Spring:-
+--------
+https://www.youtube.com/watch?v=qki1N71BJ-M Top 10 spring boot Interview questions [most frequently asked java Interview questions and answers]
+
+
 Spring Boot:-
 -------------
 https://www.youtube.com/watch?v=2YC5pIXR7e4 Spring Boot - @Autowired, @Qualifier, @Primary, @Required | Simple Programming
@@ -26,6 +31,9 @@ https://www.youtube.com/watch?v=htyq-mER0AE Interview QA | 40+ Spring & Spring B
 https://www.youtube.com/watch?v=NKhNnBvufGI Annotations in Spring boot with Explanation| Spring boot Interview Questions and Answers Code Decode
 https://www.youtube.com/watch?v=95kxPSbHzVg Spring Boot | Spring Data JPA Transaction Management | @Transactional | JavaTechie
 https://www.youtube.com/watch?v=gPnd-hzM_6A Spring Boot | REST API Request Validation & Exception Handling Realtime Example | JavaTechie
+https://www.youtube.com/watch?v=AFmyV43UBgc Cracking the coding interview || Java streams Coding questions
+https://zetcode.com/springboot/mongodb/ Spring Boot MongoDB
+
 
 Java:-
 ------
@@ -33,8 +41,58 @@ https://www.youtube.com/watch?v=k7fNLXoVCYg Java 8 Interview Questions and Answe
 https://www.youtube.com/watch?v=KfoNYoVUBJI Java collections framework interview questions | [MOST ASKED COLLECTIONS INTERVIEW QUESTION]  (27)
 https://www.youtube.com/watch?v=GO67C7V-IbQ Java Collection Interview Questions & Answers | Tricky Q&A | Freshers | Experience | JavaTechie (59)
 https://www.youtube.com/watch?v=fFnuer3AD8Q Frequently Asked Java Interview Q&A | Tricky Questions | Freshers | Experience | Part-1| JavaTechie
-https://www.youtube.com/watch?v=oUdENE7ljjw&t=25s Java 8 new features || Java 8 Interview Questions and Answers ( Live Demo with Examples ) (20)
 https://www.youtube.com/watch?v=Tapz6_T5oHY Java -8 Consumer , Supplier & Predicate Interface With Example | Java Techie (26)
+https://www.youtube.com/watch?v=oUdENE7ljjw&t=25s Java 8 new features || Java 8 Interview Questions and Answers ( Live Demo with Examples ) (20)
+https://www.youtube.com/watch?v=EmTg7Mb98Ac Java Interview Questions and Answers
+
+Q) What is microservices and example?
+A) Microservices are an architectural style that develops a single application as a set of small services. Each service runs in its own process. The services communicate with clients, and often each other, using lightweight protocols, often over messaging or HTTP.
+
+Q) What are the components of a microservice?
+A)  a) Microservices 
+	b) Containers
+	c) Service mesh 
+	d) Service discovery
+	e) API gateway
+	
+a) MicroServices:- The main component of microservices architecture is the self-contained services. They can be any language and function separate from one another, making them ideal for implementation through various software teams.
+
+There is also the service mesh. It's responsible for the communication between microservices via a messaging layer.
+
+b) Containers:- The containers are a package of software that functions independently. Containers work to isolate each service in the same environment.
+In order to create microservices, a virtual machine can serve as a container and simulate the functionaries of a standard physical computer.
+Containers provide efficiency because they only rely on specific dependencies and the underlying code within the service.
+
+c) Service discovery:- The service discovery helps manage deployment and evenly distribute the load. This component features a service consumes, service provider, and service registry.
+
+d) API gateway:- The API gateway is an essential part of communication in the complex distributed microservices architecture.
+It can handle administrative tasks, ensure the microservices load is lightweight, and perform load balancing actions when necessary.
+
+
+Q) Microservice vs Service-Oriented architecture
+A) While microservices use loose connections and APIs, SOA uses protocols to create an application and create functionality and compatibility for services.
+This system lacks when it comes to operating within the cloud and cloud computing processes. It can't compete due to latency and lack of scalable service. 
+There are varying opinions on the evolution of SOA to microservices. Many feel it's a more granular approach to application architecture, while others think it's platform-agnostic and may find its purpose within the microservices management process and architecture pattern.
+Its new features allow it to handle cloud-based services and computing with ease and fewer restrictions for parts of the application.
+
+
+Q) Why Microservices are better than Monolithic architecture
+A) As mentioned previously, microservices are so compatible with today's need to scale business because they create independent connections that are flexible and customizable.
+-> With monolithic architecture, one executable file is stored with the code, making it more complex to use and troubleshoot.
+-> In the microservices system, it's easy to define and locate the source of the code issues, whereas, in a monolithic architecture, it's much more difficult to pinpoint. That means more workforce demands and holdups or delays.
+-> Testing also creates a situation where more intensive efforts are needed. When there are any changes or updates, the entire application is affected and may require a new version of the application. All of these points add up to considerably more cost, maintenance, and planning when using a monolithic application.
+-> Monolithic applications are also challenging to scale with constantly changing needs.
+
+
+Q) Benefits of Microservices
+A) A microservices application is designed to create scalability via pipelines. This service-oriented architecture is more straightforward for development teams to navigate and maintain from day to day.
+-> Integrating this system for data management reduces latency. It can also optimize the technology stack to make a business capable of adding additional services as well as make connecting with a web application and various platforms less complex.
+
+
+Q) Drawbacks to Using Microservices Architecture
+A) While there are many advantages to using this architectural style, there are some potential disadvantages to consider. For example, there might be some latency at times if considerable use occurs.  
+-> There may also be some comprehensive security requirements along with complex testing. Extra attention is sometimes required to create communications channels between connected services. And finally, there may be too much granularity within the complex web of connections.
+
 
 Microservice orchestration:-
 ----------------------------
@@ -138,7 +196,7 @@ spring:
   application:
     name: User-Service
 	
-The Above steps can be added in Department Service (9001) as well. ( line no. 101 )
+The Above steps can be added in Department Service (9001) as well.
 
 
 Start Service Registry MS and go to browser and type url "localhost:8761" and press enter. Will see Spring Eureka Page in browser.
