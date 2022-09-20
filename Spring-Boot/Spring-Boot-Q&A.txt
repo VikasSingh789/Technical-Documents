@@ -1,0 +1,43 @@
+Q) Why we should avoid the Spring Boot Framework.
+A)  a)Spring Boot unnecessary increase the size of the build with unused dependencies.
+b) its only suitable for micro-services which eventually need to deploy in docker, but not for large or mono lithics web service.
+
+Q) What are the major starter dependencies of Spring Boot Application.
+A) a) spring-boot-starter-parent:- 
+-> provides default configuration for our application and a complete dependency tree to quickly build our Spring Boot.
+-> It also Provides default configuration for maven plugins.
+
+b) spring-boot-started-web:-
+-> Starter of Spring web uses SPring MVC, REST and Tomcat as a default embedded server. The single "spring-boot-started-web" dependency transitively pulls in all dependencies related to web development.
+-> It also reduces the build dependency count.
+
+c) spring-boot-starter-test:-
+-> This is the primary dependencyfor the test. It contains all majority of elements required for our tests.
+
+Q) What is Componenet Scan in Spring Boot
+A) It scans @Controller, @Componenet, @Service..and create beans out of that. It scans root and base packages.
+To scan a particular package, @ComponenetScan( "com.example.demo.myapp" )
+
+Q) How to disable auto-configuration in Spring Boot
+A) a)Using the exclude attribute of @EnableAutoConfiguration
+Ex:- 
+----
+@Configuration
+@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
+public class CustomConfiguration{}
+
+b) Using the exclude attribute for @SpringBootApplication annotation
+Ex:- 
+----
+@SpringBootApplication(exclude=DataSourceAutoConfiguration.class)
+public class CustomConfiguration{}
+
+Q) How to disable the default web server in the spring boot application
+A) spring.main.web-application-type=none
+
+Q) how to disable main Spring Boot banner in console
+A) spring.main.banner-mode=off
+
+Q) How to set the logging level properties.
+A) logging.level.org.springframework=ERROR.
+
