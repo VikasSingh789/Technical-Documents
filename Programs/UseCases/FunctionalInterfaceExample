@@ -1,0 +1,71 @@
+package com.practice;
+
+public class FunctionalInterfaceExample {
+	
+	public static void main(String[] args) {
+		
+		
+		FIExample i = ()->System.out.println("Lambda Expressions Example");
+		i.f1();
+		
+		FIAddExample ia = (a,b)->System.out.println(a+b);
+		ia.add(5, 5);
+		
+		FIEvenExample ie = n->{
+			for(int j=1;j<=n;j++) {
+			if(j%2==0) {
+				System.out.println(j+" is Even Number");
+			}
+			else {
+				System.out.println(j+" is Odd Number");
+			}
+			}	
+		};
+		ie.even(5);
+		
+		
+		
+		FIPrime ip = n->{
+			int count = 0;
+			for(int k=1;k<=n;k++) {
+				if(n%k==0) {
+					count = count+1;
+				}
+			}
+			if(count==2) {
+				System.out.println(n+" is Prime Number");
+			}
+		};
+		ip.prime(5);
+		
+		FIOdd io = n->{
+			if(n%2==0) {
+				System.out.println(n+" is Even Number");
+			}else {
+				System.out.println(n+" is Odd Number");
+			}
+		};
+		io.odd(2);
+		
+	}
+	
+}
+
+interface FIExample{
+	void f1();
+}
+
+interface FIAddExample{
+	void add(int a,int b);
+}
+
+interface FIEvenExample{
+	void even(int n);
+}
+interface FIOdd{
+	void odd(int n);
+}
+
+interface FIPrime{
+	void prime(int n);
+}
