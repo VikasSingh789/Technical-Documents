@@ -16,7 +16,7 @@ A)  a) Functional Interface (include default and static Method)
 3) List of Functional Interface which is already there before Java 8
 A)  a)Runnable (void run)
 	b)Callable (call)
-	c)Comparator (int compare(a1,a2)
+	c)Comparator (int compare(a1,a2))
 Note:- In Comparator Interface, it contains 2 abstract Methods, compare and equals Methods. But Equals Methods belongs from Java.lang.Object and it directly overrides from Object Class. so though we have 2 abstract methods here, we can still say its an Functional Interface because equals Method directly belongs from Object class.
 4) Can you Write 1 Functional Interface
 
