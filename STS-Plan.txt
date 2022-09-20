@@ -108,3 +108,31 @@ write a program which will print a list using Lamda.
 https://stackoverflow.com/questions/23324782/how-to-use-javas-lambda-expressions-to-print-an-array
 
 Write a programe which will print a list object and while printing append Hello as prefix using Lamda
+
+
+
+Zookeeper:-       ".\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties"
+kafka server:-    ".\bin\windows\kafka-server-start.bat .\config\server.properties"
+create topics:-   ".\bin\windows\kafka-topics.bat --create --zookeeper localhost:2181 
+					--replication-factor 1 --partitions 1 --topic Topic1"
+List All topics:- ".\bin\windows\kafka-topics.bat --list --zookeeper localhost:2181"
+Add Messages:-    ".\bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic Topic1"
+View Messages:-   ".\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic Topic1 
+					--from-beginning"
+
+https://www.edureka.co/blog/kafka-streams/#kafkastream
+
+
+Features of Kafka:-
+-------------------
+Large data per second
+Elastic
+high throughput
+Fault-Tolerance
+
+Disadvantages of kafka
+----------------------
+Redundant data
+Performance issue
+storage issue
+Number of partitions
