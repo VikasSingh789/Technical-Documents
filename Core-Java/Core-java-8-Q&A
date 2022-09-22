@@ -226,3 +226,8 @@ A) To Increase the performance, from java 8, Whenever some particular Threshold 
 
 20) What is an Optional Class
 A) It contains in Java.util Package. It contains only 2 values 0 and 1. isPresent() and get() are the 2 methods present in Optional Class. Basic utility of this class is to prevent "NullpointerPointerException" in Code Base.
+
+21) What is MetaSpace? How does it differ from PermGen
+A) PermGen is a part of HeapMemory before java 1.8. PermGen who used to contains MetaData info about the classes which was actually stored in "Permanent Generation" Memory. It used to be fixed in size and cannot be dynamically recycle whenever new metadata has to be stored about the class.
+To Prevent this "Fixed in Size" and not "Dynamic", Java 1.8 introduced MetaSpace.
+In java 1.8, the data or metadata are now stored in Native Memory called as MetaSpace. To increase the performance and to make restrictions out like "Fixed in Size" and not "Dynamic", they introduced MetaSpace.
