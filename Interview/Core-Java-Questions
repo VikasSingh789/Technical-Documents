@@ -1,0 +1,52 @@
+when to use comparator and when to use comparable over comparator
+WHat is BigInteger
+What type of GC and how can we use
+How to avoid NullpointerPointerException while using Java 8. (By Using Optinal we can avoid NPE. Its 1 of the FI)
+Different Methods used in Optional Class.
+What is Clonable Interface
+What is Marker Interface.(Blank Interface, while runtime it will provide some additional info to JVM and compiler).
+throw, throws and throwable
+Lambda Expression.(Its an anonymous Funtion, no need to pass arguments and name to funtion)
+How to fetch the distict name in given collection. (list.stream().distinct().forEach(System.out::println);)
+Query to find Middle name as "kumar" (where middle_name like "kumar")
+
+
+How to enable autowire in SpringBoot and types of Autowiring
+Diff between collection and Collections
+Wat is the use Finally Block
+Memory Leak Exception
+Diff between Factory and Abstract Factory Pattern
+
+
+Time Complexity of Hashmap for get(). (O(1))
+Time Complexity of Hashmap for get() incase all nodes are at same index. (O(n)) "n" is address of the next node
+What if we dont override Equals Method. (It will call super class equals method and will end on Data Inconsistency.)
+What is ClassLoaders in java. Name some of them.
+Other than Transient, what can we use on Object to not participate in serialize. (Override the writeObject() and throw Exception)
+Parallel Stream and Normal Stream. (Which 1 to use in which scenario)
+Streams to sort based on age.
+Diamond Problem in Java 8
+AOP and Annotations
+Which MS pattern using in Project (API Gateway Design Pattern)	
+Disadvantages of MS.
+
+Difference between class and class path
+What is Class loader in java and its types
+Which 1 is preffered to create Threads. Thread class or Runnable Interface
+Autoboxing and Auto-UnBoxing in java
+what is Spring cloud bus
+
+Difference between intermediate methods and terminate methods
+What is atomicity. What are acid properties.
+what is Big O Annotation
+What is entry set and key set
+What is the use of @PathMapping
+Annotations in Microservices
+Builder Design Pattern
+
+What is Substring and intern() in String
+Difference between append and concat in java
+What is the Enhancement in HashMap
+What is an Optional Class
+What is Spring AOP
+What is MetaSpace? How does it differ from PermGen
