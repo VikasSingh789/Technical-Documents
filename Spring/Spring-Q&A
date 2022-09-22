@@ -8,3 +8,8 @@ A)  a) Aspect is a class
 AOP has 2 types of implementation.
 a) XML configuration files
 b) AspectJ Orientation Files.
+
+
+Q) difference between Pathvariable and ReqParam.
+A) If we are using Pathvariable and we are not  giving the input, then will get "404" Error. If we are using Pathvariable, its Mandatory to give the input otherwise it will give error.
+Incase of ReqParam, the input is Optional. we wont get any exception.
