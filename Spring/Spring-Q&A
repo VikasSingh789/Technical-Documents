@@ -1,0 +1,10 @@
+Q) What is Spring AOP
+A)  a) Aspect is a class
+	b) Class contains some methods. These methods are called as Advice.
+	c) All methods contains some logic, which is called "cross cutting concerns" that we need to segregate from business logic.
+	d) These Methods will execute only on some particular condition. These condition is known as pointcut.
+	e) Pointcut executed around Business point, which is known as JoinPoint.
+	
+AOP has 2 types of implementation.
+a) XML configuration files
+b) AspectJ Orientation Files.
