@@ -62,7 +62,13 @@ public class StreamsAddress {
 		StreamsAddress s4 = new StreamsAddress(4, "ABC", "Chintal", 19);
 		List<StreamsAddress> list = Arrays.asList(s1,s2,s3,s4);
 		
-		System.out.println("Increase Age by +1");
+		System.out.println("Increase Age by +1 for all employees");
+		list.stream().map(s->{
+			s.setAge(s.getAge()+1);
+		return s;
+		}).forEach(System.out::println);
+		System.out.println("------------------------------------");
+		System.out.println("Increase Age by +1 based on name");
 		list.stream().filter(s->s.getName().equals("Akash")).map(s->s.getAge()+1).forEach(System.out::println);
 		System.out.println("------------------------------------");
 		System.out.println("Without Storing the result: Case-1");
