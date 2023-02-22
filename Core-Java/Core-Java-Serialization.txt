@@ -24,6 +24,8 @@ If we want to read Binary data from a file, we required a stream called "File In
 Object Input Stream is required to convert Binary data in to Object
 Object Input Stream contains a method called OIS.readObject();
 
+Q) How to customize serialization in java
+A) overriding readObject() and writeObject() methods in a call, we can customize serialization.
 
 Q) What is Transient
 A) Transient is modifier, can be applied only on variables. If we apply Transient on variable, JVM Ignores the Original value and it will not participate in Serialization and stores a the default value as 0. incase if datatype is "int".
