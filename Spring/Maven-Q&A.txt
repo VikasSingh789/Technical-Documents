@@ -19,3 +19,14 @@ install
 deploy
 
 The build phases are executed sequentially. When we run a maven build command, we specify the phase to be executed. Any maven build phases that come before the specified phase is also executed. For example, if we run mvn package then it will execute validate, compile, test, and package phases of the project.
+
+5) what is maven-surefire-plugin
+A) The Surefire Plugin is used during the test phase of the build lifecycle to execute the unit tests of an application. It generates reports in two different file formats:
+a) Plain text files (*.txt)
+b) XML files (*.xml)
+
+6) What is maven-war-plugin
+A) The Maven WAR plugin is responsible for collecting and compiling all the dependencies, classes, and resources of the web application into a web application archive.
+
+7) What is maven-jar-plugin
+A) Maven Jar plugin is responsible for configuring where the project's main class is, so it can add it to the Jar's manifest file. If you do not include this plugin when you try to run the jar file this error will appear : Exception in thread "main" java.lang.NoClassDefFoundError.
