@@ -165,7 +165,7 @@ b) System ClassLoaded:- classes which is required like lang package which is pre
 c) Application ClassLoader:- classes which are there in your class which has to be compiled.
 
 
-Q) Difference between class and class path
+Q) Difference between path and class path
 A)  a).Path is an environment variable which is used by the operating system to find the executables. Classpath is an environment variable which is used by the Java compiler to find the path, of classes.ie in J2EE we give the path of jar files.
 b) .PATH is nothing but setting up an environment for operating system. Operating System will look in this PATH for executables. Classpath is nothing but setting up the environment for Java. Java will use to find compiled classes.
 c) .Path refers to the system while classpath refers to the Developing Envornment.
