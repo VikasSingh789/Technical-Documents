@@ -41,3 +41,34 @@ A) spring.main.banner-mode=off
 Q) How to set the logging level properties.
 A) logging.level.org.springframework=ERROR.
 
+Q) What is SpringBoot starter parent
+A) Spring Boot Starter Parent defines spring-boot-dependencies as a parent pom. It inherits dependency management from spring-boot-dependencies.
+	<parent>  
+		<groupId>org.springframework.boot</groupId>  
+		<artifactId>spring-boot-dependencies</artifactId>   
+	</parent>  
+Contains common dependencies like common-logging, Thymlief, Java default compiler (1.8), aspectJ and maven plugins etc..
+
+Q) WHat is SpringBoot starter web
+A) It is used for building RESTful applications using Spring MVC. It provides default embedded container which is tomcat server.
+To remove default server(tomcat), we can user <exclusion> tag under web dependency. eg below,
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+Now Add jetty or other server, like below,
+<!-- Jetty instead of Tomcat -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jetty</artifactId>
+</dependency>
+
+Q) What is spring boot starter test
+A) It is the primary starter dependency for testing our spring boot application. It contains the majority of libraries that are required for tests including JUnit Jupiter, Hamcrest, and Mockito.
+
