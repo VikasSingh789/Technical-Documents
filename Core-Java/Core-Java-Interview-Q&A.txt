@@ -1,3 +1,20 @@
+Q) Difference between append and concat in java
+A) 
+Concat:-
+--------
+-> its belong to String class. concatenates one string to the end of another string.
+-> concat() method takes only one argument of string and concatenates it with other string.
+-> concat() method takes only string arguments, if there is any other type is given in arguments then it will raise an error.
+-> concat() method throws NullPointer Exception when a string is concatenated with null
+-> concat() method is better than the + operator because it creates a new object only when the string length is greater than zero(0) but the + operator always creates a new string irrespective of the length of the string.
+
+append or +:-
+-------------
+-> + operator takes any number of arguments and concatenates all the strings.
+-> + operator takes any type and converts to string type and then concatenates the strings.
+-> + operator did not raise any Exception when the string is concatenated with null.
+-> + operator creates a new String object every time irrespective of the length of the string.
+
 Q) How to create custom Immutable class in java
 A)  a)Make your class final
 	b)Declare all instance variables with private and final keywords
