@@ -1,9 +1,12 @@
 Q) What is Spring AOP
-A)  a) Aspect is a class
+A)  Spring AOP enables Aspect-Oriented Programming in spring applications. In AOP, aspects enable the modularization of concerns such as transaction management, logging or security that cut across multiple types and objects (often termed crosscutting concerns).
+	a) Aspect:- Aspect is a class
 	b) Class contains some methods. These methods are called as Advice.
 	c) All methods contains some logic, which is called "cross cutting concerns" that we need to segregate from business logic.
-	d) These Methods will execute only on some particular condition. These condition is known as pointcut.
-	e) Pointcut executed around Business point, which is known as JoinPoint.
+	d) Joinpoint:- A joinpoint always represents a method execution.
+	e) These Methods will execute only on some particular condition. These condition is known as pointcut.
+
+Types of Advice:- Before, After, After returning, After throwing advice and Around Advice.
 	
 AOP has 2 types of implementation.
 a) XML configuration files
