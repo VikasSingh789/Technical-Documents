@@ -231,3 +231,73 @@ A) It contains in Java.util Package. It contains only 2 values 0 and 1. isPresen
 A) PermGen is a part of HeapMemory before java 1.8. PermGen who used to contains MetaData info about the classes which was actually stored in "Permanent Generation" Memory. It used to be fixed in size and cannot be dynamically recycle whenever new metadata has to be stored about the class.
 To Prevent this "Fixed in Size" and not "Dynamic", Java 1.8 introduced MetaSpace.
 In java 1.8, the data or metadata are now stored in Native Memory called as MetaSpace. To increase the performance and to make restrictions out like "Fixed in Size" and not "Dynamic", they introduced MetaSpace.
+
+22) What are the Funtional Interfaces in java 8
+A) Function(apply), Predicate(test), Consumer(accept), BiConsumer(accept) are the Funtional Interfaces in java 8.
+
+-> Function:- It represents a function that accepts one argument and returns a result.
+------------
+Ex:- 
+
+import java.util.function.Function;  
+public class FunctionInterfaceExample {  
+    static String show(String message){  
+        return "Hello "+message;  
+    }  
+    public static void main(String[] args) {  
+        // Function interface referring to a method  
+        Function<String, String> fun = FunctionInterfaceExample::show;  
+        // Calling Function interface method  
+        System.out.println(fun.apply("Peter"));  
+    }  
+}  
+
+Output:-
+--------
+Hello Peter
+
+-> Predicate:- It accepts 1 arg and return value.
+-------------
+Ex:-
+
+import java.util.function.Predicate;  
+public class PredicateInterfaceExample {  
+    public static void main(String[] args) {  
+        Predicate<Integer> pr = a -> (a > 18); // Creating predicate  
+        System.out.println(pr.test(10));    // Calling Predicate method    
+    }  
+}  
+
+Output:-
+--------
+false
+
+-> Consumer:- It represents an operation that accepts a single argument and returns no result.
+-------------
+Ex:-
+
+// Importing Consumer interface  
+import java.util.function.Consumer;  
+public class ConsumerInterfaceExample {  
+    static void printMessage(String name){  
+        System.out.println("Hello "+name);  
+    }  
+    static void printValue(int val){  
+        System.out.println(val);  
+    }  
+    public static void main(String[] args) {  
+        // Referring method to String type Consumer interface   
+        Consumer<String> consumer1 = ConsumerInterfaceExample::printMessage;  
+        consumer1.accept("John");   // Calling Consumer method  
+        // Referring method to Integer type Consumer interface  
+        Consumer<Integer> consumer2 = ConsumerInterfaceExample::printValue;  
+        consumer2.accept(12);   // Calling Consumer method  
+    }  
+}  
+
+Output:-
+--------
+Hello John
+12
+
+BiConsumer:- BiConsumer Interface accepts two input arguments and does not return any result. Only Difference, consumer accepts 1 arg and BiConsumer accepts 2 args.
