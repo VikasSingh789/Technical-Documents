@@ -301,3 +301,29 @@ Hello John
 12
 
 BiConsumer:- BiConsumer Interface accepts two input arguments and does not return any result. Only Difference, consumer accepts 1 arg and BiConsumer accepts 2 args.
+
+->Supplier:- It represents an operation that does not take in any argument but produces a value of type T.
+-----------
+Ex:-
+
+import java.util.function.Supplier;
+  
+public class Main {
+    public static void main(String args[])
+    {
+  
+        // This function returns a random value.
+        Supplier<Double> randomValue = () -> Math.random();
+  
+        // Print the random value using get()
+        System.out.println(randomValue.get());
+    }
+}
+
+Output:-
+--------
+0.5685808855697841
+
+
+
+
