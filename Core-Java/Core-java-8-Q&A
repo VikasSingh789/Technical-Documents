@@ -218,14 +218,19 @@ Since Parallel Stream is using Multiple core's, if we compare the time of execut
 17) WAP to print even and odd using 2 Threads
 
 18) Difference between intermediate methods and terminate methods
-A) Intermediate methods does not generate the output. its basically used to filte and map.
-Terminate Methods generate the outputs on a stream like collect and get.
+A) 
+-> The main difference between intermediate and terminal operations is that intermediate operations return a stream as a result and terminal operations return non-stream values like primitive or object or collection or may not return anything.
+-> Intermediate operations are lazily loaded. When you call intermediate operations, they are actually not executed. They are just stored in the memory and executed when the terminal operation is called on the stream.
+-> Intermediate don't produces any result and terminal produces end result.
+
+Example of Intermediate :- map(), filter(), distinct(), sorted(), limit(), skip()
+Example of Terminal     :- collect(), min(), max(), count(), forEach()
 
 19) What is the Enhancement in HashMap
 A) To Increase the performance, from java 8, Whenever some particular Threshold is reached, they have removed the LinkedList and impelmented the BalancedTree. When threshold is reached, LinkedList converted to BalancedTree. In that case, in worst case scenario, performance becomes O(logn) which is  better than O(n) and best case scanrio is still O(1).
 
 20) What is an Optional Class
-A) It contains in Java.util Package. It contains only 2 values 0 and 1. isPresent() and get() are the 2 methods present in Optional Class. Basic utility of this class is to prevent "NullpointerPointerException" in Code Base.
+A) It contains in Java.util Package. It contains only 2 values 0 and 1. isPresent(), get() and .of() are the methods present in Optional Class. Basic utility of this class is to prevent "NullpointerPointerException" in Code Base.
 
 21) What is MetaSpace? How does it differ from PermGen
 A) PermGen is a part of HeapMemory before java 1.8. PermGen who used to contains MetaData info about the classes which was actually stored in "Permanent Generation" Memory. It used to be fixed in size and cannot be dynamically recycle whenever new metadata has to be stored about the class.
