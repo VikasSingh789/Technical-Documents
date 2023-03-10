@@ -32,7 +32,7 @@ public class StreamsLogical {
 		});
 		
 		//OR
-		System.out.println("-------------------------------");
+		System.out.println("----------------OR---------------");
 		
 		empDetails.entrySet().forEach(empDetail->{
 			System.out.print("DeptId: "+empDetail.getKey()+" contains ");
@@ -51,6 +51,16 @@ public class StreamsLogical {
 		employeeCounts.entrySet().forEach(employeeCount->{
 			System.out.println("In DeptID:"+employeeCount.getKey()+" Contains "+employeeCount.getValue()+" Employees");
 		});
+		
+		
+		//WAP to sort Employee based on salary
+		System.out.println();
+		System.out.println("WAP to sort Employee based on salary");
+		employees.stream().sorted(Comparator.comparing(Employee::getSalary).thenComparing(Employee::getEmpName)).forEach(System.out::println);
+		
+		//OR
+		System.out.println("----------------OR---------------");
+		employees.stream().map(e->e.getSalary()).sorted().forEach(System.out::println);
 		
 		
 		//WAP to print active and Inactive employees in given Collection
