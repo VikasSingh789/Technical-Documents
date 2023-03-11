@@ -400,3 +400,214 @@ And Also remove eureka-client registry from all MS, since we have added this con
 Add this bootstrap.yml file in all other MS. (User, Department, Cloud-Gateway, Hystrix-Dashboard, Cloud-config-server).
 
 1st will start the Registry, then config-server, then API-Gateway, then all other MS.
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+Circuit-Breaker Pattern:-
+-------------------------
+-> In Circuit Breaker there are 3 states,
+a)Closed (Default):- Both Services Up and Running.(User and Catalog)
+
+b)Open:- Lets say Threshold as 50%, It means 50% of call from "user" to "catalog" will fail, then immediately status change from "close" to "open". In "Open State", Circuit Breaker won't allow  you to call dependent microservices.
+
+c)half Open:- We have set of timeout, and once the timeout expired, the status change to half-open. Lets say we set the timeout as 5 sec and after 5 second, status change to half-open. In half-open state, it will allow only few calls to go through and check availability of catalog service. if it fails again then the status change to open. And if catalog service is back online then status will changed to close again.
+
+We Use Resilience4J, if any Microservice is down, still want to give some response back to the end user.
+
+Add few dependencies in pom.xml,
+a) spring-boot-starter-actuator (groupId (org.springframework.boot)):- To Find the health of Microservices.
+b) spring-boot-starter-aop  (groupId (org.springframework.boot)):- It will keep send the matrix to actuator,so that we can track circuit breaker status
+c) resilience4j-spring-boot2 (groupId (io.github.resilience4j)):- resilience4j to implement circuit-breaker pattern.
+
+-> On top of Controller Method, Add @CircuitBreaker(name = "userService", like 
+
+	public static final String USER_SERVICE="userService";
+
+	@GetMapping("/displayOrders")
+    @CircuitBreaker(name =USER_SERVICE, fallbackMethod = "getAllAvailableProducts")
+    public List<OrderDTO> displayOrders(@RequestParam("category") String category) {
+        String url = category == null ? BASEURL : BASEURL + "/" + category;
+        System.out.println("retry method called "+attempt++ +" times "+" at "+new Date());
+        return restTemplate.getForObject(url, ArrayList.class);
+    }
+	
+	public List<OrderDTO> getAllAvailableProducts(Exception e){
+        return Stream.of(
+                new OrderDTO(119, "LED TV", "electronics", "white", 45000),
+                new OrderDTO(345, "Headset", "electronics", "black", 7000),
+                new OrderDTO(475, "Sound bar", "electronics", "black", 13000),
+                new OrderDTO(574, "Puma Shoes", "foot wear", "black & white", 4600),
+                new OrderDTO(678, "Vegetable chopper", "kitchen", "blue", 999),
+                new OrderDTO(532, "Oven Gloves", "kitchen", "gray", 745)
+        ).collect(Collectors.toList());
+    }
+	
+We Call this fallbackMethod = "getAllAvailableProducts", If above Get API fails, then will call fallback method to return the appropriate response.
+fallbackMethod = "getAllAvailableProducts", returns the list of OrderDTO. As shown above in code.
+
+Add Configuration in yml file for circuit breaker
+-------------------------------------------------
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+	  
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+		
+		
+Note:-
+------
+"management.endpoints.web.exposure.include: health" :-  Expose all web endpoints of actuator.
+"management.endpoint.health:show-details: always"   :-  Endpoint show details always.
+"failureRateThreshold:50" :-  If 50% of request fails(From User to Catalog), then change status to open.
+"automaticTransitionFromOpenToHalfOpenEnabled: true"  :- After 5 sec's, Open to "half-open" transition happen Automatically.
+"permittedNumberOfCallsInHalfOpenState: 3" :- After 3 calls, if status is succeed, then status will change to closed. If not then status is "open".
+
+
+
+Resilience4J Retry Pattern:-
+----------------------------
+Lets say, User-Service called Catalog-Service and received Unexpected response. User-Service need to re-attempt few calls again and again in some time interval.- In Any of attempts, Catalog-Service back to online then we are good oterwise we have option to return FallBack response to end-user. 
+
+Some configuration changes in yml file Resilience4J Retry Module:-
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+	  
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+  retry:
+    instances:
+      userService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+
+Controller Class:-
+------------------
+
+private static final String BASEURL = "http://localhost:9191/orders";
+public static final String USER_SERVICE="userService";
+
+private int attempt=1;
+
+	@GetMapping("/displayOrders")
+    //@CircuitBreaker(name =USER_SERVICE, fallbackMethod = "getAllAvailableProducts")
+	@Retry(name = USER_SERVICE,fallbackMethod = "getAllAvailableProducts")
+    public List<OrderDTO> displayOrders(@RequestParam("category") String category) {
+        String url = category == null ? BASEURL : BASEURL + "/" + category;
+        System.out.println("retry method called "+attempt++ +" times "+" at "+new Date());
+        return restTemplate.getForObject(url, ArrayList.class);
+    }
+	
+	public List<OrderDTO> getAllAvailableProducts(Exception e){
+        return Stream.of(
+                new OrderDTO(119, "LED TV", "electronics", "white", 45000),
+                new OrderDTO(345, "Headset", "electronics", "black", 7000),
+                new OrderDTO(475, "Sound bar", "electronics", "black", 13000),
+                new OrderDTO(574, "Puma Shoes", "foot wear", "black & white", 4600),
+                new OrderDTO(678, "Vegetable chopper", "kitchen", "blue", 999),
+                new OrderDTO(532, "Oven Gloves", "kitchen", "gray", 745)
+        ).collect(Collectors.toList());
+    }
+
+
+Resilience4J Rate Limiter Pattern:-
+-----------------------------------
+If we declare "limitForPeriod" as 10, then withIn 10 secs of interval, only 10 requests are allowed, after that if there is another request, then "timeoutDuration" will wait for 3 secs and ur request will be processed.
+
+Add few dependencies in pom.xml like web and Resilience4J.
+
+Some configuration changes in yml file Resilience4J RateLimiter Module:-
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+  retry:
+    instances:
+      userService:
+        registerHealthIndicator: true
+        maxRetryAttempts: 5
+        waitDuration: 10s
+  ratelimiter:
+    instances:
+      userService:
+        registerHealthIndicator: false
+        limitForPeriod: 10
+        limitRefreshPeriod: 10s
+        timeoutDuration: 3s
+		
+Controller Class:-
+------------------
+
+@GetMapping("/displayOrders")
+    //@CircuitBreaker(name =USER_SERVICE, fallbackMethod = "getAllAvailableProducts")
+	//@Retry(name = USER_SERVICE,fallbackMethod = "getAllAvailableProducts")
+	@RateLimiter(name = USER_SERVICE,fallbackMethod = "getAllAvailableProducts")
+    public List<OrderDTO> displayOrders(@RequestParam("category") String category) {
+        String url = category == null ? BASEURL : BASEURL + "/" + category;
+        System.out.println("retry method called "+attempt++ +" times "+" at "+new Date());
+        return restTemplate.getForObject(url, ArrayList.class);
+    }
