@@ -56,6 +56,18 @@ public class StreamsAddress {
 	}
 
 	public static void main(String[] args) {
+		
+		List<Integer> list1 = new ArrayList<>();
+		list1.add(3);
+		list1.add(1);
+		list1.add(4);
+		list1.add(2);
+		
+		System.out.println("Collections.sort");
+		Collections.sort(list1,Collections.reverseOrder());
+		System.out.println(list1.get(0));
+		System.out.println("---------------------------");
+		
 		StreamsAddress s1 = new StreamsAddress(1, "Vikas", "Bapunagar", 27);
 		StreamsAddress s2 = new StreamsAddress(2, "Akash", "Aryanagar", 25);
 		StreamsAddress s3 = new StreamsAddress(3, "Abhishek", "Chintal", 19);
