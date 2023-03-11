@@ -1,0 +1,63 @@
+https://spring.io/guides/gs/multi-module/
+
+Date Queries:-
+---------------
+Q) Get employee details whose Joining month is "January" ?
+A) Select * from employee where MONTH(Joining_Date) = 1;
+
+Q) Get employee details whose Joining Year is 1994?
+A) Select * from employee where YEAR(Joining_Date) = 1994;
+
+Q) Get employee details whose Joining Date is 29?
+A) Select * from employee where 
+DAY(Joining_Date) = 29;
+
+Q) Get employee details whose Joining Year Between 1969 and 1994?
+A) Select * from employee where YEAR(Joining_Date) Between 
+1969 and 1994;
+
+Q) Get employee details whose Joining Date Between 1969-07-01 and 1994-07-01?
+A) Select * from employee where Joining_Date Between 
+'1969-07-01' and '1994-07-01';
+
+Q) Get employee details whose Joining Date is after January 31st?
+A) Select * from employee where 
+Joining_Date >= '1969-01-31';
+
+Q) Get employee details who Joined in Last 5 Years ?
+A) Select * from employee where
+TIMESTAMPDIFF(YEAR,Joining_Date,curdate()) between 0 and 5;
+
+Group By Queries:-
+-------------------
+Q) Find Total number of employees based on each department ?
+A) select dept_id, count(e.id), dept.dept_name from
+employee e join department dept
+on e.dept_id = dept.id
+group by dept_id
+having count(e.id)>=3
+
+Q) Find nth highest salary from employee table ?
+A) select salary from
+(select salary from employee order by salary desc limit 3) result
+order by salary asc limit 1;
+
+(or)
+
+select salary from employee order by salary desc limit 2,1;  (3rd higest salary)
+
+Q) Find Total employee salary from each department
+A) select ei_id, sum(salary) as "total_salary" from employee
+group by ei_id
+order by total_salary desc;
+
+Q) Find no. of employees from each department
+select ei_id, count(id) from employee
+group by ei_id;
+
+Q) Find Employee details based on department id
+A)  select employee.id, employee_name,salary, dept_name
+	from employee join department
+	where employee.ei_id = department.id
+	group by ei_id
+	having salary>25000;
