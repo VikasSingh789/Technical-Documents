@@ -25,5 +25,21 @@ d) We cannot create a bean of a class using @Component, if the class is outside 
 e) @Component has different specializations like @Controller, @Repository and @Service whereas @Bean has no specializations.
 
 Q) When should we use @Bean?
-A) Sometimes automatic configuration is not an option. When? Let's imagine that you want to wire components from 3rd-party libraries (you don't have the source code so you can't annotate its classes with @Component), so automatic configuration is not possible.
-The @Bean annotation returns an object that spring should register as bean in application context. The body of the method bears the logic responsible for creating the instance.
+A) @Bean is an annotation based configuration and hence is used in @Configuration based class. This is an explicit way of defining a bean
+Sometimes automatic configuration is not an option. When? Let's imagine that you want to wire components from 3rd-party libraries (you don't have the source code so you can't annotate its classes with @Component), so automatic configuration is not possible.
+
+Scenario : You downloaded a jar file from GitHub and it is not using Spring. The jar file is a simple and basic java program. Your app wants to use this third-party jar file but since your application is using Spring while the third party jar is not, you will have to write new() keyword to access the functionalities. You want to wire the third party classes.
+
+Say your class name is MyClass.java and you want to use ThirdPartyClass.java. In this case if you write
+
+public class MyClass{
+   .....
+	 @Autowired
+	 ThirdPartyClass thirdPartyClass;
+	 
+}
+
+Your code will throw NullPointerException if you try and access any method of class object thirdPartyClass. In this scenario, you should use @Bean.
+
+-> If you want to use third-party classes or jar then use @Bean.
+-> If you want to use a third party class or jar that is not written using Spring Component then use @Bean.
