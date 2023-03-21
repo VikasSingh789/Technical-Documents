@@ -16,3 +16,14 @@ b) AspectJ Orientation Files.
 Q) difference between Pathvariable and ReqParam.
 A) If we are using Pathvariable and we are not  giving the input, then will get "404" Error. If we are using Pathvariable, its Mandatory to give the input otherwise it will give error.
 Incase of ReqParam, the input is Optional. we wont get any exception.
+
+Q) What is difference between @Bean and @Component in Spring
+A) a) @Component auto detects and configures the beans using classpath scanning whereas @Bean explicitly declares a single bean, rather than letting Spring do it automatically.
+b) @Component is a class level annotation whereas @Bean is a method level annotation and name of the method serves as the bean name.
+c) @Bean annotation has to be used within the class which is annotated with @Configuration whereas we dont need @Configuration while using @Component.
+d) We cannot create a bean of a class using @Component, if the class is outside spring container whereas we can create a bean of a class using @Bean even if the class is present outside the spring container.
+e) @Component has different specializations like @Controller, @Repository and @Service whereas @Bean has no specializations.
+
+Q) When should we use @Bean?
+A) Sometimes automatic configuration is not an option. When? Let's imagine that you want to wire components from 3rd-party libraries (you don't have the source code so you can't annotate its classes with @Component), so automatic configuration is not possible.
+The @Bean annotation returns an object that spring should register as bean in application context. The body of the method bears the logic responsible for creating the instance.
