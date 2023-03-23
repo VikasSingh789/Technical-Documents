@@ -59,8 +59,6 @@ doThrow(new SystemException()).when(enrollmentHTMLManager).generateSubmissionHTM
 EX:- For Throw Exception in test case
 @Test(expected = NotFoundException.class)  --> declare on top of test method
 when(enrollmentRepository.findByConfirmationIDAndDeleted(Mockito.anyString(), Mockito.anyBoolean())).thenReturn(null);
-
-https://javapointers.com/java/unit-test/difference-between-spy-and-mock-in-mockito/
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -85,7 +83,7 @@ When 1 Microservice is down:- https://stackoverflow.com/questions/50562495/how-t
 https://www.interviewbit.com/microservices-interview-questions/
 Streams:- https://www.geeksforgeeks.org/functional-programming-in-java-8-using-the-stream-api-with-example/
 Adding json file for junit test cases coverage.
-Hashcode and Equals Method:- https://howtodoinjava.com/java/basics/java-hashcode-equals-methods/
+
 
 
 
@@ -136,3 +134,8 @@ Redundant data
 Performance issue
 storage issue
 Number of partitions
+
+
+https://dev.to/jakmar17/deploy-spring-boot-on-wildfly-application-server-2029
+https://www.callicoder.com/spring-boot-spring-security-jwt-mysql-react-app-part-1/
+Hashcode and Equals Method:- https://howtodoinjava.com/java/basics/java-hashcode-equals-methods/
