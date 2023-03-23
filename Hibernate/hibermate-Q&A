@@ -5,8 +5,11 @@ i.e mapping is done in only 1 table. (only 1 table is depend on other table) is 
 -> if we have 2 tables and both tables act as primary key and foreign key.
 i.e mapping is done on both tables (both table depend on each other) is called bi-directional.
 
-Q) What is mapped by property ?
-A) 
+Q) What is mappedBy property ?
+A) While performing Bi-Directional mapping between 2 hibernate classes, we will need to explicitly tell to hibernate which side it should consider for performing mapping task using mappedBy property. The side which we want to consider for performing mapping task in general known as "Owning Side" and the other side is known as "Non-Owning side".
+-> The side where you mention mappedBy becomes "Non-Owning side".
+-> If we want hibernate to do the mapping task just once, then we explicitly tell to hibernate using mappedBy property. so that hibernate wont include 3rd table for mapping task.
+-> The mappedBy attribute tells that the @ManyToOne side is in charge of managing the Foreign Key column, and the collection is used only to fetch the child entities and to cascade parent entity state changes to children (e.g., removing the parent should also remove the child entities).
 
 Q) What are the types of Fetch Type
 A) There are 2 types of Fetch type. Lazy and Eager Fetch type.
