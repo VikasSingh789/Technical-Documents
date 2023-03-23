@@ -1,0 +1,134 @@
+Q) what is uni-directional and bi-directional in Hibernate ?
+A) if we have 2 tables and 1 table act as primary key and other tables act as foreign key.
+i.e mapping is done in only 1 table. (only 1 table is depend on other table) is called uni-directional.
+
+-> if we have 2 tables and both tables act as primary key and foreign key.
+i.e mapping is done on both tables (both table depend on each other) is called bi-directional.
+
+Q) What is mapped by property ?
+A) 
+
+Q) What are the types of Fetch Type
+A) There are 2 types of Fetch type. Lazy and Eager Fetch type.
+
+a) Eager Fetch type (or) Eager Loading:- Associated Data loads along with Actual data.
+b) Lazy Fetch type (or) Lazy Loading:- Associated Data loads only when we explicitly call getter method of Associated data.
+
+Ex:- 
+----
+Question q = (Question)s.get(Question.class, 1212);
+System.out.println(q.getQuestionId());
+System.out.println(q.getQuestion);
+
+System.out.println(q.getAnswers().size());
+
+Note:- For above example, if we define our class as Lazy Loading, hibernate will run 2 queries. 1st query to get only Questions Data and 2nd query to get Associated Data (On Demand).
+-> For 1st 2 statements, Answers class or Associated data wont get loaded as we have defined Lazy Loading(if we wont write 3rd statement).
+
+Q) What is Transaction in hibernate
+A) we can use Transaction when we save or update the data (or) any changes in table.
+ex:- Transaction tx = s.beginTransaction();
+
+Q) What is cascade in hibernate
+A) cascade is to perform operations on related entities of associated entities.
+If we take Question and Answers as 2 entities or 2 Object classes which performs "@OnetoMany" Relationship. Answers class is acting as associated class cos Answers id is a foreignkey in Questions class, like below source code,
+
+class Question {
+
+	private int id;
+
+	@OnetoMany(fetch = FetchType.Lazy,cascade = CascadeType.All)
+	private List<Answers> answers;
+	
+}
+
+class Answers{
+	private int id;
+}
+
+-> if we want to perform save or persist operation on above 2 classes, if we have not defined any cascadeType as "persist", then we have to call save() explicitly for Question and Answers Object.
+ex:-
+----
+Question q1 = new Question();
+q1.questionId(123);
+q1.setQuestion("What is Cascading Type...");
+
+s.save(q1);
+s.save(a1);
+s.save(a2);
+
+-> By above example, we need to perform multiple save operations to save 2 Entities though they are performing relationship.
+-> But if we define "cascade = CascadeType.Persist" on like above class, we dont have to perform multiple save operations. on single save, it will save for both Entities.
+ex:- s.save(q1); // q1 also includes data of Answers class.
+
+Note:- By above example, we are saving only "q1" because we have performed "cascade = "CascadeType.Persist", which automatically saves dat for Associate class as well while performing only single save operation "s.save(q1)". No need to call other/extra "save(a1)".
+
+Q) Types of Cascade in Hibernate
+A) ALL, Persist, Detach, Merge, Remove and Refresh.
+
+Q) Difference between Persist and Save method
+A) -> Persist() return nothing because it is void whereas save() methods Serializable Object as return Type which returns Identifier(generated id value or primiray key).
+-> Persist() can be used only inside/within the boundary of a transaction whereas save() can be used inside or outside the transaction boundary.
+-> Persist() takes less time to execute as it does not return anything whereas save() takes more time because once the object is saved, it returns the identifier back from that save().
+-> Persist() need to initialize transaction boundary to perform operation whereas we dont even need to initialize transaction boundary while save().
+
+ex for persist():-
+------------------
+session.beginTransaction();
+session.persist(employee);
+session.getTransaction().commit();
+
+ex for save():-
+---------------
+session.save(employee);
+
+-> By above 2 Examples, if we perform persist() outside of transaction boundary, it wont save any data in db and wont get any Exception since its return types is void.
+-> By performing save(), we can perform outside of transaction boundary or we dont even have to initialize transaction boundary.
+
+Note:- When we create any object for Employee class and set properties using set(), at that point our Entity is in Transient state. To save the transient data in DB we use persist(). Transient state is not mapped with any DB record.
+
+Q) Difference between get() and Load() in hibernate
+A) -> get() gives the Object whereas load() does not gives you any Object. (Only gives proxy/blank/fake Object if you use it).
+-> get() gives you null if it doesnt find any identifier whereas load() will fire ObjectNotFoundException if identifier is not found. 
+-> get() will hit the DB everytime will call whereas load() dont hit the DB (or) wont fire the query unless you use the Object. below example
+Ex:-
+----
+Question q1 = session.load(Question.class,123);
+System.out.println(q1);
+
+Note:- if we use load() like above example, it wont hit the DB (or) wont fire the query. It will only fire if we use 2nd line statement if we use load() call.
+
+Q) Difference between merge() and update() in hibernate
+A) -> In Update(), the Employee object needs to be created under session, and same object refernce we need to use to perform update() operation where as in merge() we can create the object outside of the session, and same object we can use to save changes by creating another session.
+-> update() will only work under session and on persistant object, whereas we can use merge() on transient object under another session with same identifier.
+
+Ex:-
+---
+Employee employee = null
+try(Session session = HibernateUtil.getSessionFactory().openSession();){
+	employee = session.get(Employee.class,1); // persistant Object
+} catch(Exception e){
+	e.printStackTrace();
+}
+
+employee.setEmail("pk.m@gmail.com"); // Transient Object since Session is closed
+
+try(Session session = HibernateUtil.getSessionFactory().openSession();){
+	Employee employee = session.get(Employee.class,1);
+	session.beginTransaction();
+	session.update(employee);  // NonUniqueObjectException. since we are performing operation on same identifier i.e. session.get(Employee.class,1); and using 2 different sessions
+	session.merge(employee);  // works fine
+	session.getTransaction().commit(); 
+} catch(Exception e){
+	e.printStackTrace();
+}
+
+Note:- As above Example, we are using same Employee object in 2nd/other session because we want transient object which was loaded in 1st session and now this 1st session is closed but still want to perform modification on this transient object to sync the data, then we can use merge() by using another session.
+-> if we want to modify any transient object and then load same object in different session, to update this modified data on transient object, we can use merge().
+
+Q) what is Refresh() in hibernate
+A) To get or pull the latest DB data we use refresh() under session. ex:- session.refresh();
+
+
+
+
