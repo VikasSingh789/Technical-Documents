@@ -43,3 +43,11 @@ Your code will throw NullPointerException if you try and access any method of cl
 
 -> If you want to use third-party classes or jar then use @Bean.
 -> If you want to use a third party class or jar that is not written using Spring Component then use @Bean.
+
+Q) What is ACID in SpringBoot
+A) ACID is an acronym that stands for atomicity, consistency, isolation, and durability.
+-> Atomicity describes an all or nothing principle. Either all operations performed within the transaction get executed or none of them
+
+Q) What is Atomicity
+A) Atomicity − A transaction should be treated as a single unit of operation, which means either the entire sequence of operations is successful or unsuccessful. 
+-> Consistency − This represents the consistency of the referential integrity of the database, unique primary keys in tables, etc.
