@@ -60,17 +60,31 @@ A)  a) Microservices
 	
 a) MicroServices:- The main component of microservices architecture is the self-contained services. They can be any language and function separate from one another, making them ideal for implementation through various software teams.
 
-There is also the service mesh. It's responsible for the communication between microservices via a messaging layer.
-
 b) Containers:- The containers are a package of software that functions independently. Containers work to isolate each service in the same environment.
 In order to create microservices, a virtual machine can serve as a container and simulate the functionaries of a standard physical computer.
 Containers provide efficiency because they only rely on specific dependencies and the underlying code within the service.
 
-c) Service discovery:- The service discovery helps manage deployment and evenly distribute the load. This component features a service consumes, service provider, and service registry.
+c) Service mesh:- It's responsible for the communication between microservices via a messaging layer. A Service Mesh is layer that makes communication between microservice applications possible, structured, and observable. A service Mesh also monitors and manages network traffic between microservices, redirecting and granting or limiting access as needed to optimize and protect the system.
 
-d) API gateway:- The API gateway is an essential part of communication in the complex distributed microservices architecture.
-It can handle administrative tasks, ensure the microservices load is lightweight, and perform load balancing actions when necessary.
+d) Service discovery:- The service discovery helps manage deployment and evenly distribute the load. This component features a service consumes, service provider, and service registry.
+-> In order to send an API request to a service, the client or API gateway must know the location of the service that it’s addressing.
+-> The service provider registers its location in the service registry.
+-> The client looks for relevant service locations in the service registry.
+-> The service registry returns the location of the required microservice.
+-> The client directly calls the microservice.
 
+e) API gateway:- An API gateway is a software application between a client and a set of backend microservices. The API Gateway serves as a reverse proxy to accept API calls from the client application, forwarding this traffic to the appropriate service.
+
+Q) What is Service Registry
+A) A service registry is a database used to keep track of the available instances of each microservice in an application. The service registry needs to be updated each time a new service comes online and whenever a service is taken offline or becomes unavailable. This can be achieved with either self-registration or third-party registration.
+-> We use ServiceRegistry to manage all vast details, Scale Up and maintain all ports and URI information of all MS. ServiceRegistry Will maintain all the MS's. All the MS's will be connected to this ServiceRegistry and will get all the information regarding all the services.
+ex:- status update, what are the port info and URL etc.
+
+Q) What is Eureka Server in Microservice
+A) Eureka Server is an application that holds the information about all client-service applications. Every Micro service will register into the Eureka server and Eureka server knows all the client applications running on each port and IP address. Eureka Server is also known as Discovery Server.
+
+Q) what is config server in microservices
+A) Config Server is an externalized application configuration service. It is based on the open-source Spring Cloud Config project, which provides a centralized server for delivering external configuration properties to an application and a central source for managing this configuration across deployment environments.
 
 Q) Microservice vs Service-Oriented architecture
 A) While microservices use loose connections and APIs, SOA uses protocols to create an application and create functionality and compatibility for services.
@@ -111,7 +125,7 @@ FaultTolerance:- If a service is down.
 
 SpringCloudConfigServer:- (Problem solver for Configuration Management)
 --------------------------
-SpringCloudConfigServer provides an approach, where we can store all the configurations for all the different env's of all the MS's in a git repo(Centralized Location). SpringCloudConfigServer can be used to expose the configurations to all the microservices. This makes hepl to put all configurations in 1 place and easy to maintain the configuration for all the microservices.
+SpringCloudConfigServer provides an approach, where we can store all the configurations for all the different env's of all the MS's in a git repo(Centralized Location). SpringCloudConfigServer can be used to expose the configurations to all the microservices. This makes help to put all configurations in 1 place and easy to maintain the configuration for all the microservices.
 
 Ribbon Load Balancing:- (Problem solver for Dynamic Scale Up and Scale Down)
 -----------------------
@@ -122,22 +136,11 @@ Hystrix:- (Problem solver for FaultTolerance)
 ---------
 If a service is down, Hystrix helps us to configure a default response.
 
-Eureka Server:-
----------------
-Eureka Server is an application that holds the information about all client-service applications. Every Micro service will register into the Eureka server and Eureka server knows all the client applications running on each port and IP address. Eureka Server is also known as Discovery Server.
-
-
 MS's are solution for monolith Application.
-
 
 Setter Injections are not mandatory Injection whereas Constructor injections are mandatory dependency(injection).
 @Autowired(required = false) doesn't have any impact on Constructor
 
-
-ServiceRegistry:-
------------------
-We use ServiceRegistry to manage all vast details, Scale Up and maintain all ports and URI information of all MS. ServiceRegistry Will maintain all the MS's. All the MS's will be connected to this ServiceRegistry and will get all the information regarding all the services.
-ex:- status update, what are the port info and URL etc.
 
 Dependencies for Creating ServiceRegistry MS:-
 ----------------------------------------------
