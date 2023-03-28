@@ -230,7 +230,59 @@ Example of Terminal     :- collect(), min(), max(), count(), forEach()
 A) To Increase the performance, from java 8, Whenever some particular Threshold is reached, they have removed the LinkedList and impelmented the BalancedTree. When threshold is reached, LinkedList converted to BalancedTree. In that case, in worst case scenario, performance becomes O(logn) which is  better than O(n) and best case scanrio is still O(1).
 
 20) What is an Optional Class
-A) It contains in Java.util Package. It contains only 2 values 0 and 1. isPresent(), get() and .of() are the methods present in Optional Class. Basic utility of this class is to prevent "NullpointerPointerException" in Code Base.
+A) To avoid Unpredictable NullPointer Exception, we can use Optional class. Optional is a "public final class".
+static methods:- empty(), of() and ofNullable(). These 3 methods or 3 ways is used for Optional Object creation.
+Instance methods:- get(), equals(), filter(), map(), flatmap(), isPresent() and hashcode() etc.
+
+Optional.empty():- It will return simply Empty Optional Object.
+-----------------
+ex:- Optional<Object> emptyOptional = Optional.empty();
+System.out.println(emptyOptional);
+output:- Optional.empty
+
+Optional.of():- If we know, the object which we are passing is not null, then we can go for Optional.of method, because it performs null check internally. if we pass some --------------- object which is null, then it will give you the NPE. Below example for same,
+ex:- customer.setEmail(null);
+Optional<String> emptyOptional = Optional.of(customer.getEmail());
+System.out.println(emptyOptional);
+output:- NPE // Exception
+
+Optional.ofNullable():- It will return Optional.empty if passed object is null else it will return appropriate .of() value. Below is the example,
+-----------------------
+ex1:- customer.setEmail(null);
+Optional<String> emptyOptional = Optional.ofNullable(customer.getEmail());
+System.out.println(emptyOptional);
+output:- Optional.empty
+
+ex1:- customer.setEmail(abc);
+Optional<String> emptyOptional = Optional.ofNullable(customer.getEmail());
+System.out.println(emptyOptional);
+output:- Optional[abc]
+
+.get():- To fetch the exact value we use get().
+--------
+ex:- customer.setEmail(null);
+Optional<String> emptyOptional = Optional.ofNullable(customer.getEmail());
+System.out.println(emptyOptional.get());
+output:- java.util.NoSuchElementException: No value present. // Even though field is null, instead of getting NPE we are getting NoSuchElementException.
+
+.orElse():- To return default value, if optional doesnot contain any value or contains null value (to avoid NullPointerException).
+-----------
+ex1:- customer.setEmail(null);
+Optional<String> emptyOptional = Optional.ofNullable(customer.getEmail());
+System.out.println(emptyOptional.orElse("default@email.com"));
+output:- default@email.com"
+
+ex1:- customer.setEmail(abc);
+Optional<String> emptyOptional = Optional.ofNullable(customer.getEmail());
+System.out.println(emptyOptional.orElse("default@email.com"));
+output:- abc
+
+orElseThrow:- To throw the custom exception if optional object does not contain any value.
+-------------
+ex1:- customer.setEmail(null);
+Optional<String> emptyOptional = Optional.ofNullable(customer.getEmail());
+System.out.println(emptyOptional.orElseThrow(()->new IllegalArgumentException("email not present")));
+output:- java.lang.IllegalArgumentException: email not present // Exception
 
 21) What is MetaSpace? How does it differ from PermGen
 A) PermGen is a part of HeapMemory before java 1.8. PermGen who used to contains MetaData info about the classes which was actually stored in "Permanent Generation" Memory. It used to be fixed in size and cannot be dynamically recycle whenever new metadata has to be stored about the class.
