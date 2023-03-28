@@ -174,3 +174,12 @@ d) In path we set the path of executables while in classpath we set path of jars
 
 Q) Which 1 is preffered to create Threads. Thread class or Runnable Interface
 A) Implement the Runnable Interface, so that will have the option to extend the classes later on.
+
+Q) When we face memory leak in java
+A) -> Excessive use of static members
+-> Unclosed Resources
+-> Improper equals() and hashcode() Implementations
+-> Excessive Session Objects
+-> poorly written custome data structure.
+
+static members:- These are not associated with any objects. Static Members have lifespan of almost application. whenever class is loaded in JVM at that time all static members allocated memory. It will remain in the memory untill the class loader become eligible for garbage collection.
