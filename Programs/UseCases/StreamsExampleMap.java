@@ -173,7 +173,17 @@ public class StreamsExampleMap {
 		map5.entrySet()
 		.stream()
 		.filter(k->"Course1".equals(k.getValue()))
-		.map(n->n.getKey().name).forEach(System.out::println);
+		.map(n->n.getKey().name+"-"+n.getKey().getId()+"-"+n.getValue()).forEach(System.out::println);
+		
+		System.out.println("(or)");
+		
+		List<String> lisOfResult = map5.entrySet()
+		.stream()
+		.filter(k->"Course1".equals(k.getValue()))
+		.map(n->n.getKey().name+"-"+n.getKey().getId()+" "+n.getValue()).collect(Collectors.toList());
+		for(String loR : lisOfResult) {
+			System.out.println(loR);
+		}
 		
 		System.out.println("(or)");
 		
