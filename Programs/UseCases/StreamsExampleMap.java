@@ -95,8 +95,8 @@ public class StreamsExampleMap {
 		
 		System.out.println("--------------------------------------");
 		
-//		Inp = "Always be a good heart person"
-//      Out = "a be good heart Always person"
+		//  Inp = "Always be a good heart person"
+		//  Out = "a be good heart Always person"
 		
 		String str3 = "Always be a good heart person";
 		String sp[] = str3.split(" ");
@@ -170,12 +170,10 @@ public class StreamsExampleMap {
 				
 		System.out.println("(or)");
 		
-		
 		map5.entrySet()
 		.stream()
 		.filter(k->"Course1".equals(k.getValue()))
 		.map(n->n.getKey().name).forEach(System.out::println);
-		
 		
 		System.out.println("(or)");
 		
