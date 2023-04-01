@@ -2,8 +2,12 @@ package com.practice;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class StreamsExampleMap {
 
@@ -16,11 +20,28 @@ public class StreamsExampleMap {
 		this.name = name;
 	}
 
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public static void main(String[] args) {
 
 		StreamsExampleMap s1 = new StreamsExampleMap(1, "vikas");
 		StreamsExampleMap s2 = new StreamsExampleMap(2, "akash");
 		StreamsExampleMap s3 = new StreamsExampleMap(3, "Abhishek");
+		StreamsExampleMap s4 = new StreamsExampleMap(4, "venkatesh");
 
 		Map<Integer, StreamsExampleMap> map = new HashMap<Integer, StreamsExampleMap>();
 
@@ -74,22 +95,21 @@ public class StreamsExampleMap {
 		
 		System.out.println("--------------------------------------");
 		
-		// Inp = "Always be a good heart person"
-		// Out = "a be good heart Always person”
+//		Inp = "Always be a good heart person"
+//      Out = "a be good heart Always person"
 		
 		String str3 = "Always be a good heart person";
 		String sp[] = str3.split(" ");
-		Map<String,Integer> pam = new HashMap();
+		Map<String,Integer> pam = new HashMap<String, Integer>();
 		for(String s : sp) {
 			pam.put(s, s.length());
 		}
 		System.out.println(pam);
-		Map<String,Integer> s = pam.entrySet()
-					.stream()
-					.sorted((Map.Entry.<String,Integer>comparingByValue())
-					.thenComparing(Map.Entry.comparingByKey()))
-					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2)->e1,LinkedHashMap::new));
-		for(Map.Entry<String,Integer> b: s.entrySet()) {
+		pam = pam.entrySet().stream()
+							.sorted((Map.Entry.<String,Integer>comparingByValue())
+							.thenComparing(Map.Entry.comparingByKey()))
+							.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2)->e1,LinkedHashMap::new));
+		for(Map.Entry<String,Integer> b: pam.entrySet()) {
 			System.out.print(b.getKey()+" ");
 		}
 		System.out.println();
@@ -114,7 +134,59 @@ public class StreamsExampleMap {
 		for(Map.Entry<Character, Integer> obj : map2.entrySet()) {
 			System.out.print(obj.getKey()+"="+obj.getValue()+",");
 		}
-
+		System.out.println();
+		System.out.println("-------------------------------------->");
+		
+		//Mutable Object
+		final Map<StreamsExampleMap,Integer> map3 = new HashMap<>();
+		map3.put(s1, 40);
+		map3.put(s2, 30);
+		map3.put(s3, 60);
+	
+		final Map<StreamsExampleMap,Integer> map4 = map3;
+		map4.put(s1, 40);
+		map4.put(s2, 31);
+		
+		for(Map.Entry<StreamsExampleMap, Integer> obj1 : map4.entrySet()) {
+			System.out.println(obj1.getKey().name+"="+obj1.getValue());
+		}
+		
+		System.out.println("--------------------------------------");
+		
+		//filter based on stream and key
+		Map<StreamsExampleMap,String> map5 = new HashMap<>();
+		map5.put(s1, "Course1");
+		map5.put(s2, "Course2");
+		map5.put(s3, "Course1");
+		map5.put(s4, "Course3");
+		
+		List<StreamsExampleMap> lisOfResults = map5.entrySet()
+				.stream()
+				.filter(k->"Course1".equals(k.getValue()))
+				.map(Map.Entry::getKey).collect(Collectors.toList());
+				for(StreamsExampleMap lr: lisOfResults) {
+					System.out.println(lr.getId()+" "+lr.getName());
+				}
+				
+		System.out.println("(or)");
+		
+		
+		map5.entrySet()
+		.stream()
+		.filter(k->"Course1".equals(k.getValue()))
+		.map(n->n.getKey().name).forEach(System.out::println);
+		
+		
+		System.out.println("(or)");
+		
+		Map<StreamsExampleMap,String> result= map5.entrySet().stream()
+				.filter(k->"Course1".equals(k.getValue()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		
+		result.entrySet().forEach(n->{
+			System.out.println(n.getKey().name+" "+n.getValue());
+		});	
+		
+	
 	}
-
 }
