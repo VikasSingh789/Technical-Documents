@@ -193,7 +193,14 @@ public class StreamsExampleMap {
 		
 		result.entrySet().forEach(n->{
 			System.out.println(n.getKey().name+" "+n.getValue());
-		});	
+		});
+		
+		System.out.println("(or)");
+		
+		map5.entrySet()
+		    .stream()
+			.filter(k->"Course1".equals(k.getValue()))
+			.forEach(n->System.out.println(n.getKey().getName()+" "+n.getValue()));
 		
 	
 	}
