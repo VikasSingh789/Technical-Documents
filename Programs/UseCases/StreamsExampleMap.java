@@ -106,9 +106,9 @@ public class StreamsExampleMap {
 		}
 		System.out.println(pam);
 		pam = pam.entrySet().stream()
-							.sorted((Map.Entry.<String,Integer>comparingByValue())
-							.thenComparing(Map.Entry.comparingByKey()))
-							.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2)->e1,LinkedHashMap::new));
+				    .sorted((Map.Entry.<String,Integer>comparingByValue())
+				    .thenComparing(Map.Entry.comparingByKey()))
+				    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2)->e1,LinkedHashMap::new));
 		for(Map.Entry<String,Integer> b: pam.entrySet()) {
 			System.out.print(b.getKey()+" ");
 		}
@@ -199,8 +199,8 @@ public class StreamsExampleMap {
 		
 		map5.entrySet()
 		    .stream()
-			.filter(k->"Course1".equals(k.getValue()))
-			.forEach(n->System.out.println(n.getKey().getName()+" "+n.getValue()));
+		    .filter(k->"Course1".equals(k.getValue()))
+		    .forEach(n->System.out.println(n.getKey().getName()+" "+n.getValue()));
 		
 	
 	}
