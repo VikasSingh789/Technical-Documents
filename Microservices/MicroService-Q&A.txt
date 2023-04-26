@@ -42,7 +42,6 @@ This system lacks when it comes to operating within the cloud and cloud computin
 There are varying opinions on the evolution of SOA to microservices. Many feel it's a more granular approach to application architecture, while others think it's platform-agnostic and may find its purpose within the microservices management process and architecture pattern.
 Its new features allow it to handle cloud-based services and computing with ease and fewer restrictions for parts of the application.
 
-
 Q) Why Microservices are better than Monolithic architecture
 A) As mentioned previously, microservices are so compatible with today's need to scale business because they create independent connections that are flexible and customizable.
 -> With monolithic architecture, one executable file is stored with the code, making it more complex to use and troubleshoot.
@@ -50,11 +49,9 @@ A) As mentioned previously, microservices are so compatible with today's need to
 -> Testing also creates a situation where more intensive efforts are needed. When there are any changes or updates, the entire application is affected and may require a new version of the application. All of these points add up to considerably more cost, maintenance, and planning when using a monolithic application.
 -> Monolithic applications are also challenging to scale with constantly changing needs.
 
-
 Q) Benefits of Microservices
 A) A microservices application is designed to create scalability via pipelines. This service-oriented architecture is more straightforward for development teams to navigate and maintain from day to day.
 -> Integrating this system for data management reduces latency. It can also optimize the technology stack to make a business capable of adding additional services as well as make connecting with a web application and various platforms less complex.
-
 
 Q) Drawbacks to Using Microservices Architecture
 A) While there are many advantages to using this architectural style, there are some potential disadvantages to consider. For example, there might be some latency at times if considerable use occurs.  
