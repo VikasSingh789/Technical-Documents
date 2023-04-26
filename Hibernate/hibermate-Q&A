@@ -15,6 +15,54 @@ A) While performing Bi-Directional mapping between 2 hibernate classes, we will 
 -> If we want hibernate to do the mapping task just once, then we explicitly tell to hibernate using mappedBy property. so that hibernate wont include 3rd table for mapping task.
 -> The mappedBy attribute tells that the @ManyToOne side is in charge of managing the Foreign Key column, and the collection is used only to fetch the child entities and to cascade parent entity state changes to children (e.g., removing the parent should also remove the child entities).
 
+Q) Hibernate Lifecycle
+A) The Hibernate lifecycle contains 3 states, "Transient", "Persistent" and "Detached" State.
+
+i) Transient state:-
+--------------------
+-> The transient state is the initial state of an object.
+-> Once we create an instance of POJO class, then the object entered in the transient state.
+-> Here, an object is not associated with the Session. So, the transient state is not related to any database.
+-> Hence, modifications in the data don't affect any changes in the database.
+-> The transient objects exist in the heap memory. They are independent of Hibernate.
+
+ex:-
+---
+Employee e=new Employee(); //Here, object enters in the transient state.  
+e.setId(101);  
+e.setFirstName("Gaurav");  
+e.setLastName("Chawla");  
+
+ii) Persistent state:- 
+----------------------
+-> As soon as the object associated with the Session, it entered in the persistent state.
+-> Hence, we can say that an object is in the persistence state when we save or persist it.
+-> Here, each object represents the row of the database table.
+-> So, modifications in the data make changes in the database.
+
+We can use any of the following methods for the persistent state,
+session.save(e), session.persist(e), session.update(e), session.saveOrUpdate(e) etc..
+
+iii) Detached state:-
+---------------------
+-> Once we either close the session or clear its cache, then the object entered into the detached state.
+-> As an object is no more associated with the Session, modifications in the data don't affect any changes in the database.
+-> However, the detached object still has a representation in the database.
+-> If we want to persist the changes made to a detached object, it is required to reattach the application to a valid Hibernate session.
+
+Note:- To associate the detached object with the new hibernate session, use any of these methods - load(), merge(), refresh(), update() or save() on a new session with the reference of the detached object.
+
+We can use any of the following methods for the detached state.
+session.close(), session.clear(), session.detach(e), session.evict(e)
+
+Q) Difference between clear(), evict() and close() in hibernate
+A) Clear() :- When this method get called inside transaction boundry then all objects which are currently associate with particular session will be  disconnected / clean or no longer associate with that Session instance.
+-> Therefore, after calling this method nothing will be performed on persistance layer or DB.
+
+evict():- To detach the object from session cache, hibernate provides evict() method. After detaching the object from the session, any change to object will not be persisted.
+
+Close():- Close session by calling session.close() method, means End the session and releasing the JDBC Connection and clean up.
+
 Q) What are the types of Fetch Type
 A) There are 2 types of Fetch type. Lazy and Eager Fetch type.
 
