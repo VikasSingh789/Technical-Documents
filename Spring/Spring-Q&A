@@ -46,7 +46,8 @@ Your code will throw NullPointerException if you try and access any method of cl
 
 Q) What is ACID in SpringBoot
 A) ACID is an acronym that stands for atomicity, consistency, isolation, and durability.
--> Atomicity describes an all or nothing principle. Either all operations performed within the transaction get executed or none of them
+-> Atomicity describes an all or nothing principle. Either all operations performed within the transaction get executed or none of them executed.
+-> If anything or any transaction goes wrong, we can rollback the changes from Database. With this we can avoid or ignore Data inconsistency in our application.
 
 Q) What is Atomicity
 A) Atomicity − A transaction should be treated as a single unit of operation, which means either the entire sequence of operations is successful or unsuccessful. 
