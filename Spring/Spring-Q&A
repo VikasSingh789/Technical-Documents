@@ -52,3 +52,8 @@ A) ACID is an acronym that stands for atomicity, consistency, isolation, and dur
 Q) What is Atomicity
 A) Atomicity − A transaction should be treated as a single unit of operation, which means either the entire sequence of operations is successful or unsuccessful. 
 -> Consistency − This represents the consistency of the referential integrity of the database, unique primary keys in tables, etc.
+
+Q) What is JDBC Template
+A) JDBCTemplate is a class in Spring which is used to execute the queries. It also provides different methods for querying/retrieving data from the database.
+-> JDBC is not an ORM tool, it does not represent any rows as objects in DB whereas Hibernate does that.
+-> If we are not using Hibernte in our Project, we can use JDBCTemplate to query and retrive the data from Database.
