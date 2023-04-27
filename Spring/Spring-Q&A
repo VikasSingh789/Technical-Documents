@@ -57,3 +57,7 @@ Q) What is JDBC Template
 A) JDBCTemplate is a class in Spring which is used to execute the queries. It also provides different methods for querying/retrieving data from the database.
 -> JDBC is not an ORM tool, it does not represent any rows as objects in DB whereas Hibernate does that.
 -> If we are not using Hibernte in our Project, we can use JDBCTemplate to query and retrive the data from Database.
+
+Methods:-
+--------
+jdbcTemplate.query(queryString), jdbcTemplate.queryForList(queryString) and jdbcTemplate.update(queryString).
