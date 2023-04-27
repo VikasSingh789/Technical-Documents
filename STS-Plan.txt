@@ -139,3 +139,6 @@ Number of partitions
 https://dev.to/jakmar17/deploy-spring-boot-on-wildfly-application-server-2029
 https://www.callicoder.com/spring-boot-spring-security-jwt-mysql-react-app-part-1/
 Hashcode and Equals Method:- https://howtodoinjava.com/java/basics/java-hashcode-equals-methods/
+MAP Object filter based on value:- https://mkyong.com/java8/java-8-filter-a-map-examples/
+How to enable or disable spring bean based on condition. https://reflectoring.io/spring-boot-conditionals/
+How to make our bean synchronized. http://dolszewski.com/spring/spring-bean-thread-safety-guide/
