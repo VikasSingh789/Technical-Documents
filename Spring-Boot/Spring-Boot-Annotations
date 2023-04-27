@@ -167,7 +167,7 @@ public class StudentController {
     }
 }
 
-If we run the above controller by using any api, we would see the output as "controller object created ....". Try to hit the api many times, you will see there is no further statement or ouput about "controller object created ....". Because the Object will create once because we have define "@Scope("singleton")", the Object will be created only once and it stored in application context, thats what the Spring re-uesd it.
+If we run the above controller by using any api, we would see the output as "controller object created ...." gets printed in cosnlosole. Try to hit the api many times, you will see there is no further statement and only 1 single time statement gets printed about "controller object created ....". Because the Object will create once because we have define "@Scope("singleton")", the Object will be created only once and it stored in application context, thats what the Spring re-uesd it.
 
 By using "@Scope("prototype")", as many time we hit the api, those many times the Controller Object will be created.
 
