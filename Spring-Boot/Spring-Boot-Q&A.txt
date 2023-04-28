@@ -3,7 +3,8 @@ A)  a)Spring Boot unnecessary increase the size of the build with unused depende
 b) its only suitable for micro-services which eventually need to deploy in docker, but not for large or mono lithics web service.
 
 Q) What are the major starter dependencies of Spring Boot Application.
-A) a) spring-boot-starter-parent:- 
+A) a) spring-boot-starter-parent:-
+-> The spring-boot-starter-parent is a project starter. It provides default configurations for our applications. It is used internally by all dependencies. All          Spring Boot projects use spring-boot-starter-parent as a parent in pom. xml file.
 -> provides default configuration for our application and a complete dependency tree to quickly build our Spring Boot.
 -> It also Provides default configuration for maven plugins.
 
