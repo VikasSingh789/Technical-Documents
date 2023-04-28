@@ -61,3 +61,8 @@ A)  select employee.id, employee_name,salary, dept_name
 	where employee.ei_id = department.id
 	group by ei_id
 	having salary>25000;
+	
+Q) Query to find duplicate names and email from User table and whats the count.
+A) select employee_name, count(*) from employee
+	group by employee_name
+	having count(*)>1;
