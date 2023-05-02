@@ -1,9 +1,11 @@
 Lambda Expressions
 Stream API
 Default Methods in Interface
-Static methods
+Static methods in Interface
 Functional Interface
-Method Reference 
+Method Reference
+Optional Class
+Java Date Time API
 
 1) What are all features of java 8  did you used
 A)  a) Functional Interface (include default and static Method)
@@ -68,7 +70,8 @@ The above example can be replaced with the method reference
 ex:- list.stream().filter(t->t>4).sorted().forEach(System.out::println);
 
 11) What is Method refernce in java 8
-A) 2 types of Method reference in java 8
+A) Method reference is used to refer method of functional interface. We use :: to invoke or call the method. 
+2 types of Method reference in java 8
 
 1) static
 2) instance
@@ -381,6 +384,39 @@ Output:-
 --------
 0.5685808855697841
 
+23) What is Java Date Time API in java 1.8
+A) 
+Earlier Issues By using Date:-
+----------------------------
+1) Same class in 2 different packages. Some sort of confusion which one to use earlier.
+java.sql:- Suitable for Mysql or any DB.
+java.util:- Machine specific date or human specific date.
+ex:- Date d = new Date(); // we are creating new object here
+syso(d) // This will print date but also print time.(prints date and time both when we are only asked to print date).
+2) To format, we need to import 1 more package called java.text
+3) All date classes or packages are not-thread safe. (multiple thread is working on same date object and 1 thread making changes then other thread will suffer). Thats the issue with old date time API.
 
+Date Time API (Java 1.8)
+-------------------------
+1) Immutable. we cannot change existing value, even if you try to change existing value, it will create new object.
 
+2) LocalDate:- It defines the System Define Date which comes under "import java.time.LocalDate". No more util package for Date Time API. We have special package called 
+"import java.time.LocalDate".
+LocalDate d = LocalDate.now() // we are avoiding or not creating a new object here.
+syso(d); // it will only print date.
+To get any Specific Date:- LocalDate d = LocalDate.of(1989,Month.FEBRUARY,28), where Month argument is Enum.
+
+3) LocalTime:- It defines the System Define Time which comes under package called "import java.time.LocalTime".
+LocalTime t = LocalTime.now() // we are avoiding or not creating a new object here.
+syso(t); // it will only print time.
+To get any Specific Time:- LocalTime t = LocalTime.of(12,35.10,999).
+
+4) LocalDateTime:- It define Date and Time both which comes under package called "import java.time.LocalDateTime".
+LocalDateTime t = LocalDateTime.now(); // we are avoiding or not creating a new object here.
+syso(t); // it will print Date and Time.
+
+4) To get the zone ids's:- ZoneId.getAvailableZoneIds()
+LocalTime t = LocalTime.now(ZoneId.of("Asia/Kuwait");
+syso(t);
+-> Instant i = Instant.now() // will give us the GMT Date and Time.
 
