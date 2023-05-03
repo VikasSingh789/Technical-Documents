@@ -1,4 +1,4 @@
-Q) What is JAR in Java
+What is JAR in Java
 A) Java Archive File. It is an Executable file. This file is given to the end users or client where he can execute the application without any compilation.
 -> JAR (Java Archive) is a platform-independent file format aggregates many files in to one. It contains multiple files like .class, images and sounds.
 -> JAR Format also supports compression, which reduces the size of the file.
@@ -7,7 +7,7 @@ A) Java Archive File. It is an Executable file. This file is given to the end us
 	b) By using IDE's like (STS and IntelliJ iD)
 	c) By using java.util.jar API
 	
-Q) How to run SpringBoot Application by using Command-line Interface
+How to run SpringBoot Application by using Command-line Interface
 A) We can run SpringBoot Application by run in main-method in single class.
 -> But thats not how it runs in Production environment. We dont have an IDE in prod to run application.
 
@@ -19,18 +19,19 @@ Steps:-
 4) change directory to target folder.
 5) To run SpringBoot project from command line, use "java -jar jarname" cmd.
 ex:- java -jar spring-boot-config-0.0.1-SNAPSHOT.jar
-6) After running the above command, we could see the springboot application will be up and running in console of IDE.
+6) After running the above command, we could see the springboot application will be up and running in command prompt.
 
 -> When we download project from "start.spring.io", will get these 2 maven cmd files, "mvnw.cmd" and "mvnw".
 -> These are maven wrappers for maven that let us run maven even if we dont have installed maven in our machine.
 -> If we are running SpringBoot projects, We dont even need maven installed in our machine. we can just run this wrapper files and they will do same act as maven cmd.
-ex:- run "./mvnw install". This step we call it as "Maven Wrapper".
+ex:- run "mvnw install". This step we call it as "Maven Wrapper".
 
 -> By above steps, we required to run a build and then run a jar file to start the spring-boot application.
 
 Note:- Other way to run this SpringBoot Application is by using source directory. i.e by using the spring target.
-ex:- "mvn spring-boot:run" (runs spring boot application)
+ex:- mvn spring-boot:run (runs spring boot application)
 -> By this way we dont have to create jar file and run that. we are running it directly from Source.
+-> "mvnw -Dmaven.test.skip=true spring-boot:run":- to skip the test cases and run springboot application.
 
 Q) Why we should avoid the Spring Boot Framework.
 A)  a)Spring Boot unnecessary increase the size of the build with unused dependencies.
