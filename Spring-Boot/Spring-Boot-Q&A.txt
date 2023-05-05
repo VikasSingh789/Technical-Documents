@@ -1,4 +1,8 @@
-What is JAR in Java
+Q) What is the difference between Post and Put Method in SpringBoot
+A) The PUT method is used to modify a single resource. The POST method is used to add a child resource. It can be cached. It cannot be cached.
+-> Another important difference between the methods is that PUT is an idempotent method, while POST isn't. For instance, calling the PUT method multiple times will either create or update the same resource. In contrast, multiple POST requests will lead to the creation of the same resource multiple times.
+
+Q) What is JAR in Java
 A) Java Archive File. It is an Executable file. This file is given to the end users or client where he can execute the application without any compilation.
 -> JAR (Java Archive) is a platform-independent file format aggregates many files in to one. It contains multiple files like .class, images and sounds.
 -> JAR Format also supports compression, which reduces the size of the file.
@@ -7,7 +11,7 @@ A) Java Archive File. It is an Executable file. This file is given to the end us
 	b) By using IDE's like (STS and IntelliJ iD)
 	c) By using java.util.jar API
 	
-How to run SpringBoot Application by using Command-line Interface
+Q) How to run SpringBoot Application by using Command-line Interface
 A) We can run SpringBoot Application by run in main-method in single class.
 -> But thats not how it runs in Production environment. We dont have an IDE in prod to run application.
 
