@@ -1,7 +1,6 @@
 Q) What is checked Exceptions
 A) Checked exceptions are checked at compile-time. It means if a method is throwing a checked exception then it should handle the exception using try-catch block or it should declare the exception using throws keyword, otherwise the program will give a compilation error. It is named as checked exception because these exceptions are checked at Compile time.
-
-There is no difference between compile time exceptions and checked exceptions
+-> There is no difference between compile time exceptions and checked exceptions
 
 Q) What is Exception Propagation
 A) If we dont want to handle the exception by using "try&catch" then we can propagate or fwd that exception to other method by using "throws" keyword on method level.
