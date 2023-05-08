@@ -1,3 +1,38 @@
+Q) What is checked Exceptions
+A) Checked exceptions are checked at compile-time. It means if a method is throwing a checked exception then it should handle the exception using try-catch block or it should declare the exception using throws keyword, otherwise the program will give a compilation error. It is named as checked exception because these exceptions are checked at Compile time.
+
+There is no difference between compile time exceptions and checked exceptions
+
+Q) What is Exception Propagation
+A) If we dont want to handle the exception by using "try&catch" then we can propagate or fwd that exception to other method by using "throws" keyword on method level.
+-> We use "throws" keyword to propagate the exception.
+-> Unchecked Exceptions are by default propagated but checked Exceptions are need to be propagated.
+-> Unchecked Exceptions like "NullPointerException" will be propagated by default if we dont handle in "try&catch" block.
+-> if we use "try&catch" block, the Exception Propagation wont happen.
+
+-> checked Exception will get detected at compile time. we can declare checked exception by using "throw" keyword.
+ex:- throw new IOException()
+->  These checked exceptions must be caught or declare to be thrown.
+a) Exceptions must be caught by using "try&catch" block (or)
+b) If we dont want to handle exceptions, then we can declare/throw exceptions/propagate the exception by using "throws" keyword like "throws IOException" on method level.
+
+-> If we propagate and handle the Exception in same method, then will face Exception issue at run time. 
+ex:-
+----
+void m3() throws IOException{
+	try{
+		m2();
+	}catch(){
+		io.printStackTrace();
+	}
+}
+
+main(){
+m3();
+}
+
+By above code, on method m3() we are trying to propagate the exception by "throws" keyword and also handling the Exception by using "try&catch" block in same m3() method, so in this case will get Exception at run time because, though we have handled the exception, we are using "throws" keyword to propagate the Exception.
+
 Q) Difference between append and concat in java
 A) 
 Concat:-
