@@ -103,6 +103,10 @@ A)  a)filter
 	e)flatMap
 	f)collect
 	
+Q) What is FlatMap in java 8
+A) The main difference between map() and flatMap() is that map() transforms each element of a stream into a single element of a new stream.
+   While flatMap() transforms each element of a stream into a stream of multiple elements.
+	
 13) When to use map and flatMap
 A) 
 public class User{
