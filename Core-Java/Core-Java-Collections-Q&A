@@ -143,3 +143,9 @@ A) Initially, in HashMap, Each Bucket is used as a LinkedList, but on certain th
 10) How TreeMap Internally works.
 A) If we use treeMap, any Object we add as a key, will preserve the default natural Sorting Order. Then How its doing the DNSO ?
 Internally it uses Comparable interface which uses compareTo() to perform DNSO.
+
+11) What is ConnurrentHashMap in java
+A) ConcurrentHashMap is a thread-safe implementation of the Map interface in Java, which means multiple threads can access it simultaneously without any synchronization issues. 
+It’s part of the java.util.concurrent package and was introduced in Java 5 as a scalable alternative to the traditional HashMap class.
+-> One of the key features of the ConcurrentHashMap is that it provides Segment level locking, meaning that it locks only the portion of the map being modified, rather than the entire map.
+This makes it highly scalable and efficient for concurrent operations. Additionally, the ConcurrentHashMap provides various methods for atomic operations such as putIfAbsent(), replace(), and remove().
