@@ -15,6 +15,13 @@ Step 10 - The DispatcherServlet finally sends HTML output as a response back to 
 Q) Difference between @Qualifier and @Primary
 A) @Primary defines a default value and bean marked with this annotation will be used unless otherwise indicated. 
    @Qualifier annotation is specific and is used when a particular bean is needed.
+   
+Q) Difference between @Inject and @Autowired
+A) @Autowired is defined by Spring Framework but @Inject came from "Dependency Injection for Java" (JSR-330)".
+-> By default the dependency injection for @Autowired must be fulfilled because the value of required attribute is true by default. We can change this behavior by using @Autowired(required=false). In this case if bean is not found for dependency injection, it will not throw error.
+ But @Inject annotation has no required attribute. Therefore, if the dependencies will not be found - will be thrown an exception.
+-> @Qualifier can be used in case of ambiguity while working with @Autowired and we use @Named Qualifier while working with @Inject.
+-> @Inject is portable and can be used in spring framework and as well as with some other application. But @Autowired will work only with Spring Framework.
 
 Q) What is Spring AOP
 A)  Spring AOP enables Aspect-Oriented Programming in spring applications. In AOP, aspects enable the modularization of concerns such as transaction management, logging or security that cut across multiple types and objects (often termed crosscutting concerns).
