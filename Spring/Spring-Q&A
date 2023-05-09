@@ -1,3 +1,21 @@
+Q) How Spring MVC Works
+A) A Spring MVC provides an elegant solution to use MVC in spring framework by the help of DispatcherServlet. Here, DispatcherServlet is a class that receives the incoming request and maps it to the right resource such as controllers, models, and views.
+
+Step 1 - When the client (browser) sends an HTTP request to a specific URL. The DispatcherServlet of Spring MVC receives the request.
+Step 2 - DispatcherServlet consult to HandlerMapper to identify which controller is responsible to handle the HTTP request.
+Step 3 - HandlerMapper selects the controller which is mapped to the incoming request URL and returns the (selected Handler) and Controller details to DispatcherServlet.
+Step 4 - Now DispatcherServlet knows which controller is responsible to process the request so DispatcherServlet will forward that request to the corresponding controller to process the request.
+Step 5 - Now the Controller process the request, validates the request, and creates a model with data. Finally, the Controller returns the logical name of view and model to the DispatcherServlet.
+Step 6 - DispatcherServlet consult ViewResolver to resolve a logical view with the physical view that exists in the application.
+Step 7 - ViewResolver responsible to map logical view with actual view and return the actual view details back to the DispatcherServlet.
+Step 8 - Now DispatcherServlet sends the view and model to the View component.
+Step 9 - The View component merge view and model and forms a plain HTML output. Finally, the View component sends HTML output back to the DispatcherServlet.
+Step 10 - The DispatcherServlet finally sends HTML output as a response back to the browser for rendering.
+
+Q) Difference between @Qualifier and @Primary
+A) @Primary defines a default value and bean marked with this annotation will be used unless otherwise indicated. 
+   @Qualifier annotation is specific and is used when a particular bean is needed.
+
 Q) What is Spring AOP
 A)  Spring AOP enables Aspect-Oriented Programming in spring applications. In AOP, aspects enable the modularization of concerns such as transaction management, logging or security that cut across multiple types and objects (often termed crosscutting concerns).
 	a) Aspect:- Aspect is a class
@@ -61,3 +79,5 @@ A) JDBCTemplate is a class in Spring which is used to execute the queries. It al
 Methods:-
 --------
 jdbcTemplate.query(queryString), jdbcTemplate.queryForList(queryString) and jdbcTemplate.update(queryString).
+
+
