@@ -184,6 +184,8 @@ Note:- As above Example, we are using same Employee object in 2nd/other session 
 Q) what is Refresh() in hibernate
 A) To get or pull the latest DB data we use refresh() under session. ex:- session.refresh();
 
-
+Q) Difference between primary and unique key
+A) The primary key is accepted as a unique or sole identifier for every record in the table. In the case of a primary key, we cannot save NULL values. 
+   In the case of a unique key, we can save a null value, however, only one NULL value is supported. It supports entity integrity.
 
 
