@@ -7,23 +7,30 @@ A)  a) Microservices
 	c) Service mesh 
 	d) Service discovery
 	e) API gateway
+	f) Service Registry
+	g) Load Balancing
 	
 a) MicroServices:- The main component of microservices architecture is the self-contained services. They can be any language and function separate from one another, making them ideal for implementation through various software teams.
 
-b) Containers:- The containers are a package of software that functions independently. Containers work to isolate each service in the same environment.
-In order to create microservices, a virtual machine can serve as a container and simulate the functionaries of a standard physical computer.
-Containers provide efficiency because they only rely on specific dependencies and the underlying code within the service.
+b) Containers:- Containers are a lightweight, efficient and standard way for applications to move between environments and run independently. Everything needed to run the application is packaged inside the container object: code, run time, system tools, libraries and dependencies. Containers provide efficiency because they only rely on specific dependencies and the underlying code within the service.
 
-c) Service mesh:- It's responsible for the communication between microservices via a messaging layer. A Service Mesh is layer that makes communication between microservice applications possible, structured, and observable. A service Mesh also monitors and manages network traffic between microservices, redirecting and granting or limiting access as needed to optimize and protect the system.
+c) Service mesh:- A service mesh is a layer built into an application that controls service-to-service communication in a microservices architecture. It controls the delivery of service requests to other services, performs load balancing, encrypts data, and discovers other services. It's responsible for the communication between microservices via a messaging layer. A Service Mesh is layer that makes communication between microservice applications possible, structured, and observable.
 
-d) Service discovery:- The service discovery helps manage deployment and evenly distribute the load. This component features a service consumes, service provider, and service registry.
+d) Service discovery:- Service Discovery helps by providing a database of available service instances so that services can be discovered, registered, and de-registered based on usage.
 -> In order to send an API request to a service, the client or API gateway must know the location of the service that it’s addressing.
 -> The service provider registers its location in the service registry.
 -> The client looks for relevant service locations in the service registry.
 -> The service registry returns the location of the required microservice.
 -> The client directly calls the microservice.
 
-e) API gateway:- An API gateway is a software application between a client and a set of backend microservices. The API Gateway serves as a reverse proxy to accept API calls from the client application, forwarding this traffic to the appropriate service.
+e) API gateway:- An API gateway is focused on routing requests to the appropriate microservice. An API gateway serves as a reverse proxy to accept API calls from the client application, forwarding this traffic to the appropriate service. 
+
+f) Server Registry:- Service registry is the registry where all services register themselves, giving a way to contact them (public API, IP, port).
+-> A service registry is a database used to keep track of the available instances of each microservice in an application.
+-> We use ServiceRegistry to manage all vast details, Scale Up and maintain all ports and URI information of all MS. ServiceRegistry Will maintain all the MS's. All the MS's will be connected to this ServiceRegistry and will get all the information regarding all the services.
+ex:- status update, what are the port info and URL etc.
+
+g) Load balancer:- Load balancing is the process of distributing traffic among different instances of the same application. Load balancer is focused on Distributing requests evenly across a group of backend servers.
 
 Q) What is Service Registry
 A) A service registry is a database used to keep track of the available instances of each microservice in an application. The service registry needs to be updated each time a new service comes online and whenever a service is taken offline or becomes unavailable. This can be achieved with either self-registration or third-party registration.
