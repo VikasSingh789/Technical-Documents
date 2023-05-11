@@ -13,7 +13,7 @@ A) Add Below configs in "application.properties",
 spring.jpa.defer-datasource-initialization=true
 spring.sql.init.mode=always.
 -> create .sql file in resource folder and write some simple sql insert query with values.
--> after creating the above file and save, run SpringBoot Application and we could see the .sql file have been runa nd data have been placed in DB.
+-> after creating the above file and save, run SpringBoot Application and we could see the .sql file have been run and data have been placed in DB.
 
 Q) What is JAR in Java
 A) Java Archive File. It is an Executable file. This file is given to the end users or client where he can execute the application without any compilation.
