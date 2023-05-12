@@ -20,6 +20,14 @@ These Annotations are used to create Spring Bean automatically in the Applicatio
 
 @Component is the root / parent Sterotype annotation. and others are just derived from @Component. To define the role of a class we use other 3 annotations.
 
+Q) What is @SpringBootConfiguration
+A) @SpringBootConfiguration is a class-level annotation that is part of the Spring Boot framework. It indicates that a class provides application configuration. 
+Spring Boot favors Java-based configuration. As a result, the @SpringBootConfiguration annotation is the primary source for configuration in applications.
+
+Q) What is the difference between @SpringBootConfiguration and @EnableAutoConfiguration
+A) @SpringBootConfiguration annotation tells us that a class is a configuration class, and @EnableAutoConfiguration automatically configures the Spring application based on its included jar files.
+
+
 Q) Spring Core Annotations
 A) 
 a) @Configuration:- This @Configuration can be used when we want to use java based configuration. "Java Based Configuration" means we dont want to handle the spring bean life cycle either using annotation or xml.
