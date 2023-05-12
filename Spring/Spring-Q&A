@@ -1,3 +1,7 @@
+Q) What is dependency injection in Spring?
+A) Dependency Injection is a design pattern/module of the Spring framework, through which the Spring container “injects” objects into other objects or “dependencies”. 
+   Dependency Injection makes our programming code loosely coupled. So that it can be easy to manage and test the application. 
+
 Q) How Spring MVC Works
 A) A Spring MVC provides an elegant solution to use MVC in spring framework by the help of DispatcherServlet. Here, DispatcherServlet is a class that receives the incoming request and maps it to the right resource such as controllers, models, and views.
 
