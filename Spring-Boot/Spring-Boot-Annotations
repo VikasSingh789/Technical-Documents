@@ -27,6 +27,9 @@ Spring Boot favors Java-based configuration. As a result, the @SpringBootConfigu
 Q) What is the difference between @SpringBootConfiguration and @EnableAutoConfiguration
 A) @SpringBootConfiguration annotation tells us that a class is a configuration class, and @EnableAutoConfiguration automatically configures the Spring application based on its included jar files.
 
+Q) What is @RestController in spring boot
+A) Spring RestController annotation is a convenience annotation that is itself annotated with @Controller and @ResponseBody . This annotation is applied to a class to mark it as a request handler. 
+   Spring RestController annotation is used to create RESTful web services using Spring MVC.
 
 Q) Spring Core Annotations
 A) 
