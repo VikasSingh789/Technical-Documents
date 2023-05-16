@@ -29,33 +29,39 @@ A) overriding readObject() and writeObject() methods in a call, we can customize
 
 Q) What is Transient
 A) Transient is modifier, can be applied only on variables. If we apply Transient on variable, JVM Ignores the Original value and it will not participate in Serialization and stores a the default value as 0. incase if datatype is "int".
-ex:- transient int b=20;
+ex:- 
+----
+transient int a=10;
+int b = 20;
+System.out.println(a+".."+b);
 output:-
 -------
-0.
-The above output will be "0" if we try to print b value, because the variable is declared with transient. 
+0..20
+The above output will be "0..20". Will get 0 if we try to print a value, because the variable is declared with transient. 
 
-Static variable is a class level data and hence it wont participate in Serialization. static variables gets created 1st, compare to Object variables. It will be created at the time of Class Loading only.
+Q) Static vs transient
+A) Static variable is a class level data and hence it wont participate in Serialization. static variables gets created 1st, compare to Object variables. It will be created at the time of Class Loading only.
 Static variable is not part of Object state hence it wont participate in Serialization. Whereas Serialization only works on Object data.
 Declaring Static on Transient variable, there will be no impact or no use at all.
-ex:- public static transient int a = 10;
-
-ex:-
-static int a = 10;
-int b = 20;
-if we try to print the above "a" and "b" value, output will be 10 and 20. But "a" will be printed from Class level whereas "b" will be printed on Object level. 
+ex:- 
+----
+public transient static int a = 10;
+transient int b = 20;
+System.out.println(a+".."+b);
+output:-
+-------
+10..0
 
 Q) Final vs transient
 A) Final variable is a constant. Its value never going to be change. Every final variable value will be replaced by CT Only. Every Final variable will be participated in Serialization directly by value.
-ex:- 
-final int a =10; ( It will store as only 10 )
-int b=20; ( It will store as b = 10 )
-In above example, "a value" will always going to be the same. i.e (a value always be 10. (a=10)).
-"b value" cant be always 20. there may be a chance of value gets changed.
-
-Even if we are declaring final variable with Transient, there is no use (Exactly same as static transient variable variable).
-ex:- 
-transient final int a =10;
+ex:-
+---
+public transient int a = 10;
+public transient final int b = 20;
+System.out.println(a+".."+b);
+output:-
+-------
+0..20
 
 Q) Serialization with Inheritance
 A) If Parent class Implements Serialization and Child class doesn't Implements Serialization, even then we could able to perform Serialization operation on both variables of parent and child class.
