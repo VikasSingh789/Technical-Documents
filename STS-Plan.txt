@@ -142,3 +142,5 @@ Hashcode and Equals Method:- https://howtodoinjava.com/java/basics/java-hashcode
 MAP Object filter based on value:- https://mkyong.com/java8/java-8-filter-a-map-examples/
 How to enable or disable spring bean based on condition:- https://reflectoring.io/spring-boot-conditionals/
 How to make our bean synchronized:- http://dolszewski.com/spring/spring-bean-thread-safety-guide/
+Annotations in JUnit Test Cases:- https://www.baeldung.com/junit-before-beforeclass-beforeeach-beforeall
+Order of test cases execution:- https://www.baeldung.com/junit-5-test-order
