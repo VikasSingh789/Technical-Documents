@@ -1,26 +1,35 @@
-package simpleprograms;
+package com.practice;
 
-class Bike{
-	 void model() {
-		 System.out.println("Parent Class model Method");
-	 }
+class Parent{
+	static int i = 10;
+	void m1() {
+		System.out.println("Parent Class");
+	}
 }
-class Car  extends Bike{
-	void model() {
-		 System.out.println("Child Class model Method");
-	}	
-	
+
+class Child extends Parent{
+	static int i = 20;
+	void m1() {
+		System.out.println("Child Class");
+	}
 }
 
 public class MethodOverridingExample {
+
 	public static void main(String[] args) {
-		Bike obj1= new Bike(); // P
-		Bike obj2= new Car();  // 
-		Car obj3 = new Car();
-		//Car obj4 = (Car) new Bike();
-//		obj1.model();
-//		obj2.model();
-//		obj3.model();
+		
+		Parent p = new Parent();
+		System.out.println(p.i);
+		p.m1();
+		
+		Child c = new Child();
+		System.out.println(c.i);
+		c.m1();
+		
+		Parent pc = new Child();
+		System.out.println(pc.i);
+		pc.m1();
+
 	}
 
 }
