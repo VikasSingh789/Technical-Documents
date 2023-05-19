@@ -39,6 +39,22 @@ m3();
 
 By above code, on method m3() we are trying to propagate the exception by "throws" keyword and also handling the Exception by using "try&catch" block in same m3() method, so in this case will get Exception at run time because, though we have handled the exception, we are using "throws" keyword to propagate the Exception.
 
+Q) What is Volatile in java
+A) Volatile keyword is used to modify the value of a variable by different threads. It is also used to make classes thread safe. It means that multiple threads can use a method and instance of the classes at the same time without any problem. The volatile keyword can be used either with primitive type or objects.
+
+Q) What is Synchronization
+A) Synchronization in java is the capability to control the access of multiple threads to any shared resource. In the Multithreading concept, multiple threads try to access the shared resources at a time to produce inconsistent results. The synchronization is necessary for reliable communication between threads.
+
+Q) What is Encapsulation
+A) Encapsulation is a mechanism through which we can wrap the data members(variables and methods) of class in a single Unit.
+-> Declare variables as private // Data Hiding to acheive Encapsulation
+-> Declare methods as public to access the variables. // Data Abstraction
+-> To Have better control on class on how the class should behave.
+
+Q) What is Covariant Return Type
+A) The covariant return type specifies that the return type subclass may vary against return type of super class. 
+-> the return type of the get() method of A class is A but the return type of the get() method of B class is B. Both methods have different return type but it is method overriding. This is known as covariant return type.
+
 Q) Difference between append and concat in java
 A) 
 Concat:-
