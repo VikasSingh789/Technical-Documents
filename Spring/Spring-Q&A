@@ -1,3 +1,7 @@
+Q) What is Spring Actuator
+A) Spring Boot Actuator is a sub-project of the Spring Boot Framework. It uses HTTP endpoints to expose operational information about any running application.
+-> The main benefit of using this library is that we get health and monitoring metrics from production-ready applications. Moreover, the gathering of metrics, understanding traffic, or knowing the state of the database, becomes tremendously easy with Actuator.
+
 Q) What is dependency injection in Spring?
 A) Dependency Injection is a design pattern/module of the Spring framework, through which the Spring container “injects” objects into other objects or “dependencies”. 
    Dependency Injection makes our programming code loosely coupled. So that it can be easy to manage and test the application. 
@@ -91,5 +95,19 @@ A) JDBCTemplate is a class in Spring which is used to execute the queries. It al
 Methods:-
 --------
 jdbcTemplate.query(queryString), jdbcTemplate.queryForList(queryString) and jdbcTemplate.update(queryString).
+
+Q) Difference between Junit and Mockito
+A) JUnit is the Java library used to write tests (offers support for running tests and different extra helpers - like setup and teardown methods, test sets etc.).
+   JUnit is used to test APIs in source code. To test APIs in JUnit, sometimes we may require data classes. To create those, we can use mockito.
+-> Mockito is a library that enables writing tests using the mocking approach. 
+   Mock refers to creating duplicate or dummy objects.
+   
+Q) Difference between Mock and Spy
+A) Mock:- When using mock objects, the default behavior of the method when not stub is do nothing. Simple means, if its a void method, then it will do nothing when you call the method or if its a method with a return then it may return null, empty or the default value.
+Spy:- While in spy objects, of course, since it is a real method, when you are not stubbing the method, then it will call the real method behavior. If you want to change and mock the method, then you need to stub it.
+-> If you want to be safe and avoid calling external services and just want to test the logic inside of the unit, then use mock. If you want to call external service and perform calling of real dependency, or simply say, you want to run the program as it is and just stub specific methods, then use spy.
+-> The difference is that in mock, you are creating a complete mock or fake object while in spy, there is the real object and you just spying or stubbing specific methods of it.
+
+
 
 
