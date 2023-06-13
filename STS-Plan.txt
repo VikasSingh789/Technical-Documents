@@ -145,4 +145,5 @@ How to make our bean synchronized:- http://dolszewski.com/spring/spring-bean-thr
 Annotations in JUnit Test Cases:- https://www.baeldung.com/junit-before-beforeclass-beforeeach-beforeall
 Order of test cases execution:- https://www.baeldung.com/junit-5-test-order
 Jackson @JsonIgnore, @JsonIgnoreProperties and @JsonIgnoreType:- https://www.javaguides.net/2019/04/jackson-jsonignore-jsonignoreproperties-and-jsonignoretype.html
+Spring Scopes:- https://howtodoinjava.com/spring-core/spring-bean-scopes/
 
