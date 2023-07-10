@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-public class StreamsExampleMap {
+public class StreamsExampleMap implements Comparable<StreamsExampleMap> {
 
 	int id;
 	String name;
@@ -38,10 +38,10 @@ public class StreamsExampleMap {
 
 	public static void main(String[] args) {
 
-		StreamsExampleMap s1 = new StreamsExampleMap(1, "vikas");
-		StreamsExampleMap s2 = new StreamsExampleMap(2, "akash");
+		StreamsExampleMap s1 = new StreamsExampleMap(2, "vikas");
+		StreamsExampleMap s2 = new StreamsExampleMap(1, "akash");
 		StreamsExampleMap s3 = new StreamsExampleMap(3, "Abhishek");
-		StreamsExampleMap s4 = new StreamsExampleMap(4, "venkatesh");
+		StreamsExampleMap s4 = new StreamsExampleMap(4, "Abhishek");
 
 		Map<Integer, StreamsExampleMap> map = new HashMap<Integer, StreamsExampleMap>();
 
@@ -49,6 +49,27 @@ public class StreamsExampleMap {
 		map.put(1, s1);
 		map.put(2, s2);
 		map.put(3, s3);
+		map.put(4, s4);
+		
+		System.out.println("Before MapByValue Sorting:- ");
+		map.entrySet()
+        .stream()
+        .map(n->n.getValue().getId()+" "+n.getValue().getName())
+        .forEach(System.out::println);
+//		map = map.entrySet()
+//        .stream()
+//        .sorted((Map.Entry.comparingByValue()))
+//        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+//        System.out.println("After MapByValue Sorting:- "+map);
+		System.out.println("------------------------------------");
+		System.out.println("After MapByValue Sorting:-");
+		map.entrySet()
+        .stream()
+        .sorted(Map.Entry.comparingByValue())
+        .map(n->n.getValue().getId()+" "+n.getValue().getName())
+        .forEach(System.out::println);
+		
+		System.out.println("------------------------------------");
 		// map.put(null, s1); // Executes during HashMap, but will get NPE while using ConcurrentHashmap
 
 		System.out.println("By Using For Loop");
@@ -95,8 +116,8 @@ public class StreamsExampleMap {
 		
 		System.out.println("--------------------------------------");
 		
-		//  Inp = "Always be a good heart person"
-		//  Out = "a be good heart Always person"
+//		Inp = "Always be a good heart person"
+//      Out = "a be good heart Always person"
 		
 		String str3 = "Always be a good heart person";
 		String sp[] = str3.split(" ");
@@ -106,9 +127,9 @@ public class StreamsExampleMap {
 		}
 		System.out.println(pam);
 		pam = pam.entrySet().stream()
-				    .sorted((Map.Entry.<String,Integer>comparingByValue())
-				    .thenComparing(Map.Entry.comparingByKey()))
-				    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2)->e1,LinkedHashMap::new));
+							.sorted((Map.Entry.<String,Integer>comparingByValue())
+							.thenComparing(Map.Entry.comparingByKey()))
+							.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2)->e1,LinkedHashMap::new));
 		for(Map.Entry<String,Integer> b: pam.entrySet()) {
 			System.out.print(b.getKey()+" ");
 		}
@@ -180,28 +201,27 @@ public class StreamsExampleMap {
 		List<String> lisOfResult = map5.entrySet()
 		.stream()
 		.filter(k->"Course1".equals(k.getValue()))
-		.map(n->n.getKey().name+"-"+n.getKey().getId()+" "+n.getValue()).collect(Collectors.toList());
+		.map(n->n.getKey().name+"->"+n.getKey().getId()+" "+n.getValue()).collect(Collectors.toList());
 		for(String loR : lisOfResult) {
 			System.out.println(loR);
 		}
 		
-		System.out.println("(or)");
-		
-		Map<StreamsExampleMap,String> result= map5.entrySet().stream()
-				.filter(k->"Course1".equals(k.getValue()))
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-		
-		result.entrySet().forEach(n->{
-			System.out.println(n.getKey().name+" "+n.getValue());
-		});
 		
 		System.out.println("(or)");
 		
 		map5.entrySet()
 		    .stream()
-		    .filter(k->"Course1".equals(k.getValue()))
-		    .forEach(n->System.out.println(n.getKey().getName()+" "+n.getValue()));
+			.filter(k->"Course1".equals(k.getValue()))
+			.forEach(n->System.out.println(n.getKey().getName()+" "+n.getValue()));
 		
-	
 	}
+
+	@Override
+	public int compareTo(StreamsExampleMap o) {
+		if(this.name.equals(o.name)) {
+			return o.id-this.id;
+		}
+		return -1;
+	}
+
 }
