@@ -147,3 +147,38 @@ Order of test cases execution:- https://www.baeldung.com/junit-5-test-order
 Jackson @JsonIgnore, @JsonIgnoreProperties and @JsonIgnoreType:- https://www.javaguides.net/2019/04/jackson-jsonignore-jsonignoreproperties-and-jsonignoretype.html
 Spring Scopes:- https://howtodoinjava.com/spring-core/spring-bean-scopes/
 
+
+
+
+
+Program to write 234678 to reverse integer number
+
+Spring vs Spring boot Differences
+
+Micro service design principles
+
+SOLID design patterns
+
+1. Program to find count of second highest word in given text.
+2. Program to find if given number is prime or not?
+3. Explain the flow to retrieve bank balance using spring boot framework.
+4. What are different response codes in micro service.
+5. How to derive context path url in spring boot project.
+
+Core java questions
+OOPS – Runtime Polymorphism and how can we implement,
+Collections – Added features in java 8, How to traverse through collection
+How to filter objects using stream
+Can we have a duplicate static method in both Super class and sub class? What will be the outcome if so? 
+Microservices
+List of design patterns
+Any hands on with microservice implementation
+Communication types in between services
+How can we achieve failsafe services and what pattern can be implemented.
+Spring Boot
+How does Spring actuators work
+Custom Spring Exception handling mechanism
+Any exposure - Spring AWS Cloud Maven API
+Any idea on Profile testing with Eureka server
+data structure based coding questions like snakes and ladder
+
