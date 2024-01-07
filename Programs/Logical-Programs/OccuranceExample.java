@@ -11,14 +11,12 @@ public class OccuranceExample {
 		for (i = 0; i < ch.length - 1; i++) {
 
 			if (ch[i] == ch[i + 1]) {
-
 				count = count + 1;
 			} else {
 				sb.append(ch[i]);
 				sb.append(count);
 				count = 1;
 			}
-
 		}
 		sb.append(ch[i]);
 		sb.append(count);
