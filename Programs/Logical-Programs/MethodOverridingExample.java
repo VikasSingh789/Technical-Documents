@@ -21,15 +21,25 @@ public class MethodOverridingExample {
 		Parent p = new Parent();
 		System.out.println(p.i);
 		p.m1();
-		
+		System.out.println("===========");
 		Child c = new Child();
 		System.out.println(c.i);
 		c.m1();
-		
+		System.out.println("===========");
 		Parent pc = new Child();
 		System.out.println(pc.i);
 		pc.m1();
-
+		
 	}
 
 }
+
+
+// 10
+// Parent Class
+// ===========
+// 20
+// Child Class
+// ===========
+// 10  // 10 because static cannot be overridden
+// Child Class
