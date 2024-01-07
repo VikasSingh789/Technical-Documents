@@ -10,7 +10,7 @@ public class Prime {
 		if (c == 2)
 			System.out.println("Given No. is Prime");
 		else
-			System.out.println("nGiven No. is Not a Prime");
+			System.out.println("Given No. is Not a Prime");
 	}
 	
 	public static void main(String[] args) {
