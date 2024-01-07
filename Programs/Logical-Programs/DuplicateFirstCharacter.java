@@ -1,7 +1,5 @@
 package simpleprograms;
 
-import java.util.Scanner;
-
 public class DuplicateFirstCharacter {
 
 	static String checkDuplicateFirstCharacter(String str) {
