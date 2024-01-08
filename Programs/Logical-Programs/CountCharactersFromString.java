@@ -47,5 +47,5 @@ public class CountCharactersFromString {
 	}
 }
 
-//input:-  aaabbbbcccccccccccccca
+//input:-  aabbbc
 //output:- a2 b3 c1 
