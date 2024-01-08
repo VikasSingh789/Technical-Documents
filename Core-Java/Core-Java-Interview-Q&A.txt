@@ -1,3 +1,36 @@
+Q) Difference Between ClassNotFoundException and NoClassDefFoundError in Java?
+A) ClassNotFoundException:- ClassNotFoundException comes when we try to load a class at run-time using Reflection and if those class files are missing then application or program thrown with ClassNotFoundException Exception. 
+There is nothing to check at compile-time since it is loading the class at run-time.
+Example:-
+---------
+public class ClassNotFoundExceptionTest {
+   public static void main(String[] args) {
+      try {
+         Class.forName("Test");
+      } catch (ClassNotFoundException cnfe) {
+         System.err.println("You are trying to search for a class is not existing. "+cnfe);
+      }
+   }
+}
+
+NoClassDefFoundError:- NoClassDefFoundError is thrown when a class has been compiled with a specific class from the classpath but if same class not available during run-time. 
+Missing JAR files are the most basic reason to get NoClassDefFoundError.
+Example:-
+---------
+class Test1 {
+   public void show() {
+      System.out.println("show() method called");
+   }
+}
+public class Test2 {
+   public static void main(String[] args) {
+      Test1 t = new Test1();
+      t.show();
+   }
+}
+
+-> When we compile both the classes we will be getting two class files Test1.class and Test2.class, while running Test2 class just remove the Test1.class file then we will be getting NoClassDefFoundError as below
+
 Q) What is checked Exceptions
 A) Checked exceptions are checked at compile-time. It means if a method is throwing a checked exception then it should handle the exception using try-catch block or it should declare the exception using throws keyword, otherwise the program will give a compilation error. It is named as checked exception because these exceptions are checked at Compile time.
 -> There is no difference between compile time exceptions and checked exceptions
