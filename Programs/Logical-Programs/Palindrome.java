@@ -1,6 +1,6 @@
 package simple;
 import java.util.Scanner;
-public class palindrome {
+public class Palindrome {
 	
 	static boolean checkBoolean(int n) {
         int temp = n;
