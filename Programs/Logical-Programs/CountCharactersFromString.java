@@ -48,4 +48,4 @@ public class CountCharactersFromString {
 }
 
 //input:-  aaabbbbcccccccccccccca
-//output:- a4 b4 c14 
+//output:- a2 b3 c1 
