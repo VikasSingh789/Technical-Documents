@@ -1,6 +1,6 @@
 package simple;
 import java.util.Scanner;
-public class factorial {
+public class Factorial {
 
 	static void factorial(int n) {
 		int fact = 1;
