@@ -1,0 +1,81 @@
+Q) What is Reactive Programming
+A) Reactive programming is a programming paradigm that promotes an asynchronous, non-blocking, event-driven approach to data processing.
+-> The term, “reactive,” refers to programming models that are built around reacting to changes. 
+-> It is built around the publisher-subscriber pattern (observer pattern). In the reactive style of programming, we make a request for resources and start performing other things. 
+-> When the data is available, we get the notification along with data in the callback function. 
+-> The callback function handles the response as per application/user needs.
+
+Blocking Request Processing:- In traditional MVC applications, a new servlet thread is created (or obtained from the thread pool) when a request comes to the server. 
+-> It delegates the request to worker threads for I/O operations such as database access etc. 
+-> During the time worker threads are busy, the servlet thread (request thread) remains in waiting status, and thus it is blocked. It is also called synchronous request processing.
+
+Non-blocking Request Processing:- In non-blocking or asynchronous request processing, no thread is in waiting state. There is generally only one request thread receiving the request.
+-> All incoming requests come with an event handler and callback information. Request thread delegates the incoming requests to a thread pool (generally a small number of threads) which delegates 
+the request to its handler function and immediately starts processing other incoming requests from the request thread.
+-> When the handler function is complete, one thread from the pool collects the response and passes it to the call back function.
+-> Non-blocking nature of threads helps in scaling the performance of the application. A small number of threads means less memory utilization and less context switching.
+
+Q) What is Spring WebFlux?
+A) Spring WebFlux is used to create fully asynchronous and non-blocking applications.
+-> Spring WebFlux is a parallel version of Spring MVC and supports fully non-blocking reactive streams.
+-> Spring webflux uses project reactor as the reactive library. Reactor is a Reactive Streams library; therefore, all of its operators support non-blocking back pressure.
+
+Spring WebFlux heavily uses two publishers : Mono and Flux
+1) Mono:- Mono is a special type of Publisher. A Mono object represents a single or empty value. Returns 0 or 1 element
+-> This means it can emit only one value at most for the onNext() request and then terminates with the onComplete() signal. In case of failure, it only emits a single onError() signal.
+2) Flux:- Flux is a standard Publisher that represents 0 to N asynchronous sequence values. Returns 0…N elements.
+-> This means that it can emit 0 to many values, possibly infinite values for onNext() requests, and then terminates with either a completion or an error signal.
+
+Q) Mono vs Flux
+A) Mono and Flux are both implementations of the Publisher interface.
+-> If we are making a request to a database or an external service, and expecting a maximum of one result, then we should use Mono.
+-> When we’re expecting multiple results from our database or external service call, then we should use Flux.
+-> Mono is more relatable to the Optional class in Java since it contains 0 or 1 value, and Flux is more relatable to List since it can have N number of values.
+
+Q) What is RestTemplate
+A) Spring RestTemplate is a Synchronous client to perform HTTP requests. 
+-> It simplifies the process of interacting with external APIs by HTTP methods.
+-> RestTemplate provides a set of HTTP methods like (GET, PUT, POST, etc.) which can be directly used to get responses from remote servers. 
+-> It automatically handles serialization and de-serialization for request and response thus making it easier to work with JSON & XML data.
+-> When we do a request using RestTemplate the same thread will do the external request, and RestTemplate will block that thread under the hood in wait for the response.
+Important methods of Spring RestTemplate:-
+1) getForEntity(): executes a GET request and returns an object of ResponseEntity class that contains both the status code and the response as an object type.
+2) getForObject() : quite similar to getForObject(), but returns the resource directly.
+3) postForObject() : creates a new resource using the HTTP POST method and returns an entity.
+
+
+Q) What is Spring WebClient
+A) Spring WebClient is asynchronous and non-blocking in nature, opposite to the rest-template. 
+-> Spring WebFlux is a suitable option for applications that require concurrency, efficiency in handling multiple requests with less resources, and scalability.
+-> It follows the event-driven approach from the reactive framework of Spring Webflux. 
+-> The client need not wait for the response from the server, as it gets notified by the callback method once the response is received.
+Note:-
+------
+-> We can use WebClient to make synchronous requests, but we cannot use RestTemplate to make asynchronous requests.
+-> RestTemplate cannot make asynchronous requests. 
+-> We can achieve RestTemplate like synchronous processing with the WebClient.block() method.
+
+Example for WebClient:-
+-----------------------
+private PMMetaDataDTO findAllPiaTypesByDisplayOrder() {
+        return evaluationServiceCaller.getWebClient()
+                .get()
+                .uri("/v1.0/getPiaTypes")
+                .retrieve()
+                .bodyToMono(PMMetaDataDTO.class)
+                .block();
+    }
+    
+Q) Key Difference between 
+A) RestTemplate is Blocking but WebClient is Non-blocking.
+-> The major difference between RestTemplate is blocking in nature and uses one thread per request model of Java Servlet API. 
+-> This means it will wait for a response after making the request to a remote server, thus blocking the thread this whole time. 
+-> Opposite to it, WebClient is asynchronous and non-blocking in nature thus client doesn’t need to wait till a response is received.
+
+Note:- The idea behind writing any method as a reactive method is that its computation involves Thread waits, like a DB call or an HTTP request. 
+-> If your service method is expected to perform such operations where in you need not block your thread until you receive the data, you can write such operations in a reactive manner.
+
+-> Assuming you will be using a reactive DB library to make the DB call, your DAO will be returning an instance of Mono<T> or Flux<T>, that needs to be subscribed to and only then it would execute.
+-> So ideally, YES, you should return the Mono<T> or Flux<T> instances back until your controller or you can call .block() which I would not recommend you to, since it would fail the purpose of 
+writing the reactive code or,
+-> .subscribe() that would execute the task in a separate Thread if you do not expect the results of this operation in current Thread like pushing a message to queue.
