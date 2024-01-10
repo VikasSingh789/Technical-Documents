@@ -15,6 +15,22 @@ JDK:- The Java Development Kit (JDK) is a software development environment which
 
 Note:- Typically, We need only JRE to run Java programs on your machine or browser. However, if we want to develop an application, debug and do Java programming, you will need JDK.
 
+Q) How many ways we can create String Object in Java.
+A) 2 ways:- By String Literal and By "new" keyword.
+String Literal:- String str = "Vikas";              // 1 Object will be created in SCP Area.
+New Keyword:-    String str = new String("Vikas");  //2 Objects will be created. 1 in Heap and 1 in SCPA(String Constant Pool Area). But it will refers to Heap Area Object.
+
+String str = "Vikas";
+str.concat(" Singh");
+System.out.println(str); //str still points to "Vikas".
+Output:- Vikas  // Here Vikas is not changed, but a new object is created with "Vikas Singh" in SCPA. Thats y String is Immutable. Now SCPA has 2 Objects "Vikas" and "Vikas Singh".
+
+-> But If we assign explicitly to the referene variable, then it will refer to "Vikas Singh". Below is Example,
+Ex:- String str = "Vikas";
+     str = str.concat(" Singh");
+     System.out.println(str);
+     Output:- Vikas Singh  // Now str points to "Vikas Singh". Please Notice, "Vikas" Object is still not modified.
+
 Q) Difference Between ClassNotFoundException and NoClassDefFoundError in Java?
 A) ClassNotFoundException:- ClassNotFoundException comes when we try to load a class at run-time using Reflection and if those class files are missing then application or program thrown with ClassNotFoundException Exception. 
 There is nothing to check at compile-time since it is loading the class at run-time.
