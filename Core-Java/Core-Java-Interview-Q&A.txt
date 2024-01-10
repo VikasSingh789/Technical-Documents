@@ -1,3 +1,20 @@
+Q) What is JRE, JDK and JVM
+A) JDK:- JVM (Java Virtual Machine) is an abstract machine. It is called a virtual machine because it doesn't physically exist. 
+-> It Provides a runtime environment in which Java bytecode can be executed. 
+-> It can also run those programs which are written in other languages and compiled to Java bytecode.
+-> It Performs the tasks such as Loads code, Verifies code, Executes code and Provides runtime environment.
+
+JRE:- Java Runtime Environment(JRE) is a set of software tools which are used for developing Java applications. 
+-> It is used to provide the runtime environment. 
+-> It is the implementation of JVM. It physically exists. 
+-> It contains a set of libraries like ".jar" + other files that JVM uses at runtime.
+
+JDK:- The Java Development Kit (JDK) is a software development environment which is used to develop Java applications and applets. 
+-> It physically exists and It contains JRE + development tools.(Ex:- javac and java).
+-> The JDK includes JRE, interpreter/loader (java), a compiler (javac), an archiver (jar) etc. and other development tools.
+
+Note:- Typically, We need only JRE to run Java programs on your machine or browser. However, if we want to develop an application, debug and do Java programming, you will need JDK.
+
 Q) Difference Between ClassNotFoundException and NoClassDefFoundError in Java?
 A) ClassNotFoundException:- ClassNotFoundException comes when we try to load a class at run-time using Reflection and if those class files are missing then application or program thrown with ClassNotFoundException Exception. 
 There is nothing to check at compile-time since it is loading the class at run-time.
