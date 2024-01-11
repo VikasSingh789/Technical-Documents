@@ -21,8 +21,8 @@ Step 9 - The View component merge view and model and forms a plain HTML output. 
 Step 10 - The DispatcherServlet finally sends HTML output as a response back to the browser for rendering.
 
 Q) Difference between @Qualifier and @Primary
-A) @Primary:- When we annotate @Primary on top of Bean, then that particular class or bean will have the highest priority given w.r.to Autowiring concept and that particular bean will get invoked.
-@Qualifier:- The @Qualifier annotation is used to resolve the autowiring conflict, when there are multiple beans of same type. @Qualifier can be applied on top of @Autowired.
+A) @Primary:- When we annotate @Primary on top of class or Bean, then that particular class or bean will be given highest priority w.r.to Autowiring concept and that particular bean will get invoked.
+@Qualifier:- @Qualifier can be applied on top of @Autowired. The @Qualifier annotation is used to resolve the Ambiguity (or) autowiring conflict, when there are multiple beans with same name.
    
 Q) Difference between @Inject and @Autowired
 A) @Autowired annotation is part of the Spring framework But @Inject is a standard annotation for dependency injection.
