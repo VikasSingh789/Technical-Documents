@@ -32,6 +32,10 @@ A) @Autowired annotation is part of the Spring framework But @Inject is a standa
 -> @Qualifier can be used in case of ambiguity while working with @Autowired and we use @Named Qualifier while working with @Inject.
 -> @Inject is portable and can be used in spring framework and as well as with some other application. But @Autowired will work only with Spring Framework specific.
 
+Q) What is the Difference Between Constructor Injection and Setter Injection.
+A) Constructor Injections are Mandatory Injection whereas Setter Injection is Non-Mandatory Injections.
+-> i.e. If Spring Application won't find the Bean, then Spring will run even if we define "@Autowired(required=false)" incase of Setter Injection, but it will fail for Constructor Injections.
+
 Q) What is Spring AOP
 A)  Spring AOP enables Aspect-Oriented Programming in spring applications. In AOP, aspects enable the modularization of concerns such as transaction management, logging or security that cut across multiple types and objects (often termed crosscutting concerns).
 	a) Aspect:- Aspect is a class
