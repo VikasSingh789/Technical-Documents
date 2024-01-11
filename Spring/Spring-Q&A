@@ -35,7 +35,18 @@ A) @Autowired annotation is part of the Spring framework But @Inject is a standa
 Q) What is the Difference Between Constructor Injection and Setter Injection.
 A) Constructor Injections are Mandatory Injection whereas Setter Injection is Non-Mandatory Injections.
 -> i.e. If Spring Application won't find the Bean, then Spring will run even if we define "@Autowired(required=false)" incase of Setter Injection, but it will fail for Constructor Injections.
--> Bean must and should be declared and Found, in case of Constructor Injection. It wont work even if we define "@Autowired(required=false)"
+-> Bean must and should be declared and Found, in case of Constructor Injection. It wont work even if we define "@Autowired(required=false)".
+
+Q) What is Autowire By Properties or Autowire By Name
+A) When we Autowire the Implementation By Name. Spring Automatically recognises the class or Bean with the given Name and Autowires Easily. Below is Example,
+Ex:-
+---
+private Animal product;
+
+AutowiredController(@Qualifier"order") Product product){
+	this.product = product;
+}
+Note:- order is a class/bean annotated with @Bean. While Autowiring, we have given the "property name" to inject the Dependency.
 
 Q) What is Spring AOP
 A)  Spring AOP enables Aspect-Oriented Programming in spring applications. In AOP, aspects enable the modularization of concerns such as transaction management, logging or security that cut across multiple types and objects (often termed crosscutting concerns).
