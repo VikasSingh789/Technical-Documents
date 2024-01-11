@@ -26,8 +26,8 @@ A) @Primary:- When we annotate @Primary on top of class or Bean, then that parti
    
 Q) Difference between @Inject and @Autowired
 A) @Autowired annotation is part of the Spring framework But @Inject is a standard annotation for dependency injection.
--> By default the dependency injection for @Autowired is true by default. We can change this behavior by using @Autowired(required=false). 
-   In this case if bean is not found for dependency injection, it will not throw error.
+-> By default, Dependency Injection for @Autowired is true, means Spring wont run or throw Exception if Bean is not Found.
+   We can change this behavior by using @Autowired(required=false). In this case, even if bean is not found for dependency injection, it will not throw error.
    But @Inject annotation has no required attribute. Therefore, if the dependencies will not be found - will be thrown an exception.
 -> @Qualifier can be used in case of ambiguity while working with @Autowired and we use @Named Qualifier while working with @Inject.
 -> @Inject is portable and can be used in spring framework and as well as with some other application. But @Autowired will work only with Spring Framework specific.
