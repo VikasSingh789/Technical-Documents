@@ -15,6 +15,67 @@ JDK:- The Java Development Kit (JDK) is a software development environment which
 
 Note:- Typically, We need only JRE to run Java programs on your machine or browser. However, if we want to develop an application, debug and do Java programming, you will need JDK.
 
+Q) What is Singleton class in Java
+A) Singleton class is a class that can have only one object creation.
+-> After the first time, if we try to instantiate the Java Singleton classes, the new variable also points to the first instance created.
+-> So whatever modifications we do to any variable inside the class through any instance, affects the variable of the single instance created.
+
+-> The primary purpose of a java Singleton class is to restrict the limit of the number of object creations to only one.
+-> This often ensures that there is access control to resources, for example, socket or database connection.
+
+Advantages:-
+------------- 
+-> Memory space wastage does not occur with the use of the singleton class because it restricts instance creation.
+
+Q) How to Design/Create a Singleton Class in Java?
+A) 1) Ensure that only one instance of the class exists.
+2) Declaring all constructors of the class to be private.
+3) Providing a static method "getInstance()" that returns a reference to the instance.
+4) The instance is stored as a private static variable.
+
+Ex:-
+----
+class Singleton {
+
+    private static Singleton single_instance = null;
+    public String s;
+ 
+    private Singleton()
+    {
+        s = "Hello I am a string part of Singleton class";
+    }
+    
+    // Here, we will be creating private constructor, restricted constructor to this class itself
+    public static synchronized Singleton getInstance()
+    {
+        if (single_instance == null)
+            single_instance = new Singleton();
+ 
+        return single_instance;
+    }
+}
+
+class GFG {
+    public static void main(String args[])
+    {
+        Singleton x = Singleton.getInstance();
+        Singleton y = Singleton.getInstance();
+        Singleton z = Singleton.getInstance();
+        
+        if (x == y && y == z) {
+            System.out.println("Three objects point to the same memory location on the heap i.e, to the same object");
+        } else {
+            System.out.println("Three objects DO NOT point to the same memory location on the heap");
+        }
+    }
+}
+
+output:- 
+--------
+Three objects point to the same memory location on the heap i.e, to the same object.
+
+Note:- In Above Example, if we changes value of any 1 variable, say x, then the same changes also applies to the other variables as well. (y and z).
+
 Q) How many ways we can create String Object in Java.
 A) 2 ways:- By String Literal and By "new" keyword.
 String Literal:- String str = "Vikas";              // 1 Object will be created in SCP Area.
@@ -140,10 +201,10 @@ append or +:-
 
 Q) How to create custom Immutable class in java
 A)  a)Make your class final
-	b)Declare all instance variables with private and final keywords
-	c)Say no to Setter Methods
-	d)Initialize all variables in constructor
-	e)perform cloning of mutable objects while returning from getter methods. (Some Disadvantages while performing cloning)
+    b)Declare all instance variables with private and final keywords
+    c)Say no to Setter Methods
+    d)Initialize all variables in constructor
+    e)perform cloning of mutable objects while returning from getter methods. (Some Disadvantages while performing cloning)
 	
 Ex-1:- Lets say below we have created our custom class,
 
