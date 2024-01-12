@@ -39,7 +39,7 @@ Ex:-
 ----
 class Singleton {
 
-    // private static Singleton single_instance = new new Singleton(); //This is Eager Initialization, Instance is created as soon as the class is loaded.
+ // private static Singleton single_instance = new new Singleton(); //This is Eager Initialization, Instance is created as soon as the class is loaded.
     private static Singleton single_instance = null;
     public String s;
  
