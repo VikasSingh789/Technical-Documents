@@ -26,7 +26,8 @@ A) Singleton class is a class that can have only one object creation.
 Advantages:-
 ------------- 
 -> Memory space wastage does not occur with the use of the singleton class because it restricts instance creation.
--> Singletons help control access to shared resources and maintain consistency across the program.
+-> Better control Access to shared resources and Reduces memory consumption, and maintain consistency.
+-> It prevents multiple instances that could cause conflicts.
 
 Q) How to Design/Create a Singleton Class in Java?
 A) 1) Ensure that only one instance of the class exists.
