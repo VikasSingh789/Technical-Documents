@@ -39,6 +39,7 @@ Ex:-
 ----
 class Singleton {
 
+    // private static Singleton single_instance = new new Singleton(); //This is Eager Initialization, Instance is created as soon as the class is loaded.
     private static Singleton single_instance = null;
     public String s;
  
@@ -51,7 +52,7 @@ class Singleton {
     public static synchronized Singleton getInstance()
     {
         if (single_instance == null)
-            single_instance = new Singleton();
+            single_instance = new Singleton();  //This is Lazy Initialization since we are creating object only when "getInstance()" method is called.
  
         return single_instance;
     }
