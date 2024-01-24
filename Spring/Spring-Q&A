@@ -124,6 +124,45 @@ class OnMissingClassModule {
   ...
 }
 
+Q) How to create our own Custom Conditional Beans in Spring
+A) Step 1: Implement the Condition Interface:
+-> First, you’ll need to create a class that implements the Condition interface. 
+-> For example, let's create a custom condition that will check if a system property my.custom.property is set.
+Ex:-
+----
+public class CustomPropertyCondition implements Condition {
+  
+  @Override
+  public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    Environment env = context.getEnvironment();
+    return env.containsProperty("my.custom.property");
+  }
+}
+
+Step 2: Annotate with @Conditional
+-> Once your custom condition is ready, annotate the relevant bean or configuration with @Conditional, passing in your custom condition class.
+Ex:-
+----
+@Configuration
+public class AppConfig {
+  
+  @Bean
+  @Conditional(CustomPropertyCondition.class)
+  public MyBean myBean() {
+    return new MyBean();
+  }
+}
+
+To check on Multiple Conditions, Below is the Example,
+Ex:-
+----
+@Bean
+@Conditional({CustomPropertyCondition.class, OnPropertyCondition.class})
+public MyBean myBean() {
+  return new MyBean();
+}
+Note:- MyBean will only be registered if both CustomPropertyCondition and OnPropertyCondition evaluate to true.
+
 Q) What is Spring Actuator
 A) Spring Boot Actuator is a sub-project of the Spring Boot Framework. It uses HTTP endpoints to expose operational information about any running application.
 -> The main benefit of using this library is that we get health and monitoring metrics from production-ready applications. Moreover, the gathering of metrics, understanding traffic, or knowing the state of the database, becomes tremendously easy with Actuator.
