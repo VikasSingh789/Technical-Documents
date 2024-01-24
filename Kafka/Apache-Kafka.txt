@@ -1,0 +1,145 @@
+https://kafka.apache.org/quickstart
+Apache KAFKA Tutorial | KAFKA Crash Course | Spring Boot:- https://www.youtube.com/watch?v=tU_37niRh4U
+
+Q) What is Kafka
+A) Kafka is a communication System between Sender and Receiver.
+
+Q) How Kafka Works.
+A) Kafka Works on Publishing and Subscribing Model.
+-> So Whenever we want to send the Data, we have to Publish the Data.
+-> Sender will Publish the Data to the Kafka and Receiver will Subscribe to the Kafka in order to Read the Same Data.
+-> We May have Multiple Receivers who can subscribe to Kafka. (R1, R2, R3...Rn).
+-> By this way, kafka will send the messages to different Receivers whatever has been send by the Sender.
+
+Q) When to use Kafka and What type of Application we can use kafka
+A) In our Example we are making use of Kafka for our Cab Booking Application.
+-> When User Books a Cab, and User gets assigned a Cab. In this Case, User should gets Constant update the location of the Driver in every 5 mins.
+-> Now Consider, this update is going to the DB is storing all the Details about Current location of Driver and user is getting the information.
+-> From User, for every Time Interval, say every 5 mins, it is picking the Data from the DataBase.
+-> Consider this same Operation where we have 100 to 1000 users and 1000's of Driver where data is getting stored and fetched from DB in every 5 mins. Application is not gonna Scale.
+-> Because Db does not allow to do these kind of Humongos Operations on DB.
+-> So for this, we can have Intermediate Application such as Messaging System such as "Kafka" which can allow us to do these Operations.
+-> Now Kafka will act as a Publishing and Subscribing those constant messages.
+-> In this Case, the updated Location of Driver will gets stored in 1 of the Topics, in 1 of the Instances of the Kafka.
+-> Users also Subscribe to Apache Kafka Topic. So Whatever the Messages have been pushed to Kafka Topic for updated location of Driver in every 5 mins, these same updated location can read by User.
+-> Apache Kafka can manage High Throughput because its a Distributed System. Data can be distributed among the Different Servers, Different Replicas and Different Clusters.
+-> Whatever the Load we have, apache Kafka can able to Handle that Load and it will be able to serve the Traffic very Easily.
+
+Q) What are the Advantages of kafka
+A) High ThroughPut:- Able to Handle 100's of 1000's Transaction, Distributed across its Clusters. 
+a) It might be Having multiple clusters and these multiple clusters can be divided in to Multiple Topics.
+
+-> Falut Tolerance:- As it is having different clusters across distributed Systems, It will also Handle the Different Replicas's as well. 
+a) There might be different Replicas and 1 of the Clusters would be its Leader and the rest would be its Followers.
+b) All the Data would be Managed by the Leader and if anything goes wrong with the Leader, then any other of the followers will become the Leader and serve the Traffic and Data.
+c) By this way, we dont have to worry and loose our Data if anything goes wrong.
+
+-> Scalable:- In case there are 1000's of millions of Data, In this case we need Extra Clusters, Resources and Servers Available, then Kafka will scale up all these things accordingly.
+a) If any new servers are required, it will create the server and it will be assigned to a cluster and it will handle everything accordingly with different Replicas.
+
+Q) What is the Architecture of Apache Kafka.
+A) Apache Kafka consists of 2 Components:- Kafka Cluster and Zookeeper.
+-> Kafka Cluster and Zookeeper are part of Kafka Ecosystem.
+-> Kafka Ecosystem consists of 2 things, Kafka Cluster and Zookeeper.
+
+Kafka Cluster:- Within our Apache Kafka Cluster, Will be Having Different brokers. There might be multiple brokers available like (B1, B2...Bn).
+-> So within Kafka Cluster, there will be having different brokers.
+-> And Within the Brokers, There will be having different Topics like (T1, T2...Tn)
+-> All our Data will be stored within the Topics.
+-> Sender will send the data to that Topic and Receiver will also listen to that Topic to fetch the Latest Data.
+-> Within the Topic Itself, There will be multiple Partitions ex:- (P1, P2...Pn). Like from which partition we need to fetch the Data.
+
+-> Within those Topics, Will be having Offsets as well.
+-> Offsets is useful when, Sender has send the Data (Say it send 5 Data. 0 to 4 stored in like an Array on Index Position). When the Receiver is starting to receive the data, it may receive the Data
+from (start of the offsets like 0/ starting of the Topic) itself, or i should receive the Data from Now on Like dont want the Previous Data and want fresh data only.
+-> So Receiver can receive the Data accordingly based on the Offsets Define.
+Note:- Within the Kafka Cluster, will have Brokers. Within Brokers, will have topics. WithIn the Topics will have Partitions and Offsets as well.
+-> So when we install Kafka in Machine, we have to run Kafka Cluster and Zookeeper (which are the 2 Components of Apache Kafka)
+
+Zookeeper:- Zookeeper will take care of like, How many Clusters are available, How many Senders and Receivers are there, How many Replica's are there, All these things are handled by Zookeeper.
+a) Entire Kafka Cluster are manage by Zookeeper. It will keep track of all the things.
+b) Kafka Job is to just send and receive the data, but MetaData around it like How many Senders and Receivers are there and how many Replica's are there, zookeeper will be handling all these things.
+
+-> After Installing Kafka in System, we have to run Zookeeper and then Kafka Server.
+Start the ZooKeeper service:-      bin/zookeeper-server-start.sh config/zookeeper.properties
+Start the Kafka broker service:-   bin/kafka-server-start.sh config/server.properties
+Note:- The Above 2 commands, we have to run from Kafka Folder. Able to see this Kafka Folder After Extracting the Kafka Software)
+
+
+================================================================================================================================================================================================
+Project with kafka:- Cab Project (acts as Publisher)
+----------------------------------------------------
+-> Whenever we are connecting to our Kafka using SpringBoot, we need to tell our SpringBoot APP as well like where we need to connect to ?
+-> For this, we are Defining where Kafka need to connect, in application.properties file as below,
+Ex:- spring.kafka.producer.bootstrap-servers=localhost:9092
+
+-> Whenever we are passing the Data to Kafka/Network, we have to serialize our Data.
+-> We are Serializing our Data in to String. This serialization we are doing in "application.properties" file. Below is Sample code for Serializing "Key" and "Value"
+Ex:- spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+     spring.kafka.producer.value-serializer=org.apache.kafka.common.serialization.StringSerializer
+     
+
+-> To Publish the Messages, we have to use "KafkaTemplate".
+-> This "KafkaTemplate" we have defined in our Service class and try to publish the Messages over Kafka Topic.
+-> We use KafkaTemplate.send() to publish our data. Below is Example.
+Ex:- kafkaTemplate.send("CabLocation", location);
+Note:- In kafkaTemplate.send("CabLocation", location), 1st Argument is Topic Name, and 2nd Argument is the Data we want to publish over Kafka Topic.
+-> KafkaTemplate will help us to create the Template and store our Messages in to Apache Kafka Cluster.
+
+
+-> To Create the topic, we have created a Bean as "NewTopic" in config class where our Topic Name is "CabLocation". Below is Example,
+Ex:-
+@Bean
+	public NewTopic topic() {
+		return TopicBuilder.name("CabLocation").build();
+	}
+-> To check if the Topic is created, try run below command from Downloads/Kafka Folder after starting the Application.
+cmd:- bin/kafka-topics.sh --describe --topic CabLocation --bootstrap-server localhost:9092 (In cmd, "CabLocation" is our Topic Name)
+	
+-> In our Controller, to send the sample Data, we Randomly generating the Numbers from 1 to 100 range say as an Location co-ordinates from Cab.
+-> We are Updating this Location co-ordinates from Cab, in every 1 Sec, in our Controller.
+-> Now Hit the API "http://localhost:8082/Location/updateLocation" to send/publish the Data.
+-> We can Read/Consume the Same Data as a Consumer running by below cmd from Kafka Folder,
+cmd:- bin/kafka-console-consumer.sh --topic CabLocation --from-beginning --bootstrap-server localhost:9092
+
+========================================================================================================================================================================
+
+-> When Sender is Sending the Data, we may have different Consumers (C1, C2, C3...CN) to read the Data on the Topic "CabLocation".
+-> These consumers can be group by "group-id".
+-> Now Consumer C1 is registered to Topic "CabLocation" using group-id G1 and rest of the 2 Consumers are defined using group-id G2. (C1 as G1 and C2,C3 as G2)
+-> Now Sender has published 3 messages. Since Consumer are defined based on groups, C1 will receive all the 3 messages.
+-> But the other Consumers C2 and C3 are defined as G2, the combination of all these consumers will receive 3 Messages. It may be Each Consumer will receive each messages.
+-> the messages can be processed only once. So 1st Msg can go to C2, 2nd msg can go to C3, based on Cluster and Zookeeper how they have defined.
+
+Project with kafka:- User Project (acts as Consumer)
+----------------------------------------------------
+-> Same like Cab Project, We are Serializing our Data. This serialization we are doing in "application.properties" file. Below is Sample code for Serializing "Key" and "Value" for consumer.
+-> Minor change we can notice while serializing our data is, instead of "producer", we are defining as "consumer", since this project is responsible to consume the Data.
+Ex:- spring.kafka.consumer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+     spring.kafka.consumer.value-serializer=org.apache.kafka.common.serialization.StringSerializer.
+     
+-> In UserService, we have created a "cabLocation()", which will read the Data from the Topic "CabLocation".
+-> By using "@KafkaListener" on top of "cabLocation()", we could able to read or consume the Data from Topic. Below is Example,
+Ex:- @KafkaListener(topics = "CabLocation", groupId = "user-group")
+-> By using groupId = "user-group", consumer is able to consume the Data.
+     
+-> We have defined group-id as "user-group" in consumer "application.properties" file. Below is sample code.
+Ex:- spring.kafka.consumer,group-id=user-group
+
+Test Scenario (Consumer)
+-------------------------
+-> Once u start the Application, we could see in consumer's console logs as below,
+[Consumer clientId=consumer-user-group-1, groupId=user-group] Resetting offset for partition CabLocation-0 to position FetchPosition{offset=150...
+-> This is because, we have already published 150 messages and now the offset has reached to 150.
+-> Now from 151 offset, we are going to receive the data. We dont get the 1st 150 Offset records.
+=============================================================================================================================================================
+
+Important Commands in Kafka:-
+------------------------------
+Start the ZooKeeper service:-      bin/zookeeper-server-start.sh config/zookeeper.properties
+Start the Kafka broker service:-   bin/kafka-server-start.sh config/server.properties
+To Create the Topic:-              bin/kafka-topics.sh --create --topic user --bootstrap-server localhost:9092 --partitions 2  (With Partition as 2)
+To See List of Topic:-             bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+To See Specific Topic:-            bin/kafka-topics.sh --describe --topic user --bootstrap-server localhost:9092
+To See the Data in Consumer:       bin/kafka-console-consumer.sh --topic user --from-beginning --bootstrap-server localhost:9092
+
