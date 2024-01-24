@@ -134,6 +134,11 @@ Test Scenario (Consumer)
 -> Now from 151 offset, we are going to receive the data. We dont get the 1st 150 Offset records.
 =============================================================================================================================================================
 
+Q) What is the Difference Between Kafka and MQ(RabbitMQ)
+-> Kafka is designed for handling high volume of data, high throughput and real-time data streams, MQ is designed for high performance, robust security and guaranteed message delivery.(Like SMS, Emails and WhatsAPP)
+-> Kafka is a distributed event streaming platform designed to process massive amounts of data, while ActiveMQ is a traditional message broker that supports multiple protocols and flexible messaging patterns.
+-> Kafka is a message queuing system. It offers message processing just like a great message queue, along with high availability and fault tolerance.
+
 Important Commands in Kafka:-
 ------------------------------
 Start the ZooKeeper service:-      bin/zookeeper-server-start.sh config/zookeeper.properties
