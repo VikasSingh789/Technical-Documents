@@ -1,3 +1,27 @@
+Q) What is the Use of @ExceptionHandler
+A) @Exceptionhandler catches the Exception in the Controller.
+-> You can have multiple methods annotated with ExceptionHandler inside this controller with valid exceptions classes.
+
+Drawback:
+---------
+-> These Exception handlers are active only inside that controller. It wont work outside of that controller or it wont for other controllers.
+-> If There are multiple controllers, then we need to define @ExceptionHandler in each Controller.
+-> There is an annotation available that makes it happen, it is called @ControllerAdvice which will segregate the ExceptionHandlers into a common class so that we can maintain in future as well.
+
+Q) What is the use of @ControllerAdvice
+A) There are several ways to handle exceptions in Spring Boot. One way is to use the @ControllerAdvice annotation. 
+-> This annotation allows you to create a global exception handler that can catch and handle exceptions that occur in any controller in your application.
+-> The @ControllerAdvice annotation is used to define a class that will be called whenever an exception is thrown in your application. This class can contain multiple methods, each of which is annotated with the @ExceptionHandler annotation and is responsible for handling a specific exception.
+
+Q) What is the use of @ResponseBody
+A) If we use @ResponseBody annotation on top of method, Spring will try to convert its return value and will write it to the HTTPResponse Automatically.
+-> We dont get the Default Json value which contains timestamp, status, error, message and path. Will get only message as String.
+-> Response will be only "List name will be required field" as a Single String.
+
+Q) What is the use of  @RestControllerAdvice
+A) If we are working on resful service, then we can change this @ControllerAdvice to @RestControllerAdvice. @RestControllerAdvice combines both "@ControllerAdvice+@ResponseBody" in it.
+-> By this way, we dont need to Explicitly annotate the method with @ResponseBody.
+
 Q) What is Spring Actuator
 A) Spring Boot Actuator is a sub-project of the Spring Boot Framework. It uses HTTP endpoints to expose operational information about any running application.
 -> The main benefit of using this library is that we get health and monitoring metrics from production-ready applications. Moreover, the gathering of metrics, understanding traffic, or knowing the state of the database, becomes tremendously easy with Actuator.
