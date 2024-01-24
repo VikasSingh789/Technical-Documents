@@ -174,6 +174,8 @@ A) Volatile keyword is used to modify the value of a variable by different threa
 
 Q) What is Synchronization
 A) Synchronization in java is the capability to control the access of multiple threads to any shared resource. In the Multithreading concept, multiple threads try to access the shared resources at a time to produce inconsistent results. The synchronization is necessary for reliable communication between threads.
+(or)
+Synchronization in Java is the process that allows only one thread at a particular time to access the Shared Resources.
 
 Q) What is Encapsulation
 A) Encapsulation is a mechanism through which we can wrap the data members(variables and methods) of class in a single Unit.
@@ -202,130 +204,49 @@ append or +:-
 -> + operator did not raise any Exception when the string is concatenated with null.
 -> + operator creates a new String object every time irrespective of the length of the string.
 
+Q) What is Thread Safe in Java
+A) When a Thread is already working on an object and preventing another thread on working on the same object, this process is called Thread-Safety.
+
+Q) What is the use of Thread Safe in Java
+A) When multiple threads are working on the same data, and the value of that data is changing, that scenario is not thread-safe and we will get inconsistent results.
+-> In order to avoid this Data Inconsistency, we can go for Thread Safety.
+
+Q) How to achieve Thread Safety
+A) There are four ways to achieve Thread Safety in Java. These are:
+Using Synchronization.
+Using Volatile Keyword.
+Using Atomic Variable.
+Using Final Keyword.
+
+1) Synchronization:- Synchronization is the process of allowing only one thread at a time to complete the particular task. 
+-> So synchronization is used to resolve inconsistency problem by allowing only one thread at a time.
+-> Synchronization uses a "synchronized" keyword on top of method.
+
+2) Volatile:- A volatile keyword is a field modifier that ensures that the object can be used by multiple threads at the same time without having any problem. 
+-> volatile is one good way of ensuring that the Java program is thread-safe.
+-> volatile keyword can be used as an alternative way of achieving Thread Safety in Java.
+
+3) Atomic Variable:- Using an atomic variable is another way to achieve thread-safety in java. When variables are shared by multiple threads, the atomic variable ensures that threads don’t crash into each other. 
+
+4) Final Keyword:- Final Variables are also thread-safe in java because once assigned the value cannot be changed.
+
+Q) What is the use of Immutable class in Java
+A) Immutable objects are inherently thread-safe. 
+-> Since their state cannot change after creation, multiple threads can safely access them concurrently without the risk of race conditions or data corruption.
+-> An immutable class is good for caching purposes because you don't have to worry about the value changes.
+
 Q) How to create custom Immutable class in java
 A)  a)Make your class final
-    b)Declare all instance variables with private and final keywords
+    b)Declare all the variables private and final
     c)Say no to Setter Methods
     d)Initialize all variables in constructor
-    e)perform cloning of mutable objects while returning from getter methods. (Some Disadvantages while performing cloning)
-	
-Ex-1:- Lets say below we have created our custom class,
-
-//mutable class
-public class Address {
-
-    private String city;
-    private String zip;
-	
-	//Setter and getters methods
-	
-}
-
-public final class Employee {
-
-    private final String name;
-    private final Date doj; //mutable
-    private final List<String> mobile;
-
-    private final Address address;
-
-    public Employee(String name, Date doj, List<String> mobile, Address address) {
-        this.name = name;
-        this.doj = doj;
-        this.mobile = mobile;
-        this.address = address;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Date getDoj() {
-        return doj;
-    }
-
-    public List<String> getMobile() {
-        return mobile;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    @Override
-    public String toString() {
-        return "Employee{" +
-                "name='" + name + '\'' +
-                ", doj=" + doj +
-                ", mobile=" + mobile +
-                ", address=" + address +
-                '}';
-    }
-
-    public static void main(String[] args) {
-        Address address=new Address("blr","1012");
-        Employee employee=new Employee("Basant",new Date(),
-                Arrays.stream(new String[]{"1234","5678"}).collect(Collectors.toList()), address);
-
-        employee.getDoj().setDate(20);   // By this, we are able to modify the date. Immutable concept fails here.
-        employee.getMobile().add("9010"); // By this, we are able to modify the date. Immutable concept fails here.
-        employee.getAddress().setCity("Pune"); // Though Address class is made as immutable in Employee class, still Immutable concept fails here
-
-        System.out.println(employee);
-
-
-    }
-}
-
-Above, Though we have followed all rules to create Custom Immutable class, still printing output, will see the added values/objects will get added and Immutable rule fails here.
-
-For Object, we can go with the clone and for List, we can create a new List, rather than return the actual reference.
-
-Notes to acheive Immutable class for above Example. (Changes in code in above Example),
-
--> Rather than return the direct Object, we can simply do the clone. Below is the Syntax
-from:
------
-public Date getDoj() {
-        return doj;
-}
-To:-
-----
-public Date getDoj() {
-        return (Date) doj.clone();
-}
-
--> Rather than return the direct Object, we can simply return "Collections.unmodifiableList(mobile)". By this will get some Exception, because we are not allowing anyone to modify. But we dont want to give any Exception. To avoid this, we can simply return "new ArrayList<>(mobile);". Both "Collections.unmodifiableList(mobile)" and "new ArrayList<>(mobile);" can be followed, only difference is Exception will get.
-from:
------
-public List<String> getMobile() {
-        return mobile;
-    }
-To:-
-----
-public List<String> getMobile() {
-        return new ArrayList<>(mobile);
-}
-
--> Rather than return the direct/actual Object, create a new address object and get all the attributes.
-from:
------
-public Address getAddress() {
-        return address;
-    }
-To:-
-----
-public Address getAddress() {
-        return new Address(address.getCity(),address.getZip());
-}
-
 
 Q) Which one is good to store password in Java ? String or char[] & why
 A)  a)If we store our "passwords" in String, it may get stored in memory untill GC clears the memory.
-	b)SCPA is used for reusability, there is a pretty  high chance that it will remain in memory for long duration.
-	c)The 1 who have access to Memory Dump, can find the password in clear text
-	d)Since Strings are Immutable, there are no way, contents of Strings can be changed because any change will produce new String.
-	e)We can set our passwords in "char[]", we can still set to blank or zero. And by using Array, even if we print array, its content won't get displayed but its location will be visible.
+b)SCPA is used for reusability, there is a pretty  high chance that it will remain in memory for long duration.
+c)The 1 who have access to Memory Dump, can find the password in clear text
+d)Since Strings are Immutable, there are no way, contents of Strings can be changed because any change will produce new String.
+e)We can set our passwords in "char[]", we can still set to blank or zero. And by using Array, even if we print array, its content won't get displayed but its location will be visible.
 	
 Ex:-
 String strPassword="Unknown";
