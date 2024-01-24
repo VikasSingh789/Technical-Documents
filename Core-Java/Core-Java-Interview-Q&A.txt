@@ -178,10 +178,18 @@ A) Synchronization in java is the capability to control the access of multiple t
 Synchronization in Java is the process that allows only one thread at a particular time to access the Shared Resources.
 
 Q) What is Encapsulation
-A) Encapsulation is a mechanism through which we can wrap the data members(variables and methods) of class in a single Unit.
--> Declare variables as private // Data Hiding to acheive Encapsulation
--> Declare methods as public to access the variables. // Data Abstraction
--> To Have better control on class on how the class should behave.
+A) Encapsulation is a mechanism through which we can wrap the data members(variables) and data methods of class in a single Unit.
+-> Class variables are hidden from other classes and can only be accessed by the methods of the class in which they are found.
+
+Q) How to create Encapsulation Class in Java
+A) Declare variables as private // Data Hiding to acheive Encapsulation
+-> Declare methods as public to retrieve and modify the values of the instance variables. // Data Abstraction.
+
+Q) What is the Need of Encapsulation in Java
+A) Better Control:- Encapsulation provides ultimate control over the data members and data methods inside the class.
+Security:- Encapsulation prevents access to data members and data methods by any external classes. The encapsulation process improves the security of the encapsulated data.
+Flexibility:- Changes made to one part of the code can be successfully implemented without affecting any other part of the code.
+Data Hiding:- To avoid access to the data members and data methods and their logical implementation from the Other Classes.
 
 Q) What is Covariant Return Type
 A) The covariant return type specifies that the return type subclass may vary against return type of super class. 
