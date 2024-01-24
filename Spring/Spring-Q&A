@@ -60,6 +60,70 @@ Application:- In Application Bean scope, A bean instance is created at the start
 -> The bean instance is stored in a global scope and can be accessed from any part of the application. This allows sharing global data or functionality in the application, such as configurations, utilities, cache objects, and so on.
 -> The Application scope is useful to define beans that need to be shared between multiple components, services or controllers in a Spring application, and that need to maintain a global state and be accessible from any part of the application.
 
+Q) What is Conditional Bean in Spring
+A) Conditional Bean helps us to control and decide whether Bean should get register or not in Application Context based on some specific conditions.
+-> The Spring Container checks these conditions at runtime and decides whether the annotated bean should be included in the application context.
+
+Q) How to Enable or Disable Bean based on Conditions in Spring
+A) By using @Conditional annotation, It allows you to register beans conditionally.
+-> This Annotation can be applied on various Levels such as,
+
+Method or Bean Level:- Like @Conditional on top of @Bean
+Class or Configuration Level:- Like @Conditional on top of @Configuration
+Component Level:- Like @Conditional on top of @Service, @Component, @Controller.
+
+-> Spring Boot offers some pre-defined "@ConditionalOn..." annotations that we can use. Below are the Examples,
+
+1) @ConditionalOnBean:- Sometimes, we might want to load a bean only if a certain other bean is available in the application context.
+-> The DependantModule is only loaded if there is a bean of class OtherModule in the application context.
+Ex:- 
+----
+@Configuration
+@ConditionalOnBean(OtherModule.class)
+class DependantModule {}
+
+2) @ConditionalOnMissingBean:- if we want to load a bean only if a certain other bean is not in the application context.
+-> We’re only injecting an in-memory datasource into the application context if there is not already a datasource available. This is very similar to what Spring Boot does internally to provide an in-memory database in a test context.
+Ex:-
+----
+@Configuration
+class OnMissingBeanModule {
+
+  @Bean
+  @ConditionalOnMissingBean
+  DataSource dataSource() {
+    return new InMemoryDataSource();
+  }
+}
+
+3) @ConditionalOnResource:- If we want to load a bean depending on the fact that a certain resource is available on the class path, we can use @ConditionalOnResource.
+-> The LogbackModule is only loaded if the logback configuration file was found on the classpath. Below is the Example
+Ex:-
+----
+@Configuration
+@ConditionalOnResource(resources = "/logback.xml")
+class LogbackModule {
+  ...
+}
+
+4) @ConditionalOnClass:- Load a bean only if a certain class is in the classpath
+Ex:- 
+----
+@Configuration
+@ConditionalOnClass(name = "this.clazz.Exist")
+class OnClassModule {
+  ...
+}
+
+5) @ConditionalOnMissingClass:- Load a bean only if a certain class is not on the classpath:
+Ex:- 
+----
+@Configuration
+@ConditionalOnMissingClass(value = "this.clazz.does.not.Exist")
+class OnMissingClassModule {
+  ...
+}
+
 Q) What is Spring Actuator
 A) Spring Boot Actuator is a sub-project of the Spring Boot Framework. It uses HTTP endpoints to expose operational information about any running application.
 -> The main benefit of using this library is that we get health and monitoring metrics from production-ready applications. Moreover, the gathering of metrics, understanding traffic, or knowing the state of the database, becomes tremendously easy with Actuator.
