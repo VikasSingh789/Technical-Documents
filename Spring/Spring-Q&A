@@ -22,6 +22,43 @@ Q) What is the use of  @RestControllerAdvice
 A) If we are working on resful service, then we can change this @ControllerAdvice to @RestControllerAdvice. @RestControllerAdvice combines both "@ControllerAdvice+@ResponseBody" in it.
 -> By this way, we dont need to Explicitly annotate the method with @ResponseBody.
 
+Q) What is Bean in Spring
+A) In Spring, a bean is an object that is managed by the Spring IoC (Inversion of Control) container. 
+-> It is an instance/object of a class that is configured and controlled by Spring.
+-> Beans are typically used to represent components and services within a Spring application.
+
+Q) What are the Bean Scopes in Spring
+A) Spring beans can have different scopes that indicate how their lifecycle and availability will be managed in the Application Context. Some of the most common scopes for Spring beans are:
+
+Singleton
+Prototype
+Request
+Session
+Application
+
+Singleton:- This is the default spring bean scope. When a bean has a singleton scope, it means that only a single instance of the bean is created per Spring application context. 
+-> This instance is stored in memory and reused each time the bean is requested in the future, rather than creating a new instance for each request.
+-> Each time the bean is requested, the same previously created instance is returned, if it already exists.
+Drawback:- The same singleton bean is shared between different components or classes that inject it into their Spring application context. This may have impact while working with concurrency and bean state, so care must be taken when handling shared data in singleton beans.
+
+Prototype:- In Prototype Bean Scope, New instance of the bean is created on each request.
+-> Bean instances with prototype scope do not share their state with other bean instances. Each instance has its own independent state and any modification to one bean instance will not affect other instances.
+Drawback:- Increased in Memory and higher resource consumption as more instances are created and destroyed.
+
+Request:- In Request Bean Scope, New instance of the bean is created for each HTTP request that arrives at the server. 
+-> This instance of the bean will be available for the duration of the processing of that specific request, and will be destroyed at the end of the request.
+-> The request scope is especially useful in WebApplications such as Spring MVC, where you need to have a specific bean instance for each request and you want to share the same bean between different components within the same request lifecycle.
+
+Session:- In Session bean scope, A single instance of the bean is created for each HTTP session that is established in the application. 
+-> This instance of the bean will be available for the duration of the user’s session, and will be destroyed at the end of the session.
+-> The session scope is available only in Spring MVC-based web applications, as it refers to the management of instances in the context of an HTTP session.
+-> The session”scope is especially useful in web applications, where specific user session information needs to be maintained, such as authentication data, user preferences or session state.
+
+Application:- In Application Bean scope, A bean instance is created at the start of the application and is maintained for the lifetime of the application. 
+-> This means that there will only be a single instance of the bean in the entire application, and all parts of the application will access the same instance.
+-> The bean instance is stored in a global scope and can be accessed from any part of the application. This allows sharing global data or functionality in the application, such as configurations, utilities, cache objects, and so on.
+-> The Application scope is useful to define beans that need to be shared between multiple components, services or controllers in a Spring application, and that need to maintain a global state and be accessible from any part of the application.
+
 Q) What is Spring Actuator
 A) Spring Boot Actuator is a sub-project of the Spring Boot Framework. It uses HTTP endpoints to expose operational information about any running application.
 -> The main benefit of using this library is that we get health and monitoring metrics from production-ready applications. Moreover, the gathering of metrics, understanding traffic, or knowing the state of the database, becomes tremendously easy with Actuator.
