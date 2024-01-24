@@ -21,6 +21,7 @@ A) If we use @ResponseBody annotation on top of method, Spring will try to conve
 Q) What is the use of  @RestControllerAdvice
 A) If we are working on resful service, then we can change this @ControllerAdvice to @RestControllerAdvice. @RestControllerAdvice combines both "@ControllerAdvice+@ResponseBody" in it.
 -> By this way, we dont need to Explicitly annotate the method with @ResponseBody.
+Note:- We have covered @ExceptionHandler, @ResponseBody, @ControllerAdvice and @RestControllerAdvice.
 
 Q) What is Bean in Spring
 A) In Spring, a bean is an object that is managed by the Spring IoC (Inversion of Control) container. 
