@@ -82,7 +82,7 @@ Note:- In Above Example, if we changes value of any 1 variable, say x, then the 
 Q) How many ways we can create String Object in Java.
 A) 2 ways:- By String Literal and By "new" keyword.
 String Literal:- String str = "Vikas";              // 1 Object will be created in SCP Area.
-New Keyword:-    String str = new String("Vikas");  //2 Objects will be created. 1 in Heap and 1 in SCPA(String Constant Pool Area). But it will refers to Heap Area Object.
+New Keyword:-    String str = new String("Vikas");  // 2 Objects will be created. 1 in Heap and 1 in SCPA(String Constant Pool Area). But it will refers to Heap Area Object.
 
 String str = "Vikas";
 str.concat(" Singh");
@@ -343,7 +343,11 @@ A) As every Object in Java has only 1 lock or monitor and "wait(),notify() and n
 (or)
 Every Object is associated with monitor. Only 1 Thread can hold the monitor at a time. acquiring the object, monitor allow thread to hold lock on object. These methods are not called on the thread as it does not have its own lock as the monitor is with the object. wait() is called on the object to have the thread move to wait() state.
 -> Similarly, "notify() and notifyAll()", is called on the Object to notify the waiting thread.
-
+(or)
+-> Every object in java has only one lock(monitor) and wait(),notify(),notifyAll() are used for monitor sharing thats why they are part of Object class rather than Thread class.
+-> These methods works on the locks and locks are associated with Object and not Threads. Hence, it is in Object class.
+-> wait() and notify() work at the monitor level and monitor is assigned to an object not to a particular thread. 
+-> Hence, wait() and notify() methods are defined in Object class rather than Thread class.
 
 Q) What is Class loader in java and its types
 A) Class Loaders are the Base class which has to be loaded before running or compiling any of our applications 
