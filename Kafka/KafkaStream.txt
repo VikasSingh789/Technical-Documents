@@ -1,0 +1,177 @@
+Important Commands in Kafka:-
+------------------------------
+Start the ZooKeeper service:-      bin/zookeeper-server-start.sh config/zookeeper.properties
+Start the Kafka broker service:-   bin/kafka-server-start.sh config/server.properties
+To Create the Topic:-              bin/kafka-topics.sh --create --topic user --bootstrap-server localhost:9092 --partitions 2  (With Partition as 2)
+To See List of Topic:-             bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+To See Specific Topic:-            bin/kafka-topics.sh --describe --topic user --bootstrap-server localhost:9092
+To See the Data in Consumer:       bin/kafka-console-consumer.sh --topic user --from-beginning --bootstrap-server localhost:9092
+
+============================================================================================================================================
+What is Kafka Streams | Apache Kafka Streams Architecture | Kafka Streams Core Concept:- https://www.youtube.com/watch?v=-cVH9D3pA8E
+Kafka Streams using Spring Cloud Stream | Microservices Example :- https://www.youtube.com/watch?v=rqjdSbIOrJ4
+Kafka Stream Processing | Spring Boot:- https://www.youtube.com/watch?v=3N_Lah56pTI
+============================================================================================================================================
+
+
+Kafka Streams:-
+---------------
+
+Q) What is the difference between Kafka topic and Kafka stream?
+A) Kafka Stream:- Supports multiple stream processing instances within the same application, enabling parallel processing of data. 
+Kafka Topic:- Multiple consumers can independently subscribe to a topic, making it suitable for scenarios like log aggregation.
+
+Scanrio/Project
+---------------
+-> We are going to create 1 Producer Service which will take Order Object through a Rest API.
+-> It will send the order to a Kafka Topic with the help of Kafka Producer API.
+-> We use Kafka Stream to Analyse and process the Real Time Stream.
+-> Kafka Stream will take Order Object from Topic and it will check Delivery Type is "Home Delivery" or "Take Away".
+-> If its a "Home Delivery, then it will send the Order Object to Topic called "Home Delivery" if order is "Take Away", then it will send the Order to "Take Away" Topic.
+
+Producer Project:-
+------------------
+This Producer Service is only responsible to publish the Data over "user" Topic.
+
+Dependencies we Added for this Producer Project are
+-> Spring Web
+-> Lombok
+-> Spring for Apache Kafka
+
+-> We have created a "KafkaProducerConfig" and we are reading the values of "Kafka BootstrapServer" with the help of "@value" annotation from "application.properties" file. Below is Example,
+Ex:- kafka.bootStrapServer = localhost:9092
+
+-> We are writing a Bean that will return the KafkaTemplate by using "@Bean" Annotation on top of Method.
+-> For this Kafka Template, the Key is "String" and Value will be "Order" (Order is Model class we created in model package)
+-> This Bean "KafkaTemplate" will take "producerFactory()" as method, where will send all our configurations and will return a "KafkaTemplate".
+
+-> This method "producerFactory()" return type will be "ProducerFactory", where key will "String" and value will be "Order". Below is Example,
+Ex:-   @Bean
+	   public ProducerFactory<String, Order> producerFactory() {}
+-> In this "producerFactory()", will declare a "Map" to add all of our configurations.
+-> In this Map, will add 3 configuration properties, and will return "DefaultKafkaProducerFactory". Below is code,
+Ex:-	Map<String, Object> config = new HashMap<String, Object>(); 
+		config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrapServer);   //Configuration for Kafka BootStrap Server on which the Kafka Server is Running
+		config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);  //For Key Serialization. In our case, String is "Key"
+		config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);  //For Order Serialization. In our case, Object is "value"
+		return new DefaultKafkaProducerFactory<>(config);  //return "DefaultKafkaProducerFactory" with Map as Argument.
+		
+-> In Service, We created a Topic called "user".
+-> We are using "KafkaTemplate.send()" to send the Data over Kafka Topic along with Data.
+-> This "KafkaTemplate.send()" will have 3 args,
+1) Topic
+2) Random Generating String as our Key is String
+3) order Object, since our value is Order
+Ex:- kafkaTemplate.send(TOPIC, UUID.randomUUID().toString(), order);
+
+-> Start the Producer Application
+-> Start the Zookeeper Server with cmd "zookeeper-server-start ./config/zookeeper.properties". (cmd should be from Kafka Software Downloaded Folder)
+-> Open Another Terminal and Start Kafka Server with cmd "kafka-server-start ./config/server.properties". (cmd should be from Kafka Software Downloaded Folder)
+-> Open New Terminal and hit cmd :"bin/kafka-console-consumer.sh --topic user --from-beginning --bootstrap-server localhost:9092" (To Consume Data from "user" Topic, once we publish data through API)
+-> From Postman, Hit the API "http://localhost:8080/producer/produce" (POST), with the below Payload,
+Payload-1:- { "item": "butter chicken", "deliveryType":"takeaway", "quantity":1 }
+Payload-2:- { "item": "butter chicken", "deliveryType":"homedelivery", "quantity":1 }
+-> After hitting the API, we could see the same data in consumer console. (consuming the data after published through API).
+
+KafkaStream Project:-
+---------------------
+-> The Objective of this KafkaStream Service is, will take the order from "user" topic and it will deliver it to the respective topic based on "deliveryType".
+-> This we are going to achieve by adding "Cloud Stream" and "Apache Kafka Streams" Dependencies in our pom.xml.
+
+Dependencies we Added for this KafkaStreams Service are,
+-> Spring Web
+-> Lombok
+-> Spring Cloud Stream
+-> Spring for Apache Kafka Streams
+Note:- The Difference in these 2 Projects are, We are Using "KafkaStream" and "Cloud Stream" Dependency whereas we are not using these Dependencies in Producer Project.
+
+-> In application.properties file, we have added "bindings" and "binder" configurations. In binding we have defined 3 Topics.
+binding:- Under this, we have defined List of Topics and Channels to publish and consume the Data over Topic. 
+binder:-  Under this, we have defined the kafka brokers and port No.
+
+Below is the config of application.yml, (YML file Create Manually)
+Ex:- 
+spring:
+  cloud:
+    function:
+      definition: takeaway;homedelivery;takewawayProducer;homedeliveryProducer
+    stream:
+      bindings:
+        takewawayProducer-in-0:
+          destination: user
+        takewawayProducer-out-0:
+          destination: takeaway-service
+        homedeliveryProducer-in-0:
+          destination: user
+        homedeliveryProducer-out-0:
+          destination: home-service
+        takeaway-in-0:
+          destination: takeaway-service
+        homedelivery-in-0:
+          destination: home-service
+      kafka:
+        streams:
+          binder:
+             brokers: localhost:9092
+server:
+  port: 8082
+
+-> In Above config's, "destination" key will be defined as the Topic Names.
+-> Under bindings, we have defined 6 channels, which will act as Input or Output Channel.
+-> Channel is for defining to publish and consume the data. In our Case, "user" Topic is to publish the Data and "home-service" and "takeaway-service" topic is to consume same data conditionally.
+
+-> Spring Cloud Stream able to Leverage the Java 8 Function Interfaces and Understands that if a Function is a Functional Interface, then it takes something as input and returns something as output.
+-> Spring Cloud Stream is smart enough to determine the application Type based on the method return Type.
+-> If we are returning a "Function", it means our application is a "Processor". Hence it will create both input and output channel. (Can Consume and Publish).
+-> If we are returning a "Consumer", it means our application is a "Consumer". It will take input and returns Nothing. it will create only input channel. i.e. Can only Read/Consume the Data.
+-> So, By using Functional Interface methods, Message Channels will be created based on method names. Below is Example,
+Ex:- public Consumer<Order> homedelivery() {} // We used to consume data from Topic
+-> Message Channel will be created as "homedelivery-in-0", since method name is "homedelivery" and return type is "Consumer", which can only be used to consume/read the data and return nothing.
+Note:- Whatever the Functional Interface methods we are using, we have to define in .yml file and "spring.cloud.function" property. Please refer application.yml file for the same.
+
+-> To Consume and Publish the Data, we have used "Function" method. Below is Example.
+ex:- public Function<KStream<String, Order>, KStream<String, Order>> takewawayProducer() {}
+-> In Example, method name is "takewawayProducer()" with return type as "Function".
+-> So for this, Spring Cloud Stream, will create 2 Message channels(in and out) name as "takewawayProducer-in-0" and "takewawayProducer-out-0". 1 for read and another for publish the data.
+-> Here Channel "takewawayProducer-in-0" will read data from "user" topic and another channel "takewawayProducer-out-0" will publish the data in "takeaway-service" topic.
+-> Basically, Message Channel which ends with "-in-0" is used to read data from topic and channel which ends with "-out-0" is to publish the data on topic.
+-> For Each channel, we have to define our Topic accordingly under bindings in yml file. such as "destination: user" where key is "destination" and "user" is our topic name.
+-> Since, to read/consume the data, we are using "Consumer" method, Message Channel will be created as "takeaway-in-0" for the method name "takeaway". Below is Example.
+Ex:- public Consumer<Order> takeaway() {} //Message Channel will be created as "takeaway-in-0" since return type is "Consumer" and method name is "takeaway".
+
+-> By using KStream, We are reading and processing the data and publishing the data based on "deliveryType".
+-> so in our case we have 2 topics which are used to consume the data. ("home-service" and "takeaway-service")
+-> To check if the Topics are consuming the Data based on deliveryType, we have to open 2 terminals for consumer.(1 for "home-service" and another one for "takeaway-service"). Below are the cmds,
+cmd:- bin/kafka-console-consumer.sh --topic home-service --from-beginning --bootstrap-server localhost:9092
+      bin/kafka-console-consumer.sh --topic takeaway-service --from-beginning --bootstrap-server localhost:9092
+-> Once we hit the api to publish the data, open command terminal and run above cmds in each terminal from Kafa Folder. Will se Data based on the deliveryType.
+Note:- We haven't created Topics manually. Spring Cloud Stream will create the Topics once we define "destination" in .yml file. Run Project and will see Topics are created after this config define. 
+
+
+Kafka Streams:-
+---------------
+-> We are Using "KStreams" to process our Data as Streams stored in Kafka and perform logics.
+-> Kafka Streams is a client library for building applications and microservices, where the input and output data are stored in Kafka clusters.
+-> It combines the simplicity of writing and deploying standard Java and Scala applications on the client side with the benefits of Kafka's server-side cluster technology.
+-> Kafka Streams is used to store and distribute, in real-time, published content to the various applications and systems that make it available to the readers.
+-> KafkaStream is elastic, highly scalable, fault-tolerant, stateful, and ready to run in production at large scale.
+
+
+============================================================================================================================================
+Spring Cloud Stream:-
+---------------------
+-> Its a Binding Framework which binds your code to destination. (Producing and Consuming).
+-> It is used to create highly scalable event driven microservices.
+-> We can produce, consume, process data without much configs and it will be easy to switch between message Brokers. (Kafka and RabbitMQ).
+-> We No need to specify the implementation Details of Messaging System. (Kafka and RabbitMQ are Messaging Systems)
+-> Only we need to specify the Required Binding Dependency, and rest of the things will take care by "Spring Cloud Stream".
+
+Scenario of the use of Spring Cloud Stream:-
+--------------------------------------------
+-> Earlier Project requirement is to use "Kafka" for Publish and Consume the Data.
+-> Later Project architecture will gets change, and will ask us to use RabbitMQ instead of Kafka to publish the Messages.
+-> We have to remove only Kafka Binder Dependencies from Producer and Consumer and Add "RabbitMQ" Dependencies. Below is the Dependency we can remove,
+"spring-cloud-stream-binder-kafka" (from artifactId)
+-> After changes, Spring Cloud Stream will decide how these publish and consumer microservices will communicate using Event Driven Architecture like Kafka and RabbitMQ
+-> We can also avoid Kafka related configurations, if we go with Spring Cloud Stream.
+
