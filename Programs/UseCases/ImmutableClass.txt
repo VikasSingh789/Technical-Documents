@@ -1,0 +1,115 @@
+Q) How to create custom Immutable class in java
+A)  a)Make your class final
+    b)Declare all the variables private and final
+    c)Say no to Setter Methods
+    d)Initialize all variables in constructor
+    e)perform cloning of mutable objects while returning from getter methods. (Some Disadvantages while performing cloning)
+	
+Ex-1:- Lets say below we have created our custom class,
+
+//mutable class
+public class Address {
+
+    private String city;
+    private String zip;
+	//Setter and getters methods
+	
+}
+
+public final class Employee {
+
+    private final String name;
+    private final Date doj; //mutable
+    private final List<String> mobile;
+
+    private final Address address;
+
+    public Employee(String name, Date doj, List<String> mobile, Address address) {
+        this.name = name;
+        this.doj = doj;
+        this.mobile = mobile;
+        this.address = address;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Date getDoj() {
+        return doj;
+    }
+
+    public List<String> getMobile() {
+        return mobile;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "name='" + name + '\'' +
+                ", doj=" + doj +
+                ", mobile=" + mobile +
+                ", address=" + address +
+                '}';
+    }
+
+    public static void main(String[] args) {
+        Address address=new Address("blr","1012");
+        Employee employee=new Employee("Basant",new Date(),
+                Arrays.stream(new String[]{"1234","5678"}).collect(Collectors.toList()), address);
+
+        employee.getDoj().setDate(20);   // By this, we are able to modify the date. Immutable concept fails here.
+        employee.getMobile().add("9010"); // By this, we are able to modify the date. Immutable concept fails here.
+        employee.getAddress().setCity("Pune"); // Though Address class is made as immutable in Employee class, still Immutable concept fails here
+
+        System.out.println(employee);
+
+
+    }
+}
+
+Above, Though we have followed all rules to create Custom Immutable class, still printing output, will see the added values/objects will get added and Immutable rule fails here.
+
+For Object, we can go with the clone and for List, we can create a new List, rather than return the actual reference.
+
+Notes to acheive Immutable class for above Example. (Changes in code in above Example),
+
+-> Rather than return the direct Object, we can simply do the clone. Below is the Syntax
+from:
+-----
+public Date getDoj() {
+        return doj;
+}
+To:-
+----
+public Date getDoj() {
+        return (Date) doj.clone();
+}
+
+-> Rather than return the direct Object, we can simply return "Collections.unmodifiableList(mobile)". By this will get some Exception, because we are not allowing anyone to modify. But we dont want to give any Exception. To avoid this, we can simply return "new ArrayList<>(mobile);". Both "Collections.unmodifiableList(mobile)" and "new ArrayList<>(mobile);" can be followed, only difference is Exception will get.
+from:
+-----
+public List<String> getMobile() {
+        return mobile;
+    }
+To:-
+----
+public List<String> getMobile() {
+        return new ArrayList<>(mobile);
+}
+
+-> Rather than return the direct/actual Object, create a new address object and get all the attributes.
+from:
+-----
+public Address getAddress() {
+        return address;
+    }
+To:-
+----
+public Address getAddress() {
+        return new Address(address.getCity(),address.getZip());
+}
