@@ -231,15 +231,63 @@ Using Final Keyword.
 4) Final Keyword:- Final Variables are also thread-safe in java because once assigned the value cannot be changed.
 
 Q) What is the use of Immutable class in Java
-A) Immutable objects are inherently thread-safe. 
+A) Immutable objects are inherently thread-safe.
 -> Since their state cannot change after creation, multiple threads can safely access them concurrently without the risk of race conditions or data corruption.
 -> An immutable class is good for caching purposes because you don't have to worry about the value changes.
+-> All the wrapper classes (like Integer, Boolean, Byte, Short) and String class is immutable.
 
 Q) How to create custom Immutable class in java
 A)  a)Make your class final
     b)Declare all the variables private and final
     c)Say no to Setter Methods
     d)Initialize all variables in constructor
+
+Q) What is Wrapper Class in Java
+A) Wrapper Class in Java provides the mechanism to convert primitive into object and object into primitive.
+-> Auto-boxing and Unboxing feature convert primitives into objects and objects into primitives automatically.
+
+AutoBoxing:- The automatic conversion of primitive data type into its corresponding Object/wrapper class is known as Auto-boxing. (Primitive to Wrapper)
+-> byte to Byte, char to Character, int to Integer, long to Long, float to Float, boolean to Boolean, double to Double, and short to Short. are Example of Auto-boxing.
+-> Since Java 5, we do not need to use the valueOf() method of wrapper classes to convert the primitive into objects.
+Ex:- (Primitive to Wrapper)
+----
+int a = 20;  
+Integer i=Integer.valueOf(a);   //converting int into Integer explicitly  
+Integer j=a;                    //autoboxing, now compiler will write Integer.valueOf(a) internally
+
+Unboxing:- The automatic conversion of wrapper type into its corresponding primitive type is known as unboxing. (Wrapper to Primitive)
+-> It is the reverse process of autoboxing. 
+-> Since Java 5, we do not need to use the intValue() method of wrapper classes to convert the wrapper type into primitives.
+Ex:- (Wrapper to Primitive)
+---------------------------
+Integer a = new Integer(3);    
+int i=a.intValue();     //converting Integer to int explicitly  
+int j=a;                //unboxing, now compiler will write a.intValue() internally.
+
+Q) What is the use of Wrapper Classes in Java
+1) Representing primitive data types as objects:- In Java, sometimes we might need to use objects instead of primitive data types. For example, while working with collections.
+Ex:-
+----
+// error
+ArrayList<int> list = new ArrayList<>();
+
+// runs perfectly
+ArrayList<Integer> list = new ArrayList<>();
+-> In such cases, wrapper classes help us to use primitive data types as objects.
+
+2) Storing null values: Primitive data types in Java cannot store null values, but wrapper classes can be set to null, which can be useful in representing missing or unknown values.
+-> We can store the null value in wrapper objects. For example,
+Ex:-
+----
+// generates an error
+int a = null;
+
+// runs perfectly
+Integer a = null;
+
+3) Converting between primitive data types and strings: Wrapper classes provide methods for converting primitive values to and from strings, which can be useful for reading data from a file or user input.
+4) Comparing values: Wrapper classes provide methods for comparing values, such as equals() and compareTo(), which can be useful for sorting and searching.
+5) Serialization can allow only object data.
 
 Q) Which one is good to store password in Java ? String or char[] & why
 A)  a)If we store our "passwords" in String, it may get stored in memory untill GC clears the memory.
