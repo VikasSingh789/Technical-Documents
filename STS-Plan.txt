@@ -146,6 +146,7 @@ Annotations in JUnit Test Cases:- https://www.baeldung.com/junit-before-beforecl
 Order of test cases execution:- https://www.baeldung.com/junit-5-test-order
 Jackson @JsonIgnore, @JsonIgnoreProperties and @JsonIgnoreType:- https://www.javaguides.net/2019/04/jackson-jsonignore-jsonignoreproperties-and-jsonignoretype.html
 Spring Scopes:- https://howtodoinjava.com/spring-core/spring-bean-scopes/
+or https://medium.com/@miguelangelperezdiaz444/understanding-bean-scopes-in-spring-which-one-is-best-for-your-application-3ff404e44b76
 Spring Boot | REST API Request Validation & Exception Handling Realtime Example:- https://github.com/Java-Techie-jt/validation-exception-handling
 Sort Map in Java using Streams:- https://codingwithharish.com/posts/how-to-sort-map-in-java/
 
