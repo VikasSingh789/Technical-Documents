@@ -128,13 +128,20 @@ public class Test2 {
 
 -> When we compile both the classes we will be getting two class files Test1.class and Test2.class, while running Test2 class just remove the Test1.class file then we will be getting NoClassDefFoundError as below
 
-Q) What is checked Exceptions
-A) Checked exceptions are checked at compile-time. It means if a method is throwing a checked exception then it should handle the exception using try-catch block or it should declare the exception using throws keyword, otherwise the program will give a compilation error. It is named as checked exception because these exceptions are checked at Compile time.
--> There is no difference between compile time exceptions and checked exceptions
--> By default, Checked Exceptions are not forwarded in calling chain (propagated)
-ex:- void m(){  
-    throw new java.io.IOException("device error"); //checked exception  
-  }
+Q) What is Checked Exception and UnChecked Exception
+A) Checked Exception:- Exceptions which are checked by the Java Compiler which Occurs at Run Time. (File Wont compile).
+-> Checked Exceptions should be Handled by programmer using Either "throws" or "try Catch" block.
+-> If we dont use any either of this, then our compiler will not compile our code.
+-> Even Before you are able to run, ur compiler throws an Exception Saying "UnHandled Exception type...".
+Ex:- 
+-----
+1) FileNotFoundException  //Possibility of FileNotFoundException when we deal with Files.
+2) Interrupted Exception  //Thread.sleep
+
+UnChecked Exception:- Exceptions which are Unchecked/Not Checked by the compiler is called UnChecked Exception.
+-> Code Which gets Compiled but Exception will occurs at RunTime.
+-> These Exceptions will get by Program Errors like, Dividing 10/0, or fetching the Length of String which is Null.
+Ex:- ArithmeticException(50/0), ArrayIndexOutOfBoundsException and NullPointerException(s.length()).
 
 Q) What is Exception Propagation
 A) If we dont want to handle the exception by using "try&catch" then we can propagate or fwd that exception to other method by using "throws" keyword on method level.
