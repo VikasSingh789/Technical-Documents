@@ -51,8 +51,15 @@ A) Inside set.add(), it internally use map Object to store the value.
 ex:- public boolean add(E e){
 	return map.put(e, PRESENT) == null;
 }
-consider passed arg as a key in map.put(), and value as a "PRESENT" which is a dummy Object.
+consider passed arg as a key in map.put() and constant Object called “PRESENT” as it’s value.
 ex:- private static final Object PRESENT = new Object();
+-> If the Key is unique and added to the map, then it will return null
+-> If the Key is duplicate, then it will return the old value of the key.
+
+Note:- 
+-------
+-> If the method map.put(key, value) returns null, then the method map.put(e, PRESENT)==null will return true internally, and the element added to the HashSet.
+-> If the method map.put(key, value) returns the old value of the key, then the method map.put(e, PRESENT)==null will return false internally, and the element will not add to the HashSet.
 
 In Set, if we are using set with primitive, then no need to override "hashcode and equals()", Set Rule will work properly. (doesn't allow duplicates)
 But if we are using any Custom Object like "Employee", Set rule may not work properly. Then in this scenario or to overcome this problem, we must need to override "hashcode and equals()".
@@ -108,8 +115,8 @@ Because Internally,  Implementation of put() checks "if(key == null || value == 
 
 6) If we have HashTable which is already  synchronized then why we need ConcurrentHashMap
 A) Locking Mechanism still same as per HashMap. ( locks whole Object or Locks whole Underlying DS ).
-Will have Segment or Bucket Level Locking in ConcurrentHashMap, which is not there in Hashtable.
-Its always preferable to use ConcurrentHashMap over HashTable.
+-> Will have Segment or Bucket Level Locking in ConcurrentHashMap, which is not there in Hashtable.
+-> Its always preferable to use ConcurrentHashMap over HashTable.
 
 7) We can Synchronize a HashMap using Collections then why can't we use HashMap instead using ConcurrentHashMap.
 A) if we used Collections.synchronizedMap(map), it will act as a synchronized Hashtable only. Where again Locking mechanism is different.
