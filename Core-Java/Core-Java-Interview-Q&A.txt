@@ -169,12 +169,11 @@ void m3() throws IOException{
 		io.printStackTrace();
 	}
 }
-
 main(){
 m3();
 }
 
-By above code, on method m3() we are trying to propagate the exception by "throws" keyword and also handling the Exception by using "try&catch" block in same m3() method, so in this case will get Exception at run time because, though we have handled the exception, we are using "throws" keyword to propagate the Exception.
+-> If we are using both "throws" and "try catch" on m3() as above Example, then Exception will not be Propagated and will get caught in m3() itself. So no use of using Both.
 
 Q) What is Volatile in java
 A) Volatile keyword is used to modify the value of a variable by different threads. It is also used to make classes thread safe. It means that multiple threads can use a method and instance of the classes at the same time without any problem. The volatile keyword can be used either with primitive type or objects.
