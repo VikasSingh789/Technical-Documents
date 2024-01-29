@@ -146,18 +146,10 @@ Ex:- ArithmeticException(50/0), ArrayIndexOutOfBoundsException and NullPointerEx
 Q) What is Exception Propagation
 A) If we dont want to handle the exception by using "try&catch" then we can propagate or fwd that exception to other method by using "throws" keyword on method level.
 -> We use "throws" keyword to propagate the exception.
--> Unchecked Exceptions are by default propagated but checked Exceptions are need to be propagated.
+-> Unchecked Exceptions are by default propagated but Checked Exceptions are need to be propagated by using "throws" keyword.
 -> Unchecked Exceptions like "NullPointerException" will be propagated by default if we dont handle in "try&catch" block.
--> if we use "try&catch" block, the Exception Propagation wont happen.
-ex:-  void m1() throws IOException {
-	int a = 10/0; // UnChecked Exception
-      }
-
--> checked Exception will get detected at compile time. we can declare checked exception by using "throw" keyword.
-ex:- throw new IOException()
-->  These checked exceptions must be caught or declare to be thrown.
-a) Exceptions must be caught by using "try&catch" block (or)
-b) If we dont want to handle exceptions, then we can declare/throw exceptions/propagate the exception by using "throws" keyword like "throws IOException" on method level.
+-> If we use "try catch" block, the Exception Propagation wont happen and Exception will get caught in "catch" block.
+-> If we dont want to handle exceptions, then we can declare/throw exceptions/propagate the exception by using "throws" keyword like "throws IOException" on method level.
 
 -> If we propagate and handle the Exception in same method, then will face Exception issue at run time. 
 ex:-
