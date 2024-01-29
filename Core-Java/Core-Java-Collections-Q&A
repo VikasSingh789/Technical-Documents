@@ -65,9 +65,12 @@ In Set, if we are using set with primitive, then no need to override "hashcode a
 But if we are using any Custom Object like "Employee", Set rule may not work properly. Then in this scenario or to overcome this problem, we must need to override "hashcode and equals()".
 
 4) What is the difference between fail fast and fail safe iterator
-A) fail fast:- Iterator which fail fast when we do  any modification while iterating a collection is called fail fast iterator.
+A) Java Collection supports two types of iterators, Fail Fast and Fail Safe. These iterators are very useful in exception handling. 
+Fail Fast:- Fail fast iterator aborts the operation as soon it exposes failures and stops the entire operation.
+-> Iterator which fail fast when we do  any modification while iterating a collection is called fail fast iterator.
 ex:- ( ArrayList, HashMap and Vector )
-fail safe:- Iterator who allows us to modify in middle while iterating a collection is called fail safe iterator.
+Fail Safe:- Fail Safe iterator doesn't abort the operation in case of a failure.
+-> Iterator who allows us to modify in middle while iterating a collection is called fail safe iterator.
 ex:- ( CopyOnWriteArrayList, CopyOnWriteArraySet, ConcurrentHashMap ).
 
 FailFast:-
