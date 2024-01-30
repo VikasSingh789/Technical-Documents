@@ -2,6 +2,7 @@ package simpleprograms;
 
 
 public class CountCharactersFromString {
+	
 	static void countCharacterFromString(String str) {
 		char c[] = str.toCharArray();
 		for (int i = 0; i < c.length; i++) {
@@ -13,9 +14,8 @@ public class CountCharactersFromString {
 						count++;
 					}
 				}
-				if (count > 1) {
-					System.out.print(c[i]);
-					System.out.print(count + " ");
+				if (count >= 1) {
+					System.out.print(c[i]+""+count + " ");
 				}
 			}
 		}
