@@ -192,14 +192,31 @@ A) @Primary:- When we annotate @Primary on top of class or Bean, then that parti
    
 Q) Difference between @Inject and @Autowired
 A) @Autowired annotation is part of the Spring framework But @Inject is a standard annotation for dependency injection.
--> By default, Dependency Injection for @Autowired is true, means Spring wont run or throw Exception if Bean is not Found.
+-> By default, Dependency Injection for @Autowired is true, means Spring won't run or throw Exception if Bean is not Found.
    We can change this behavior by using @Autowired(required=false). In this case, even if bean is not found for dependency injection, it will not throw error.
    But @Inject annotation has no required attribute. Therefore, if the dependencies will not be found - will be thrown an exception.
--> @Qualifier can be used in case of ambiguity while working with @Autowired and we use @Named Qualifier while working with @Inject.
+-> @Autowired has "required" attribute whereas @Inject has no required attribute.
+-> In case of Ambiguity, we use @Qualifier with @Autowired and we use @Named Qualifier while working with @Inject.
 -> @Inject is portable and can be used in spring framework and as well as with some other application. But @Autowired will work only with Spring Framework specific.
 
+Q) What are the types of Depedency Injection in Spring
+A) In the Spring Framework, there are 3 main Dependency Injection techniques:
+1) Constructor Based Dependency Injection:- Constructor Injection, involves passing all necessary dependencies for an object as arguments to the constructor. 
+-> The object is created only after all necessary dependencies have been provided.
+-> The main reason for preferring dependency injection through the constructor is that it allows dependencies to be explicit and mandatory.
+
+2) Setter Based Dependency Injection:- Setter Based Dependency Injection involves annotating a method with the @Autowired annotation. 
+When Spring creates an object that has a method annotated with @Autowired, Spring looks up an instance of the corresponding dependency and assigns it to the method parameter.
+
+3) Field or Property-Based Dependency Injection (@Autowired in a variable):- Property-Based Dependency Injection(@Autowired on a variable) involves annotating a property with the @Autowired annotation. Property/Field can be used to inject the Dependency, where Field is the name of a "Bean".
+When Spring creates an object that has a property annotated with @Autowired, Spring looks up an instance of the corresponding dependency and assigns it to the property.
+
+Note:- it is recommended to use dependency injection through the constructor whenever possible. 
+This makes dependencies explicit and mandatory, leading to cleaner code that is easier to understand and maintain.
+
 Q) What is the Difference Between Constructor Injection and Setter Injection.
-A) Constructor Injections are Mandatory Injection whereas Setter Injection is Non-Mandatory Injections.
+A)  In Constructor Injection, dependency can be injected through class constructor where as in Setter Injection, dependency can be injected through Setter Methods.
+-> Constructor Injections are Mandatory Injections whereas Setter Injection is Non-Mandatory Injections.
 -> i.e. If Spring Application won't find the Bean, then Spring will run, if we define "@Autowired(required=false)" incase of Setter Injection, but it will fail for Constructor Injections.
 -> Bean must and should be declared and Found, in case of Constructor Injection. Spring won't run even if we define "@Autowired(required=false)".
 
