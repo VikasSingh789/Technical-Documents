@@ -79,6 +79,11 @@ Three objects point to the same memory location on the heap i.e, to the same obj
 
 Note:- In Above Example, if we changes value of any 1 variable, say x, then the same changes also applies to the other variables as well. (y and z).
 
+Q) How to break SIngleton Design Pattern
+A) We can break Singleton Pattern by not using "synchronize" keyword on method.
+-> By this way, if we do not synchronize the method in singleton, then we can create more than an instance of the class.
+-> Other Ways are Reflection and Cloning:- Cloning is a concept to create duplicate objects. Using clone we can create a copy of an object.
+
 Q) How many ways we can create String Object in Java.
 A) 2 ways:- By String Literal and By "new" keyword.
 String Literal:- String str = "Vikas";              // 1 Object will be created in SCP Area.
