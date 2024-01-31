@@ -213,11 +213,12 @@ A) In the Spring Framework, there are 3 main Dependency Injection techniques:
 -> The object is created only after all necessary dependencies have been provided.
 -> The main reason for preferring dependency injection through the constructor is that it allows dependencies to be explicit and mandatory.
 
-2) Setter Based Dependency Injection:- Setter Based Dependency Injection involves annotating a method with the @Autowired annotation. 
-When Spring creates an object that has a method annotated with @Autowired, Spring looks up an instance of the corresponding dependency and assigns it to the method parameter.
+2) Setter Based Dependency Injection:- Setter Based Dependency Injection involves annotating @Autowired annotation on top of Setter Method.
+-> When Spring creates an object that has a method annotated with @Autowired, Spring looks up an instance of the corresponding dependency and assigns it to the method parameter.
 
-3) Field or Property-Based Dependency Injection (@Autowired in a variable):- Property-Based Dependency Injection(@Autowired on a variable) involves annotating a property with the @Autowired annotation. Property/Field can be used to inject the Dependency, where Field is the name of a "Bean".
-When Spring creates an object that has a property annotated with @Autowired, Spring looks up an instance of the corresponding dependency and assigns it to the property.
+3) Field or Property-Based Dependency Injection (@Autowired in a variable):- Property-Based Dependency Injection(@Autowired on a variable) involves annotating a property with the @Autowired annotation. 
+-> Property/Field can be used to inject the Dependency, where Field is the name of a "Bean".
+-> When Spring creates an object that has a property annotated with @Autowired, Spring looks up an instance of the corresponding dependency and assigns it to the property.
 
 Note:- it is recommended to use dependency injection through the constructor whenever possible. 
 This makes dependencies explicit and mandatory, leading to cleaner code that is easier to understand and maintain.
