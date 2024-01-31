@@ -23,6 +23,10 @@ A) If we are working on resful service, then we can change this @ControllerAdvic
 -> By this way, we dont need to Explicitly annotate the method with @ResponseBody.
 Note:- We have covered @ExceptionHandler, @ResponseBody, @ControllerAdvice and @RestControllerAdvice.
 
+Q) Is RestAPIs are Stateful or Stateless
+A) REST APIs are stateless because each request is independent, and servers can handle requests in parallel without worrying about shared state.
+-> Meaning that calls can be made independently of one another, and does not relate to other requests which comes prior.
+
 Q) What is Bean in Spring
 A) In Spring, a bean is an object that is managed by the Spring IoC (Inversion of Control) container. 
 -> It is an instance/object of a class that is configured and controlled by Spring.
