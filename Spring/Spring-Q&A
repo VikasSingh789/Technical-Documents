@@ -254,8 +254,20 @@ a) XML configuration files
 b) AspectJ Orientation Files.
 
 
-Q) difference between Pathvariable and ReqParam.
-A) If we are using Pathvariable and we are not  giving the input, then will get "404" Error. If we are using Pathvariable, its Mandatory to give the input otherwise it will give error.
+Q) Difference between PathParam and QueryParam.
+A) Path parameter:- Path parameter are part of the endpoint and defines the resource location.
+Path parameters are used to identify a specific REST API resource.
+Path parameter is separated by slash '/' in the URL.
+Use @PathParam for retrieval based on id.
+Ex:- GET /employee/{id}             //get the details of the employee whose id is 15
+
+Query parameters:- Query parameters are used to sort/filter resources.
+Query parameter defines sort, pagination, or filter operations
+Query parameters is separated by question mark (`?`) in the URL
+Use @QueryParam for filter, sort and Pagination Operations
+Ex:- GET /employee?start=1&size=10  //get the details of all employees but only 10 at a time
+
+Note:- If we are using Pathvariable and we are not giving the input in the URL/API, then will get "404" Error. If we are using Pathvariable, its Mandatory to give the input otherwise it will give error.
 Incase of ReqParam, the input is Optional. we wont get any exception.
 
 Q) What is difference between @Bean and @Component in Spring
