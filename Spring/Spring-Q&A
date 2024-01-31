@@ -195,7 +195,7 @@ A) @Autowired annotation is part of the Spring framework But @Inject is a standa
 -> By default, Dependency Injection for @Autowired is true, means Spring won't run or throw Exception if Bean is not Found.
    We can change this behavior by using @Autowired(required=false). In this case, even if bean is not found for dependency injection, it will not throw error.
    But @Inject annotation has no required attribute. Therefore, if the dependencies will not be found - will be thrown an exception.
--> @Autowired has "required" attribute whereas @Inject has no required attribute.
+-> @Autowired has "required" attribute to change the default behaviour whereas @Inject has no required attribute.
 -> In case of Ambiguity, we use @Qualifier with @Autowired and we use @Named Qualifier while working with @Inject.
 -> @Inject is portable and can be used in spring framework and as well as with some other application. But @Autowired will work only with Spring Framework specific.
 
