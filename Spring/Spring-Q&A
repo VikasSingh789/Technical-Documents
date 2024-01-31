@@ -27,6 +27,10 @@ Q) Is RestAPIs are Stateful or Stateless
 A) REST APIs are stateless because each request is independent, and servers can handle requests in parallel without worrying about shared state.
 -> Meaning that calls can be made independently of one another, and does not relate to other requests which comes prior.
 
+Q) What are Safe Methods in Rest API
+A) GET and HEAD are the Safe methods. Safe methods are HTTP methods that do not modify the resource.
+Idempotent:- HTTP methods that can be called multiple times and they will produce the same result. GET, PUT, and PATCH are Idempotent methods.
+
 Q) What is Bean in Spring
 A) In Spring, a bean is an object that is managed by the Spring IoC (Inversion of Control) container. 
 -> It is an instance/object of a class that is configured and controlled by Spring.
