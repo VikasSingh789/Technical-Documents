@@ -32,5 +32,8 @@ public class MergeArrays {
 		System.out.println("As List:- "+y);
 
 	}
-
 }
+
+//input:-   { 1, 2, 3 }
+//          { 4, 5, 6 }		 
+//output:-  [1, 2, 3, 4, 5, 6]
