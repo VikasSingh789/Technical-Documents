@@ -86,29 +86,6 @@ Adding json file for junit test cases coverage.
 
 
 
-
-Spring Boot Tutorial:
----------------------
-https://www.educba.com/spring-boot-ehcache/?source=leftnav
-
-
-Programs:-
------------
-Write the code to sort collection Using Stream API on the basis of student address.
-class student{
-id
-name
-address
-}
-https://stackabuse.com/java-8-how-to-sort-list-with-stream-sorted/
-
-write a program which will print a list using Lamda.
-https://stackoverflow.com/questions/23324782/how-to-use-javas-lambda-expressions-to-print-an-array
-
-Write a programe which will print a list object and while printing append Hello as prefix using Lamda
-
-
-
 Zookeeper:-       ".\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties"
 kafka server:-    ".\bin\windows\kafka-server-start.bat .\config\server.properties"
 create topics:-   ".\bin\windows\kafka-topics.bat --create --zookeeper localhost:2181 
@@ -119,21 +96,6 @@ View Messages:-   ".\bin\windows\kafka-console-consumer.bat --bootstrap-server l
 					--from-beginning"
 
 https://www.edureka.co/blog/kafka-streams/#kafkastream
-
-
-Features of Kafka:-
--------------------
-Large data per second
-Elastic
-high throughput
-Fault-Tolerance
-
-Disadvantages of kafka
-----------------------
-Redundant data
-Performance issue
-storage issue
-Number of partitions
 
 
 https://dev.to/jakmar17/deploy-spring-boot-on-wildfly-application-server-2029
@@ -149,37 +111,3 @@ Spring Scopes:- https://howtodoinjava.com/spring-core/spring-bean-scopes/
 or https://medium.com/@miguelangelperezdiaz444/understanding-bean-scopes-in-spring-which-one-is-best-for-your-application-3ff404e44b76
 Spring Boot | REST API Request Validation & Exception Handling Realtime Example:- https://github.com/Java-Techie-jt/validation-exception-handling
 Sort Map in Java using Streams:- https://codingwithharish.com/posts/how-to-sort-map-in-java/
-
-
-
-Program to write 234678 to reverse integer number
-
-Spring vs Spring boot Differences
-
-Micro service design principles
-
-SOLID design patterns
-
-1. Program to find count of second highest word in given text.
-2. Program to find if given number is prime or not?
-3. Explain the flow to retrieve bank balance using spring boot framework.
-4. What are different response codes in micro service.
-5. How to derive context path url in spring boot project.
-
-Core java questions
-OOPS – Runtime Polymorphism and how can we implement,
-Collections – Added features in java 8, How to traverse through collection
-How to filter objects using stream
-Can we have a duplicate static method in both Super class and sub class? What will be the outcome if so? 
-Microservices
-List of design patterns
-Any hands on with microservice implementation
-Communication types in between services
-How can we achieve failsafe services and what pattern can be implemented.
-Spring Boot
-How does Spring actuators work
-Custom Spring Exception handling mechanism
-Any exposure - Spring AWS Cloud Maven API
-Any idea on Profile testing with Eureka server
-data structure based coding questions like snakes and ladder
-
