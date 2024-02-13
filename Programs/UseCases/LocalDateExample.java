@@ -42,20 +42,42 @@ public class LocalDateExample {
 		this.dob = dob;
 	}
 
-	public static void main(String[] args) {
-		LocalDateExample l1 = new LocalDateExample(1L,"vikas", LocalDate.of(1991, 01, 01));
-		LocalDateExample l2 = new LocalDateExample(2L,"vivek", LocalDate.of(1999, 11, 29));
-		
-		List<LocalDateExample> list = Arrays.asList(l1,l2);
+	public static void withJava7(List<LocalDateExample> list) {
 		LocalDate now = LocalDate.now();
 		list.forEach(n->{
 			Period p = Period.between(n.getDob(), now);
 			int ageDiff = p.getYears();
-			if(ageDiff>=25 && ageDiff<=35) {
+			if(ageDiff>=25 && ageDiff<=40) {
 				System.out.println(n.getName());
 			}
 		});
-		
+	}
+	
+	public static void withStreams(List<LocalDateExample> list) {
+		List<LocalDateExample> listOfAge = list.stream().filter(n-> LocalDateExample.checkAgeDifference(n.getDob(), LocalDate.now(), 25, 40) == true).collect(Collectors.toList());
+		listOfAge.forEach(n->System.out.println(n.getName()));
+		System.out.println("Without Collecting the Results:-");
+		list.stream().filter(n-> LocalDateExample.checkAgeDifference(n.getDob(), LocalDate.now(), 25, 40) == true).forEach(n->System.out.println(n.getName()));
+	}
+	
+	public static boolean checkAgeDifference(LocalDate d1, LocalDate d2, int startRange, int endRange) {
+		int diffAge = Period.between(d1, d2).getYears();
+		if (diffAge >= startRange && diffAge <= endRange) {
+			return true;
+		}
+		return false;
+	}
+
+
+	public static void main(String[] args) {
+		LocalDateExample l1 = new LocalDateExample(1L, "vikas", LocalDate.of(1991, 01, 01));
+		LocalDateExample l2 = new LocalDateExample(2L, "vivek", LocalDate.of(1999, 11, 29));
+		LocalDateExample l3 = new LocalDateExample(3L, "abc", LocalDate.of(1987, 11, 29));
+
+		List<LocalDateExample> list = Arrays.asList(l1, l2, l3);
+		withJava7(list);
+		withStreams(list);
+
 	}
 
 }
