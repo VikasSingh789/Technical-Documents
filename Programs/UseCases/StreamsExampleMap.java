@@ -123,9 +123,14 @@ public class StreamsExampleMap {
 
 		System.out.println("\nor Print Directly: WithOut Storing the Result\n");
 		map1.entrySet().stream()
-				.sorted((Map.Entry.<String, Integer>comparingByValue()).reversed()
-						.thenComparing(Map.Entry.<String, Integer>comparingByValue()))
+				.sorted((Map.Entry.<String, Integer>comparingByValue()).reversed().thenComparing(Map.Entry.<String, Integer>comparingByValue()))
 				.forEach(n -> System.out.println(n.getKey()));
+		
+		// Fetch Element based on Most repeated Occurances and Collect the Result
+		System.out.println("\nWithout Map and By Using Collectors.counting()\n");
+		List<String> ls =  Arrays.asList(arr);
+		Map<String, Long> m2 = ls.stream().collect(Collectors.groupingBy(n->n, Collectors.counting()));
+		m2.entrySet().stream().sorted((Map.Entry.<String, Long>comparingByValue()).reversed()).forEach(n->System.out.println(n.getKey()));
 
 		// input:- { "car", "bus", "bus", "train", "car", "car" };
 		// output:- car, bus, train //print Based on Most repeated Occurances
