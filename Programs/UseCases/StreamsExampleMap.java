@@ -65,6 +65,25 @@ public class StreamsExampleMap {
 		StreamsExampleMap s4 = new StreamsExampleMap(4, "Baron", 2, 5000);
 		StreamsExampleMap s5 = new StreamsExampleMap(5, "Catherine", 3, 5000);
 
+		// Fetch 3rd Highest Salary From Employee List
+		System.out.println("Fetch 3rd Highest Salary From Employee List\n");
+		List<StreamsExampleMap> list = Arrays.asList(s1, s2, s3, s4, s5);
+		List<StreamsExampleMap> listOfSortResults = list.stream().sorted(Comparator.comparing(StreamsExampleMap::getSal)).skip(2).collect(Collectors.toList());
+		System.out.println(listOfSortResults.get(0).getName()+" "+listOfSortResults.get(0).getSal());
+		
+		System.out.println("===============================================================");
+		
+		// Fetch Highest Salary with Employee Name From Each Department
+		System.out.println("Fetch Highest Salary with Employee Name From Each Department\n");
+		Map<Integer, Optional<StreamsExampleMap>> m = list.stream().collect(Collectors.groupingBy(
+									StreamsExampleMap::getDept, Collectors.maxBy(Comparator.comparing(StreamsExampleMap::getSal))));
+		m.entrySet().forEach(n -> {
+			StreamsExampleMap values = n.getValue().get();
+			System.out.println("From Department:- " + n.getKey() + ",  " + values.getName()+ " has Highest Salary with " + values.getSal());
+		});
+		
+		System.out.println("===============================================================");
+
 		Map<Integer, StreamsExampleMap> map = new HashMap<Integer, StreamsExampleMap>();
 
 		map.put(1, s1);
@@ -72,21 +91,7 @@ public class StreamsExampleMap {
 		map.put(3, s3);
 		map.put(4, s4);
 		map.put(5, s5);
-
-		List<StreamsExampleMap> list = Arrays.asList(s1, s2, s3, s4, s5);
-
-		// Fetch Highest Salary with Employee Name From Each Department
-		System.out.println("Fetch Highest Salary with Employee Name From Each Department\n");
-		Map<Integer, Optional<StreamsExampleMap>> m = list.stream().collect(Collectors.groupingBy(
-				StreamsExampleMap::getDept, Collectors.maxBy(Comparator.comparing(StreamsExampleMap::getSal))));
-		m.entrySet().forEach(n -> {
-			StreamsExampleMap values = n.getValue().get();
-			System.out.println("From Department:- " + n.getKey() + ",  " + values.getName()
-					+ " has Highest Salary with " + values.getSal());
-		});
-
-		System.out.println("===============================================================");
-
+		
 		// Fetch Employee Name by Sorting in Descending Order by Collecting the Result
 		System.out.println("Fetch Employee Name by Sorting in Descending Order by Collecting the Result\n");
 		Map<Integer, StreamsExampleMap> result = map.entrySet().stream()
