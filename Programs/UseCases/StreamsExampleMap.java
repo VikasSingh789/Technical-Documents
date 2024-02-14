@@ -98,8 +98,7 @@ public class StreamsExampleMap {
 
 		// Print Directly: WithOut Storing the Result
 		map.entrySet().stream()
-				.sorted(Map.Entry
-						.comparingByValue(Comparator.comparing(StreamsExampleMap::getName, Comparator.reverseOrder())))
+				.sorted(Map.Entry.comparingByValue(Comparator.comparing(StreamsExampleMap::getName, Comparator.reverseOrder())))
 				.forEach(n -> System.out.println(n.getKey() + " " + n.getValue().getName()));
 
 		System.out.println("===============================================================");
