@@ -1,5 +1,5 @@
 Q) What is JRE, JDK and JVM
-A) JDK:- JVM (Java Virtual Machine) is an abstract machine. It is called a virtual machine because it doesn't physically exist. 
+A) JVM:- JVM (Java Virtual Machine) is an abstract machine. It is called a virtual machine because it doesn't physically exist. 
 -> It Provides a runtime environment in which Java bytecode can be executed. 
 -> It can also run those programs which are written in other languages and compiled to Java bytecode.
 -> It Performs the tasks such as Loads code, Verifies code, Executes code and Provides runtime environment.
