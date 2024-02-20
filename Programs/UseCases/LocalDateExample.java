@@ -78,6 +78,14 @@ public class LocalDateExample {
 		withJava7(list);
 		withStreams(list);
 
+
+		LocalDateTime l = LocalDateTime.now();
+		System.out.println(l);
+		DateTimeFormatter d = DateTimeFormatter.ofPattern("dd M yy:m h s");
+		String n = d.format(l);
+		System.out.println(n);
+		System.out.println(n.substring(3,4));
+
 	}
 
 }
