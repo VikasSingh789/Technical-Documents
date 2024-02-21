@@ -1,3 +1,95 @@
+Q) HTTP Error Codes (401 and 403 error diff)
+A) 400:- Bad Request (Request/Json is Not correct)
+401:- When client is UnAuthenticated User (Provides InValid Credentials)
+403:- When client is Authenticated User But not Authorised to access the Resource. (Doesn't have privileges to access the resource)
+404:- When Resource is Not Found (API Doesn't Exist)
+405:- When trying to access API with HTTP Post, But HTTP Method is GET. (Method Not Found)
+
+Q) What is CSRF(Cross-Site Request Forgery) Token in Spring Security
+A) CSRF attacks trick the victim into submitting a malicious request, leveraging their identity and privileges.
+-> A CSRF token is a secure random token that is used to prevent CSRF attacks. The token needs to be unique per user session and should be of large random value to make it difficult to guess.
+-> When a request is made, Spring Security checks for the CSRF token in the request. If not found, it generates a new one. Once the CSRF token is used, it remains the same for the whole session.
+-> To create a unique CSRF token for every request, we need to override the default behavior of Spring Security. We’ll do this by implementing a custom CsrfTokenRepository. Our custom repository 
+   will always generate a new CSRF token for each request and won't store any tokens between requests.
+
+Q) How to write RestAPI to download and upload CSV
+A) With Adding Dependency such as "poi" and "poi-ooxml" provided by Apache, we can perform upload and download on CSV Files.
+Ex:- groupid:-    <groupId>org.apache.poi</groupId>
+     artifactId:- <artifactId>poi</artifactId>, <artifactId>poi-ooxml</artifactId>
+Creating a WorkBook(an New Excel file ).
+Creating Row(row.createCell(0)), Sheet(sheet.createRow), Cell 
+Sheet sheet2 = workbook.createSheet("Regulator Specific Reporting"); //To file the SheetName
+-> To Download, Map the Json
+-> Create WorkBook as Workbook workbook = new XSSFWorkbook();
+-> Create ByteArrayInputStream stream = null;
+-> Set contentType as contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+-> Set Header as fileName such as .header("Content-Disposition", "attachment; filename=" + "RegulatorSpecificReporting.xlsx")
+-> Create new InputStreamResource(stream)
+
+Q) How to config 2 Datasources in Application
+A) 1) Set DataSource Properties in application.properties
+spring.datasource.url=jdbc:h2:mem:user
+spring.datasource.order.url=jdbc:h2:mem:order
+
+2) Define DataSource Configuration for Each DataBase
+-> Creating New Bean for Each DataSourceProperties Class
+@Configuration
+public class OrderDatasourceConfiguration {
+	
+    @Bean(name="orderProperties")
+    @ConfigurationProperties("spring.datasource.order")   //Load URL, Username and Password based on prefix in @ConfigurationProperties
+    public DataSourceProperties dataSourceProperties() {
+        return new DataSourceProperties();
+    }
+
+	@Primary
+    @Bean(name="orderDatasource")
+    @ConfigurationProperties(prefix = "spring.datasource.order")
+    public DataSource datasource(@Qualifier("orderProperties") DataSourceProperties properties){
+        return properties.initializeDataSourceBuilder().build();
+    }
+}
+
+3) EntityManager Configuration:- Since we are using two datasources, we need to create an EntityManager for each datasource, which is done by referencing the datasource bean and base package of 
+entities to the EntityManagerFactory builder class.
+4) TransactionManager Configuration:- 
+5) @EnableJpaRepositories:- Since we are going to have multiple datasources, we must provide specific information for each datasource repository using Spring’s @EnableJpaRepositories annotation. 
+-> This annotation "@EnableJpaRepositories", will be applied on top of @Configuration class.
+-> In this annotation, we will set the reference to the EntityManager, the repository path, and the TransactionManager to use.
+
+Q) properties vs yml File
+A) .properties stores data in sequential format, whereas
+   .yml stores data in hierarchical format.
+-> .properties is specifically used by Java, whereas
+   .yml can be used by other languages (eg Java, Python, ROR, etc).
+-> When managing multiple configuration profiles, then:
+   .properties requires you to create .properties file per every profile, whereas in
+   .yml you can create a section for each specific profile inside a single .yml file.
+-> In Spring projects, @PropertySource annotation can only be used with .properties.
+
+Q) SQL Injection, how will Handle
+A) A SQL injection (SQLi) is a technique that attackers use to gain unauthorized access to a web application database by adding a string of malicious code to a database query.
+-> A malicious user can obtain unauthorized access to your application and steal data. They can alter, delete data in your database and take your application down.
+Query:- String userId = {get data from end user}; 
+String sqlQuery = "select * from tbluser where userId = " + userId;
+
+Ex:- select * from tbluser where userId=2 or 1=1
+Result: Now the above query is having two conditions with SQL OR expression. This is known as Boolean Based SQL Injection
+
+userId=2: This part will match table rows having userId value as ‘2’.
+1=1: This part will be always evaluate as true. So Query will return all the rows of the table.
+
+Preventing SQL Injection:-
+---------------------------
+-> The simplest solution is to use PreparedStatement instead of Statement to execute the query.
+-> Instead of concatenating username and password into the query, we provide them to query via PreparedStatement’s setter methods.
+-> Now, the value of username and password received from the request is treated as only data so no SQL Injection will happen.
+Ex:- How its Working
+-------------------
+Query: select * from tbluser where username = ? and password = ?
+-> The question mark (?) in the above query is called a positional parameter.  
+-> There are 2 positional parameters in the above query. We don’t concatenate username and password to query. We use methods available in the PreparedStatement to provide user Input.
+
 Q) What is the Use of @ExceptionHandler
 A) @Exceptionhandler catches the Exception in the Controller.
 -> You can have multiple methods annotated with ExceptionHandler inside this controller with valid exceptions classes.
@@ -253,7 +345,6 @@ Types of Advice:- Before, After, After returning, After throwing advice and Arou
 AOP has 2 types of implementation.
 a) XML configuration files
 b) AspectJ Orientation Files.
-
 
 Q) Difference between PathParam and QueryParam.
 A) Path parameter:- Path parameter are part of the endpoint and defines the resource location.
