@@ -118,6 +118,11 @@ public class StreamsExampleMap {
 			}
 		}
 
+		(or)
+		for (String str : arr) {
+		     map1.put(str, map1.getOrDefault(str, 1) + 1);
+		}
+
 		// Fetch Element based on Most repeated Occurances and Collect the Result
 		System.out.println("Fetch Element based on Most repeated Occurances\n");
 		Map<String, Integer> mapResult = map1.entrySet().stream()
