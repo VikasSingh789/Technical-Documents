@@ -65,18 +65,26 @@ public class StreamsExampleMap {
 		StreamsExampleMap s4 = new StreamsExampleMap(4, "Baron", 2, 5000);
 		StreamsExampleMap s5 = new StreamsExampleMap(5, "Catherine", 3, 5000);
 
+		List<StreamsExampleMap> list = Arrays.asList(s1, s2, s3, s4, s5);
+		
+		//Collections.max() on List Object
+		System.out.println("Collections.max() on List Object\n");
+		StreamsExampleMap sresult = Collections.max(list, Comparator.comparing(n->n.getSal()));
+		System.out.println(sresult.getId()+" "+sresult.getSal());
+		System.out.println("===============================================================\n");
+		
 		// Fetch 3rd Highest Salary From Employee List
 		System.out.println("Fetch 3rd Highest Salary From Employee List\n");
-		List<StreamsExampleMap> list = Arrays.asList(s1, s2, s3, s4, s5);
-		List<StreamsExampleMap> listOfSortResults = list.stream().sorted(Comparator.comparing(StreamsExampleMap::getSal)).skip(2).collect(Collectors.toList());
-		System.out.println(listOfSortResults.get(0).getName()+" "+listOfSortResults.get(0).getSal());
+		List<StreamsExampleMap> listOfSortResults = list.stream().sorted(Comparator.comparing(StreamsExampleMap::getSal).reversed())
+																							.skip(2).limit(1).collect(Collectors.toList());
+		listOfSortResults.stream().forEach(n->System.out.println(n.getName()+" "+n.getSal()));
 		
 		System.out.println("===============================================================");
 		
 		// Fetch Highest Salary with Employee Name From Each Department
 		System.out.println("Fetch Highest Salary with Employee Name From Each Department\n");
 		Map<Integer, Optional<StreamsExampleMap>> m = list.stream().collect(Collectors.groupingBy(
-									StreamsExampleMap::getDept, Collectors.maxBy(Comparator.comparing(StreamsExampleMap::getSal))));
+								  StreamsExampleMap::getDept, Collectors.maxBy(Comparator.comparing(StreamsExampleMap::getSal))));
 		m.entrySet().forEach(n -> {
 			StreamsExampleMap values = n.getValue().get();
 			System.out.println("From Department:- " + n.getKey() + ",  " + values.getName()+ " has Highest Salary with " + values.getSal());
@@ -92,6 +100,12 @@ public class StreamsExampleMap {
 		map.put(4, s4);
 		map.put(5, s5);
 		
+		//Collections.max() on Map Value Object
+		System.out.println("Collections.max() on Map Value Object\n");
+		StreamsExampleMap smap = Collections.max(map.values(), Comparator.comparing(n->n.getSal()));
+		System.out.println(smap.getId());
+		System.out.println("===============================================================\n");
+		
 		// Fetch Employee Name by Sorting in Descending Order by Collecting the Result
 		System.out.println("Fetch Employee Name by Sorting in Descending Order by Collecting the Result\n");
 		Map<Integer, StreamsExampleMap> result = map.entrySet().stream()
@@ -99,14 +113,15 @@ public class StreamsExampleMap {
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		result.entrySet().stream().forEach(n -> System.out.println(n.getValue().getName()));
 
-		System.out.println("\nor Print Directly: WithOut Storing the Result\n");
+		System.out.println("\nor Print Directly: WithOut Storing the Result with Map.Entry.comparingByValue(Comparator.comparing)\n");
 
-		// Print Directly: WithOut Storing the Result
+		// Print Directly: WithOut Storing the Result with Map.Entry.comparingByValue(Comparator.comparing)
 		map.entrySet().stream()
 				.sorted(Map.Entry.comparingByValue(Comparator.comparing(StreamsExampleMap::getName, Comparator.reverseOrder())))
 				.forEach(n -> System.out.println(n.getKey() + " " + n.getValue().getName()));
 
 		System.out.println("===============================================================");
+		System.out.println("With Map\n");
 
 		String arr[] = { "car", "bus", "bus", "train", "car", "car" };
 		Map<String, Integer> map1 = new HashMap<>();
@@ -117,14 +132,13 @@ public class StreamsExampleMap {
 				map1.put(str, 1);
 			}
 		}
-
-		(or)
+		
 		for (String str : arr) {
-		     map1.put(str, map1.getOrDefault(str, 1) + 1);
+			map1.put(str, map1.getOrDefault(str, 1) + 1);
 		}
 
 		// Fetch Element based on Most repeated Occurances and Collect the Result
-		System.out.println("Fetch Element based on Most repeated Occurances\n");
+		System.out.println("Fetch Element based on Most repeated Occurances and Collect the Result\n");
 		Map<String, Integer> mapResult = map1.entrySet().stream()
 				.sorted((Map.Entry.<String, Integer>comparingByValue()).reversed())
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -156,9 +170,9 @@ public class StreamsExampleMap {
 		mapOfFruits.put("grapes", 25);
 		mapOfFruits.put("banana", 32);
 		Map<String, Integer> sortedByCount = mapOfFruits.entrySet().stream()
-				.sorted((Map.Entry.<String, Integer>comparingByValue())
-						.thenComparing(Map.Entry.<String, Integer>comparingByKey().reversed()))
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+							.sorted((Map.Entry.<String, Integer>comparingByValue())
+							.thenComparing(Map.Entry.<String, Integer>comparingByKey().reversed()))
+							.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		System.out.println(sortedByCount);
 
 		System.out.println("===============================================================");
