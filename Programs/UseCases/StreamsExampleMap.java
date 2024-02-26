@@ -76,7 +76,7 @@ public class StreamsExampleMap {
 		// Fetch 3rd Highest Salary From Employee List
 		System.out.println("Fetch 3rd Highest Salary From Employee List\n");
 		List<StreamsExampleMap> listOfSortResults = list.stream().sorted(Comparator.comparing(StreamsExampleMap::getSal).reversed())
-																							.skip(2).limit(1).collect(Collectors.toList());
+													.skip(2).limit(1).collect(Collectors.toList());
 		listOfSortResults.stream().forEach(n->System.out.println(n.getName()+" "+n.getSal()));
 		
 		System.out.println("===============================================================");
