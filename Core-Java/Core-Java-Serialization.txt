@@ -72,7 +72,7 @@ class parent {
 	int a = 10
 }
 class child extends parent implements Serialization{
- int j = 20;
+ int b = 20;
 }
 
 From the above Example, 
