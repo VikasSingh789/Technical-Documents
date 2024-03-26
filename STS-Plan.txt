@@ -114,3 +114,12 @@ Sort Map in Java using Streams:- https://codingwithharish.com/posts/how-to-sort-
 
 
 Vivek's GitHub:- https://github.com/Vivek9126/Technical_Studies
+https://www.editpad.org/
+
+
+
+BeanFactory and ApplicationCOntext
+Solid Principles
+How MVC Works
+How to make API completely Asynchromous
+
