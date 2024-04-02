@@ -1,5 +1,6 @@
-Q) Are REST API calls synchronous or asynchronous?
-A) Synchronous calls are the most common method of making requests in a REST API. In synchronous calls, the client application sends a request to the server and waits for a response before proceeding to the next step. This means that the client application is blocked until it receives a response from the server.
+Q) What is Synchronous and Asynchronous calls ?
+A) Synchronous:- When the client application sends a request to the server and waits for a response before proceeding to the next step. This means that the client application is blocked until it receives a response from the server.
+Asynchronous:- Request class or Method will be executed in a separate thread, and the calling thread will not be blocked waiting for the method to complete.
 
 Q) What is the use of @Async in Springboot
 A) The @Async annotation in Spring Boot is used to mark a method as asynchronous. This means that the method will be executed in a separate thread, and the calling thread will not be blocked waiting for the method to complete.
