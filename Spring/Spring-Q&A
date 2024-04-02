@@ -1,3 +1,6 @@
+Q) Are REST API calls synchronous or asynchronous?
+A) Synchronous calls are the most common method of making requests in a REST API. In synchronous calls, the client application sends a request to the server and waits for a response before proceeding to the next step. This means that the client application is blocked until it receives a response from the server.
+
 Q) HTTP Error Codes (401 and 403 error diff)
 A) 400:- Bad Request (Request/Json is Not correct)
 401:- When client is UnAuthenticated User (Provides InValid Credentials)
