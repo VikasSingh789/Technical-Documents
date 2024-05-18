@@ -1,3 +1,6 @@
+Spring Webflux:- https://howtodoinjava.com/spring-webflux/spring-webflux-tutorial/
+https://stackoverflow.com/questions/71128020/spring-resttemplate-vs-webclient-for-sync-requests
+================================================================================================================================================================================
 Q) What is Reactive Programming
 A) Reactive programming is a programming paradigm that promotes an asynchronous, non-blocking, event-driven approach to data processing.
 -> The term, “reactive,” refers to programming models that are built around reacting to changes. 
