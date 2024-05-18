@@ -13,6 +13,10 @@ https://www.youtube.com/watch?v=w7zDItQBo4c Deploy Spring Boot App in AWS EC2 in
 https://www.youtube.com/watch?v=F9o21ydf6Wk How to Deploy SpringBoot Application to AWS Elastic Beanstalk
 https://www.youtube.com/watch?v=b50k35Dh4xc CICD using AWS CodePipeline and Elastic Bean Stalk | DevOps | Tech Primers
 ===================================================================================================================================================
+Eureka Url's can be configured in many ways. Some of them are below
+eureka.instance.hostname=localhost
+eureka.client.serviceUrl.defaultZone  = http://localhost:8761/eureka/
+eureka.client.service-url.defaultZone = http://localhost:8761/eureka/
 
 discovery-server:8761 :- http://localhost:8080/eureka/web , http://localhost:8761/eureka
 APIGateway:8080
@@ -140,7 +144,7 @@ A) We have to add Dependency "spring-cloud-starter-netflix-eureka-client" in Cli
 -> Also we have to add annotation "@EnableEurekaClient" on top of Main Method in each Client Service.
 -> Also we need to add config/info about Eureka Server in "application.properties" file in each Client Service. Below is Example,
 Ex:- #eureka.client.service-url:http://localhost:8761/eureka       //This Eureka Client config is not working so added below line in properties file
-	 eureka.instance.hostname=localhost (URL of eureka server)     // This Eureka Client config is working
+     eureka.instance.hostname=localhost (URL of eureka server)     // This Eureka Client config is working
 -> Here Client Microservices are "Product, Order and Inventory Service" and our Server is "Discovery Server".
 -> After Running all the Service, we can see the status of all Microservices in Eureka Server Dashboard while hitting "http://localhost:8761/eureka" url.
 -> In Eureka Dashboard, we could see under Application as "UNKNOWN" because we did not define any unique name for our applications (Product, Order and Inventory Service).
