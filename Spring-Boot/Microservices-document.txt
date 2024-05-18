@@ -1,0 +1,408 @@
+Youtube:- https://www.youtube.com/watch?v=mPPhcU7oWDU - Spring Boot Microservice Project Full Course in 6 Hours
+GitHub:-  https://github.com/SaiUpadhyayula/spring-boot-microservices
+
+===================================================================================================================================================
+https://www.youtube.com/watch?v=zvR-Oif_nxg Spring Boot Complete Tutorial - Master Class
+https://www.youtube.com/watch?v=AK6Rf_yjvI0 AWS Tutorial For Beginners | AWS Crash Course - Learn AWS In 5 Hours | Java Developer | JavaTechie
+https://www.youtube.com/watch?v=H__ELR1y3FQ Spring Data JPA Mappings in one Shot | Detail Video | OneToOne | OneToMany | ManyToMany Mapping
+https://www.youtube.com/watch?v=rBNOc4ymd1E Spring Boot - Spring Security + JWT Complete Tutorial With Example | javatechie
+
+AWS
+https://www.youtube.com/watch?v=D1yOALZcMHs Spring Boot AWS Deployment - Full Course
+https://www.youtube.com/watch?v=w7zDItQBo4c Deploy Spring Boot App in AWS EC2 instance using S3
+https://www.youtube.com/watch?v=F9o21ydf6Wk How to Deploy SpringBoot Application to AWS Elastic Beanstalk
+https://www.youtube.com/watch?v=b50k35Dh4xc CICD using AWS CodePipeline and Elastic Bean Stalk | DevOps | Tech Primers
+===================================================================================================================================================
+
+discovery-server:8761 :- http://localhost:8080/eureka/web , http://localhost:8761/eureka
+APIGateway:8080
+product-service:8084
+Order-Service:8082
+inventory-service:8083
+KeyCloak:8181 :- http://localhost:8181/
+http://localhost:8181/realms/spring-boot-microservices-realm/.well-known/openid-configuration
+zipkin:- http://localhost:9411/zipkin
+
+Design Patterns in MicroServices:-
+----------------------------------
+API Gateway
+Circuit Breaker
+Saga Pattern
+Service Discovery
+Asynchronous Messaging (Kafka)
+
+Important Points:-
+------------------
+KeyCloak:- To Secure the Microservices (Security)
+Sleuth:-   For Distributed Tracing in each MicroServices
+Zipkin:-   To Visualize Distributed Tracing
+Kafka:-    Event Driven Messaging (To Publish Data over Kafka Topic)
+Note:- All Above Features, we are running Over Docker Container. We haven't Installed in Machine Locally.
+===================================================================================================================================================
+
+
+Q) What is Spring Cloud
+-> Spring Cloud use to mainly Develop the Microservices.
+-> Spring cloud is another project just like Spring Boot, Spring Data and Spring Security. 
+-> Mainly concentrates on to build reliable and robust microservices. 
+-> Provides us common set of design patterns which are implemented already like configuration management, service discovery and circuit breaker. And other many patterns.
+
+Q) What is Service discovery
+A) Service Discovery pattern is a server called as discovery server which will store all the info about the services.
+ex:- service and IP Addresses.
+-> Discovery Server is a place where it stores all the info about the services.
+-> When using Discovery Server, other microservices will try to register at the starting at the time of application. They(MS) try to register with the Discovery server by making a request.
+-> WHenever the services are making the request to Discovery Server, Discovery Server will add the entries of the services in to its Registry/Local Copy. Thats why "Discovery Server" will also called as "Service Registry".
+
+Q) What is API Gateway
+A) API Gateway will route the requests from Users/Client to corresponding services.
+-> API Gateway will act like an Entry Point, routes the request from user to different services.
+
+Q) What is Load balancing
+A) Load Balancing will distribute traffic between multiple servers.
+-> if we are making a call from Order service to Inventory service call, and if Inventory service is running on multiple instances say (9090 and 9091), then order service doesn't know or gets confused which instance to call and will end up getting 500 error. 
+-> So, to Avoid this confusion we can use "Client Side LoadBalancing" in our Eureka Clients.
+-> To enable Client Side Load Balancing, we have to add annotation "@LoadBalanced" when constructing the WebClient Bean. (Because We are using WebClient to communicate between Services.)
+
+Features of Spring Cloud
+------------------------
+Distributed/versioned configuration
+Service registration and discovery
+Routing
+Service-to-service calls
+Load balancing
+Circuit Breakers
+Global locks
+Distributed messaging
+
+
+Q) How to load the data in DB
+A) via CommandLineRunner and resource/src folder
+
+Q) @ResponseStatus(HttpStatus.OK) instead of using @ResponseEntity against method
+
+Q) Ways of Interprocess communication between services.
+A) RestTemplate and WebClient
+RestTemplate supports Synchronous communication
+Webclient supports Synchronous, Asynchronous and Streaming Scenarios.
+
+Project Flow:-
+--------------
+Product Service:-    Save 1 Product Data in DB.
+Order Service:-      Save 1 Order Data in DB.
+Inventory Service:-  Save 2 Inventory Data in DB.
+
+-> Order Service will make a call to Inventory Service whenever Customer Places an Order. (Order -> Inventory)
+-> When Order is Placed, We want to check if Product is available in Inventory or Not.
+-> Order Service will make a HTTP Request call to Inventory Service and in Response, Inventory Service will respond with Status of the Product.
+-> Based on Product availability, Order will place the order and order data will get saved in DB else it will throw the Exception if product is not available in Inventory Service.
+-> From Order Service, We are making the call to inventory service directly by hardcoding the url i.e. "http://localhost:8083/api/inventory".
+-> But in Production, Inventory Service may be run on Multiple Instances and each Instances may have dynamic IP Address.
+
+Q) How do Order Service will know which Inventory Service to call, if Inventory Service running on multiple servers or datacentres (like 3 servers) ?
+A) For this, we have Pattern called Service Discovery pattern.
+-> Service Discovery pattern is nothing but creating a server called as discovery server which will store all the info about the services.
+ex:- service and IP Addresses.
+-> Discovery Server is a place where it stores all the info about the services.
+-> When using Discovery Server, other microservices will try to register at the starting at the time of application. They(MS) try to register with the Discovery server by making a request.
+-> WHenever the services are making the request to Discovery Server, Discovery Server will add the entries of the services in to its Registry/Local Copy. Thats why "Discovery Server" will also called as "Service Registry".
+-> Once all the info is present in Discovery server, When Order service wants to call the inventory service, the order service 1st make a call to the discovery server asking where i can find the inventory service and then the discovery server will respond with like particular IP Address to call the inventory Server. And then Order service will make a call to the Inventory Service.
+-> In this way we can avoid hardcoding the url of inventory service by making use of the Discovery Server.
+
+Q) What happens if Discovery Service is down
+A) When Order Service making initial call to Discovery service, Discovery Server also sends its registry which contains inventory service info to Client(Order Service) as a response.
+-> Now Client will also store local copy of Discovery server in a separate location. 
+-> If Discovery Server is not available, then it will 1st check the local copy.
+-> As Discovery Server already had info about inventory service, client(Order Service) will check the local copy and it will make a call to "10.12.128.1" which is the inventory service.
+-> If 1st instance of Inventory service is not available, then it will try to check the next entry in the local copy and likewise it will go through all the entries of its own registry and if all the instances are down then it will fail the communication saying "Inventory service is not available".
+-> Client(OrderService) -> Discovery Server -> Inventory Service.
+
+Discovery Project
+------------------
+-> We have created another Microservice with name "discovery-server".
+
+Q) How to use or create Disocvery Server
+A) To make the Service as Eureka Discovery Server, Add dependency or library called "Netflix Eureka Server" Provided by SpringCloud. Below is Example,
+Ex:-    <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+		</dependency>
+		
+-> Also we have to add annotation "@EnableEurekaServer" on top of Main Method.
+-> Also we need to add properties like (i)eureka.client.register-with-eureka=false and  (ii)eureka.client.fetch-registry=false in application.properties file.
+-> (i) As this is discoveryServer, we dont want discoveryServer register itself as a client.
+-> (ii)Because as this is server, we dont need to fetch the registry of the server because it already maintains its local registry.
+-> So whenever the client tries to register with the discoveryServer, the Discovery server will send the local copy of its registry. The client then will store the registry in memory in its own storage.
+Note:- If we are defining a server like Client or Discovery Service, we have to manually set it by "false" manully. "By default the value will be true."
+
+Q) How to define Microservices as Eureka Client or How Microservices can register with Eureka Client ?
+A) We have to add Dependency "spring-cloud-starter-netflix-eureka-client" in Client Microservices in pom.xml.
+-> Also we have to add annotation "@EnableEurekaClient" on top of Main Method in each Client Service.
+-> Also we need to add config/info about Eureka Server in "application.properties" file in each Client Service. Below is Example,
+Ex:- #eureka.client.service-url:http://localhost:8761/eureka       //This Eureka Client config is not working so added below line in properties file
+	 eureka.instance.hostname=localhost (URL of eureka server)     // This Eureka Client config is working
+-> Here Client Microservices are "Product, Order and Inventory Service" and our Server is "Discovery Server".
+-> After Running all the Service, we can see the status of all Microservices in Eureka Server Dashboard while hitting "http://localhost:8761/eureka" url.
+-> In Eureka Dashboard, we could see under Application as "UNKNOWN" because we did not define any unique name for our applications (Product, Order and Inventory Service).
+-> Thats the reason Eureka server is not able to provide any Name. To fix this, add property as "spring.application.name=inventory-service" in each client Service in application.properties file.
+-> After adding property, we could see Application Name as "inventory-service" in Eureka Dashboard.
+
+Q) How to run Microservices in Multiple instance or port.
+A) To run Multiple Instances of a service, 1st we need to change value of "server.port" from "8082" to "0".
+-> This is because, if we want to run on multiple instance, we dont want to hardcode the port number. I want to run multiple service on random port. So we are provided as "0" as port no.
+-> So, at the time of Starting Application, it will pick random free port in our machine and runs the application on that port.
+-> In this way we can run multiple services on free random port.
+-> Below are the Steps to run Service on Multiple Ports. (Inventory Service)
+sts->right click on project->run as configuration->In Left Hand Side, click on service which want to run on multiple port->environment(Add Variable and Value).
+ex:- server.port:9091
+-> And in case want to run 3rd instance of same service then,
+sts->right click on project->run as configuration->In Left Hand Side, click on service which want to run on multiple port and rightclick and select Duplicate option->environment tab(Add Variable and Value).
+ex:- server.port:9092
+-> After running service on multiple ports, we could see the same data/info in Eureka server dashboard under "Availability Zones"
+
+Q) What is the use of LoadBalancing
+A) if we are making a call from Order service to Inventory service call, and if Inventory service is running on multiple instances say (9090 and 9091), then order service doesn't know or gets confused which instance to call and will end up getting 500 error. 
+-> So, to Avoid this confusion we can use "Client Side LoadBalancing" in our Eureka Clients.
+-> To enable Client Side Load Balancing, we have to add annotation "@LoadBalanced" when constructing the WebClient Bean. (Because We are using WebClient to communicate between Services.)
+-> In Order Service under OrderConfig class, we have added the annotation on top of WebClientBuilder(). Below is Example,
+Ex:- @Bean
+	 @LoadBalanced
+	 public WebClient.Builder webClientBuilder() {
+		return WebClient.builder();
+	 }
+-> This "@LoadBalanced", will add Client Side LoadBalancing capabilities to the WebClientBuilder.
+-> Whenever we are creating an instance of Client using this "WebClientBuilder", it will automatically create the Client Side LoadBalancer and "WebClient" will use this Client Side LoadBalancing to call the Inventory Service. (Which is running on Multiple Ports.)
+-> In this way, even though order service finds the multiple instances of Inventory Service, It wont be confused and it will try to call Inventory Service 1 after another instances.
+
+Q) Can 1 MS make call to another MS if Service Discovery is down  (Test Scenario-1) ?
+A) Consider, if all MS's are running along with Discovery Service.
+ex:-
+----
+-> Inventory Service running on 2 instances
+-> Order service and Discovery Service are running on 1 instance each.
+
+Test Scenario-1:- If we bring down Discovery Service, and will make a call from order to Inventory Service. we could see the Rest API Call will be successfull even if the discovery service is not running.
+-> This is Because, While trying to make a call to the discovery server, the client(Order Service) will store a local copy of a registry.
+-> Inside Local copy of order service, we have the inventory service info.
+Note:- Because we have added this Dependency "spring-cloud-starter-netflix-eureka-client" in each Client MS, this feature enables or works.
+
+Test Scenario-2:- Continuation of Test Scenario-1
+-> Now Bring down the Both the instances of Inventory Service (previously running on 2 instances).
+-> Now Bring up 1 Inventory service. We could see some errors in inventory service console, because Inventory Service not able to register or find the discovery service. Discovery service is down as mentioned in Test Scenario-1)
+-> Now send the request from order to inventory 1 more time and we could see we are getting the 500 error. Because order service 1st try to check with inventory service in its local copy and its not able to reach any of the services(cos of restrated 1 inventory service). Then it will reach out to Discovery Server and found out that Discovery server is not running and thats y its throwing an error.
+
+Test Scenario-3:- Continuation of Test Scenario-2
+-> Now Bring Up the Disocvery Service.
+-> Now send the request from order to inventory we could see we the API is successfull because this time order service gets the info from discovery service.
+
+Q) What is the use of API Gateway
+A) In Local and Dev env, we are directly calling Inventory Service by port no. But in Production, It might run on multiple Instance and port no. may not work, so we are using API Gateway.
+-> If a user wants to communicate with product service, user dont want to give the hostname and IP Address of product service to communicate with it. API Gateway acts like a gatekeeper to send out the request to different users.
+
+Q) What is API Gateway
+A) API Gateway will route the requests from users to corresponding services.
+-> API Gateway will act like an Entry Point, routes the request from user to different services
+-> In API gateway, we can configure the rules, that if we receive the request with URL Parameter as "/api/order", then route it to Order Service. And If User wants to call Product Service, based on the request url "/api/product", then we can route this to product service.
+-> API Gatway route the request to Product Service or any other Service by inspecting the url.
+ex:- ("/api/product")
+By above example, we could see API Gatway will route this request to product service.
+Advantages or Features of of APIGateway
+---------------------------------------
+Route
+Predicate
+Filter:- To modify the request in API GateWay. We use filters to remove the url parameter and we can change the path of the request.
+ex:- If we call /eureka/web, it will redirect to the request //localhost:8761.
+Authentication
+LocadBalancing
+
+API Gateway Project (8080):- (Also Client)
+----------------------------
+-> To make the service act like API-Gateway, We have to add dependency like "spring-cloud-starter-gateway" in pom.xml. Below is the example.
+Ex:-  <dependency>
+	      <groupId>org.springframework.cloud</groupId>
+	      <artifactId>spring-cloud-starter-gateway</artifactId>
+      </dependency>
+
+
+Q) How to Define a Route in API Gateway.
+A) Below is the config where we can define the route for Product Service in application.properties file in API Gateway Service.
+#Product Service Route
+spring.cloud.gateway.routes[0].id=product-service                //[0] cos we are going to define multiple routes
+spring.cloud.gateway.routes[0].uri=lb://product-service          //uri which we want to route this service. "lb":- APIGateway also acts like LoadBalancer. APIGateway will LoadBalance the request by providing "lb" in order to achieve Client Side LoadBalancing.
+spring.cloud.gateway.routes[0].predicates[0]:Path=/api/product   //When we receive request with path predicate as "/api/product", then APIGateway will route this request "/api/product" to "product-service" as we defined in url(above line).
+
+-> After above config, We use APIGateway Rest API to call /api/product (GET).
+-> Earlier we were using Product Service API call "http://localhost:8084/api/product" (GET), to fetch the Product Response. (Running on 8084)
+-> But now we are directly calling api as "http://localhost:8080/api/product" to fetch the Product Response from API Gateway service.
+
+-> Currently, to access the Eureka Server, we are using "http://localhost:8761/eureka".
+-> Now will try to access the Eureka Server through the API Gateway.
+-> Add below config in application.properties file in API Gateway Service.
+#Discovery Server Route
+spring.cloud.gateway.routes[3].id=discovery-server
+spring.cloud.gateway.routes[3].uri=http://localhost:8761          // uri which we want to route this service
+spring.cloud.gateway.routes[3].predicates[0]:Path=/eureka/web     // When we call "http://localhost:8080/eureka/web" from Gateway Service, we want to redirect to "http://localhost:8761" url.
+
+-> If we try to run "http://localhost:8080/eureka/web" from API Gateway, it should call Eureka Server at "http://localhost:8761" without the Parameters as per the config we have defined.
+-> But will face 503 error because "/eureka/web" doesn't even exist or no such url exists.
+-> So, Will make use of Filters to remove the Parameter (/eureka/web are parameters) and we can change the path of our request.
+-> Below is the Filter config have been defined in application.properties
+Ex:- spring.cloud.gateway.routes[3].filters[0]:SetPath=/
+
+-> Now Expectation is, If we call "http://localhost:8080/eureka/web", it should redirect to "http://localhost:8761" since we have modified the url from "/eureka/web" to "/" using filters.
+-> Will face Errors while running API Gateway Service, because We only have 1 instance of Discovery Server, its not able to Loadbalance the request to the Discovery Server.
+-> To fix this, We dont have to provide "lb" in uri. instead just put "http:"
+-> Now if we run Eureka Server from API Gateway i.e "http://localhost:8080/eureka/web", Eureka Dashboard will work but will get displayed as in Plain HTML.
+ 
+Q) How to load CSS of Eureka server or any other server
+A) Use "/eureka/**" to load  the resources like "HTML and CSS" using predicates in application.properties file.
+ex:- "spring.cloud.gateway.routes[4].predicates[0]:Path=/eureka/**"  // any request from "/eureka/**", it will be redirected to the Discovery Server. i.e to "http://localhost:8761"
+
+Q) Microservices HTTP Status Code
+A) 503:- When APIGateway trying to call Discovery Service port 8761/eureka/web, but there is no route in the eureka server for the path eureka "/eureka/web"
+
+Q) How we can secure our microservices
+A) We can make use of keycloak. We can outsource Authentication and Authorization related configuration using Kecloak. (We are running Keycloak in docker and not in Locally.)
+
+-> By this we dont need to implement the authentication mechanism by manually/hand in our microservices.
+-> In keycloak Homepage, We have concept called Realm, where we can group all our Clients in to single entity called as "Realms".
+-> By Default Kecloak provides us Master Realm.
+-> Select Realm -> Add Realm (to create Realm) -> provide Name as "spring-boot-microservices-realm". and click ok. Realm will be created.
+-> In this Realm, we can create our clients. Click on Clients (Left Menu) -> Create -> Provide Client ID as "spring-cloud-client" -> click save.
+-> After saving, screen will take us to another screen with different fields.
+-> Select Access Type as "Confidential". Disable "Standard Flow" and "Direct Access grants".
+-> Enable "Service accounts Enabled". It will Enable Client Credentials Grant. and click on Save.
+-> After Saving. Go to "Credentials" Tab and copy the Secret (Text). Till Here, we have configured the Keycloak.
+
+-> After Configuration, we have to provide the URL of KeyCloak in APIGateway.
+-> Go to Realm Settings -> click on "OpenID Endpoint Configuration". By clicking, screen will open on Browser with some Json.
+-> From that Json, Copy the "issuer" with its value.  ex:- {"issuer-uri"="http://localhost:8181/realms/spring-boot-microservices-realm"}
+-> We need to provide this Issuer ID in our APIGateway to talk to the KeyCloak Server.
+
+-> Will copy this issuer id in application.properties
+ex:- spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8181/realms/spring-boot-microservices-realm
+-> Once SpringBoot Application starts, it will read this discovery Document.
+-> From this discovery Document, it will fetch all the end-points to "Authorization_endpoint" and "token_endpoint". So instead of configuring all these values in properties, we can just configure 
+the Issuer URI and Springboot will do the work by reading the values from "OpenID Configuration" url or document.
+-> Needs to be added SecurityConfig class as config by creating bean as "SecurityWebFilterChain".
+-> Add annotation "@EnableWebFluxSecurity" on top of SecurityConfig class in Gateway API.
+-> Under PathMatchers in SecurityWebFilterChain(), we are adding api "/eureka/**", as we dont want this api to be authenticated as its related to Static HTML and CSS.
+-> Whenever we are retrieving HTML and CSS files, we dont want to send token for those api's, so we have to exclude this "/eureka/**" call from security config. Thats the reason we added api in PathMatchers.
+-> pathMatchers("/eureka/**").permitAll(). Other Than "/eureka/**", we want all the calls to be authenticated in exchange.
+-> We need to add 2 dependency in pom.xml
+spring-boot-starter-oauth2-resource-server
+spring-boot-starter-security
+Note:- http://localhost:8181/ (Home Page of Kecloak) after running Keycloak instance from Docker.
+
+Test Scenario After Keycloak configuration:-
+--------------------------------------------
+-> Re-Run APIGateway and try to access "http://localhost:8080/api/order" (GET), and will see "401 Unauthorized" Status Because we didn't provide any authentication details.
+-> We have to provide "Bearer Token". for that we have to request the token from keycloak by providing our Credentials.
+-> And then we have to provide these credentials to the APIGateway through "Authorization" Header in the type of Bearer's Key.
+-> CLick "Authorization" tab, click dropdown and select "OAuth 2.0". Under "Configuration Options", provide below data,
+Token Name              :-   token
+Grant Type              :-   Client credentials
+Access Token URL        :-   http://localhost:8181/realms/spring-boot-microservices-realm/protocol/openid-connect/token  (Copy value from "token_endpoint" from Discovery Document)
+Client ID               :-   spring-cloud-client
+Client Secret           :-   Secret (Text) from Credentials tabs from created realm from Keycloak Site.
+Scope                   :-   openid offline_access (Default)
+Client Authentication   :-   Send as Basic Auth header
+
+-> After above config, click on "Get New Access token".
+-> On Screen, will get the Token. click on "Use Token". This token will be used now whenever we are making the call to our microservices.
+-> We have to place this Token under "Current Token" Section.
+-> Now Send the API call "http://localhost:8080/api/product" (GET) and will get the response from Product Service.
+-> To Make the API call "http://localhost:8080/api/order" (POST), Authorization->OAuth2-> Under "Current Token", click on "Available Tokens->Manage Tokens->Token->Use Token" and place this token under "Current Token" Section.
+
+Q) What if end MS is not responding ?
+A) If order service makes a request to Inventory service, and if Inventory service is not responding, then we can implement fallback method to handle fault tolerance.
+-> Use of Fallback method is to to provide some useful or static info to end user like if end MS is not working ot not responding.
+ex:- "Inventory Service is Not Available"
+-> To Implement this "Fallback method", Will be using "Resilience4J" provided by "Spring Cloud Circuit Breaker".
+-> Below Dependency needs to be added in pom.xml, for Resilience4J
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+</dependency>
+
+Q) How Circuit Breaker Pattern Works
+A) We have Set of States we maintain in our application in Circuit Breaker Pattern. Closed, Open and Half Open.
+Closed:- By Default, If communication between Services is working fine and we dont find any issues, then state of the Circuit Breaker will be in a "Closed" State.
+
+Open:- Order -> Inventory, If Inventory Service is not responding and we have issues in response then the State will be in "Open" State.
+-> In Open State, The Calls/Communication wont be working. It wont allow the calls from Order -> Inventory Service anymore.
+-> It will not allow for certain number of Duration (based on configuration in properties file).
+-> During This Period, Either it will throw Error Message or It can also Execute Some FallBack Logic.
+-> If Inventory Service is not available, we can execute fallback logic with the help of Circuit Breaker when the state is in Open.
+Ex:- @CircuitBreaker(name = "inventory", fallbackMethod = "fallbackmethod") (On top of OrderController Method)
+
+Half Open:- When the State is in Open, After Certain Duration, Circuit Breaker will change the Status from "Open" to "Half Open".
+-> In this, It will slowly start taking the request to Inventory Service, and it will check whether the request is going through or not.
+-> If the request are still not going through, It will change the Status from "Half Open" to "Open", and it will Execute the Fallback Logic.
+-> If the Request are Executed Successfully, then the status will change from "Half Open" to "Closed".
+
+-> So, this loop will be followed whenever we are making the calls to Inventory Service.
+-> Spring Cloud Circuit Breaker, can have multiple Implementations like "Netflix Hystrix", "Resilience4J", "Sentinal" and "Spring Retry".
+-> Will be using "Spring Cloud Circuit Breaker" Project to implement "Fault Tolerance" using the "Resilience4J".
+-> To Implement this Circuit Breaker Pattern, we are using Spring Cloud "Resilience4J". Below is the Dependency we need to add in Pom.xml.
+Ex:-
+----
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+</dependency>
+
+Q) What is TimeLimiter in Microservice
+A) if Inventory Service is not responding, then OrderService can wait upto some duration to waitfor the response like "3s". And if response won't get in 3 seconds, then order service can throw the Exception untill 3 secs are done.
+-> To Implement this TimeLimiter, We need to add "@TimeLimiter(name = "inventory")" on top of OrderController method. In our case, Calling Order -> Inventory.
+-> In application.properties, we need to add properties for the TimeLimiter, like below example
+ex:- "resilience4j.timelimiter.instances.inventory.timeout-duration=3s"
+Note:- In Above property, "inventory" is dynamic variable, and should be same in "@TimeLimiter(name = "inventory")" as well as in application.properties.
+
+Q) Test Scenario After Implementing TimeLimiter
+A) We have brought the services up like Discovery Service, APIGateway, OrderService and inventory Service.
+-> Now use Thread.Sleep(0 for 10 secs in Inventory service.
+-> make a call from order to inventory, and we could see after 3 sec's, exception will be thrown by order service as we have mentioned, order service will wait for response for 3 secs' but we made inventory service sleep for 10 sec's and thus order service throws the exception.
+
+Q) Retry Mechanism
+A) Order service will try to call Inventory service for 3 times with wait duration of 5 sec's.
+-> In this retry mechanism, if order services wont get any repoonse then TimeOut issue will be thrown in Order Service console.
+
+Q) What is Spring Actuator
+A) To check all these above statistics, how many times order service made request and how many times restarted, We can see in Actuator metrics.
+ex:- localhost:8080/actuator
+By above url or page, we could get to see options like which statistics we want to see like circuitbreaker and retry mechanism and others.
+
+Q) How the token will be Generated
+A) Token will be generated based on 3 components. All the components called as Claims in JWT.
+1) Header:- This consists Algorithm and Token type
+2) Payload:- Data
+3) verifySignature:- SHA256
+
+Q) What is distributed tracing.
+A) This helps us to track the request from start to finish so that if request failed at any point time, we can inderstand why it failed and where it failed.
+ex:- APIGateway->OrderService->Inventory Service.
+-> We use Spring Cloud Sleuth to implement Distributed Tracing(To generate SpanID and TraceID). Need to add dependency of sleuth in pom.xml in all the Services.
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-sleuth</artifactId>
+</dependency>
+-> We need UI to visualizes this info. For this will be using ZipKin which will help us to visualize this info. Need to add dependency of zipkin in pom.xml in all the Services.
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-zipkin</artifactId>
+  <version>2.2.5.RELEASE</version>
+</dependency>
+-> To Implement this "distributed tracing", will have a "traceId". This traceid will be unique across all the MS communication when makes a request like above example.
+-> spanID will calculate the no. of trips during MS communication. This SpanID will be unique Identifier for each microservice.
+ex:- APIGateway->OrderService->Inventory Service. total trips is 3.(Span1,Span2 and Span3 respectively for each Trip).
+-> TraceID for whole request and spanID for each MS.
+
+Q) Properties to add for zipkin and sleuth features in application.properties
+A) below are the properties needs to be added in application.properties for zipkin and sleuth.
+spring.zipkin.base-url=http://localhost:9411
+spring.sleuth.sampler.probability=1.0
+Note:- We have set "sampler.probability" = 1.0. That means we want to send 100% of the request which we are receiving to our system to zipkin.
+-> We want to start tracing 100% of the request which we are receiving to our system.
+-> After configurations, Once we hit Order API, These TraceID and SpanID we could see in zipkin Dashboard by hitting in chrome "http://localhost:9411/zipkin".
+-> We are using Docker to install Zipkin in Machine.
