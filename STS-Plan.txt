@@ -123,3 +123,68 @@ Solid Principles
 How MVC Works
 How to make API completely Asynchromous
 
+
+
+
+
+
+
+
+
+public class Solution {
+    public int countValidRectangles(int[][] A) {
+        int R = A.length;
+        if (R == 0) return 0;
+        int C = A[0].length;
+        if (C == 0) return 0;
+        
+        int totalSum = 0;
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                totalSum += A[r][c];
+            }
+        }
+        
+        int count = 0;
+        
+        // Iterate over all possible top-left and bottom-right corners of rectangles
+        for (int r1 = 0; r1 < R; r1++) {
+            for (int c1 = 0; c1 < C; c1++) {
+                for (int r2 = r1; r2 < R; r2++) {
+                    for (int c2 = c1; c2 < C; c2++) {
+                        // Calculate the sum of elements inside the rectangle (r1, c1) to (r2, c2)
+                        int sumInside = 0;
+                        for (int r = r1; r <= r2; r++) {
+                            for (int c = c1; c <= c2; c++) {
+                                sumInside += A[r][c];
+                            }
+                        }
+                        
+                        // Calculate the sum of elements outside the rectangle
+                        int sumOutside = totalSum - sumInside;
+                        
+                        // Check if sumInside equals sumOutside
+                        if (sumInside == sumOutside) {
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return count;
+    }
+    
+    public static void main(String[] args) {
+        Solution solution = new Solution();
+        int[][] A = {
+            {1, 1, 1, 1},
+            {2, 1, 2, 4},
+            {-1, -2, -1, -2},
+            {2, 1, 1, 2}
+        };
+        
+        int result = solution.countValidRectangles(A);
+        System.out.println("Number of valid rectangles: " + result); // Expected output: 7
+    }
+}
