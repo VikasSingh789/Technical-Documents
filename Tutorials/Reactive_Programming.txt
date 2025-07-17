@@ -1,0 +1,444 @@
+Youtube URL:- https://www.youtube.com/watch?v=bXcFCgQsvAE&t=1267s (Spring Boot | Reactive Programming Complete Tutorials for Beginners | JavaTechie)
+
+====================================================================================================================================================
+====================================================================================================================================================
+
+KeyPoints:-
+-----------
+-> In Reactive Programming, By Default Our Server will be "Netty" and not "Tomcat".
+-> If we have Millions of Records, Until it process all 1 Million record, User wont get the Response and has to wait till its gets Processed.
+This Flow is called as Synchronous or Blocking.
+-> In Synchronous or Blocking, Even though, When Subscriber Cancels the Request, Still Request will gets Executed in Backend or Code.
+-> In Asynchronous or Non-Blocking, If Subscriber cancels the Request in Middle, Immediately Publisher stops the Execution. No Data Stream will happen.
+-> Publisher will keep pushing the event as a Stream to Subscriber. And each Stream will be Transferred through a doOnNext() call.
+
+====================================================================================================================================================
+====================================================================================================================================================
+
+Core Features of Reactive Programming
+-------------------------------------
+Asynchronous and Non-Blocking
+Functional Style Code
+Data Flow as Event Driven Stream
+Backpressure on Data Streams
+
+====================================================================================================================================================
+====================================================================================================================================================
+
+Asynchronous and Non-Blocking
+-----------------------------
+
+Q) What is Synchronous Flow
+A) Flow of Execution is 1 after another. Until the Current Request gets Response from Server, Request wont gets Executed or Completed, It Wont Accept any
+other New Requests. Due to This, New Requests has to wait for their Execution and gets Blocked. Only Limited no. of Requests could be accepted by this
+Waiting Period.
+-> It Works on Thread per Request Model (Traditional Rest API).
+-> Each request is handled by 1 Thread in Application. Application May have Thread Pool Limitation, lets say 20. It Means, Application can handle only
+20 Concurrent Request at a Time. If the Application Received 21st Request, Then the Request has to wait until any of the Existing Thread is Free to handle
+the New Request.
+-> In this Way, It will have Poor Performance as it are Blocked in Synchronous Flow.
+-> Because all the Thread is Occupied With DB Driver to get the Response, 21st Request is not Immediately handled by any of the Thread.
+-> To Overcome this Performance Issue, Reactive Programming Came into Picture. It Will Eliminate Thread per Request Concept.
+
+Q) How Reactive Programming Works
+A) Lets say, Request Came to Application, and Request Got Assigned to Thread-1.
+->  Thread-1 will go to Database to fetch the Data. In this Case, Thread will not wait to get the Response Back.
+-> Instead, he will Send an Event to DB and he will Inform to DB that he won't wait for the Response. When DB is Ready with the Response, assign the Response
+to Available Thread and "Publish" me a "Complete" Event.
+-> In this Case, Thread is Completely Free. Application can Accept N no. of request, because Not a Single Thread is Blocked in this Event Loop Approach.
+-> With this Approach, we can handle tons of Concurrent Request with very Less Thread.
+-> This is Called as Asynchronous and Non-Blocking Flow. 
+
+In A Nutshell:- Request is Assigned to Particular Thread, And That Thread is not going to wait for the Database driver to get the Response. In this Way,
+Thread can accept other New request for Process. By this Performance will get Improved and Waiting time will be Reduced.
+
+Q) Advantages of Asynchronous Flow
+A) We can Handle No. of Requests By Publisher and Subscribe Model.
+-> No Need to wait for Current Request to get Response from the Server. It can accept new request. Meanwhile it will simply notify to User about the Current
+Request when the Request gets Completed. This Happens By Using Publisher and Subscribe Model Concept. In this way, New Request dont have to wait for their 
+Execution.
+-> We can Achieve Proper CPU Utilization.
+-> No Application Down Time.
+-> Flow of Execution can be Concurrent because It Supports Asynchronous and Non-Blocking.
+-> It Streams the Data using Publisher and Subscriber Model.
+
+====================================================================================================================================================
+====================================================================================================================================================
+
+Functional Style Code
+---------------------
+
+-> Traditional Rest API Style Code.
+Lets say i want to delete a User from DB, We use Below Code,
+public void deleteUser (Integer userId){
+ userRepository.deleteById(userId)
+}
+
+-> Reactive Program functional style code
+public Mono‹User> deleteUser (Integer userId){
+       return userRepository.findById(userId)
+                            .flatMap(existingUser -> userRepository.delete(existingUser)
+                            .then(Mono.just(existingUser)));
+ }
+ 
+ -> In Above Reactive Program functional style code, Data type called "Mono", which can handle Single Object.
+ -> There is another Data type called "Flux", which can handle "0-N" no. of Objects.
+ -> Reactive Style Programming will work on Streams and Functional Style Code i.e "->" Syntax.
+
+
+====================================================================================================================================================
+====================================================================================================================================================
+
+Data Flow as Event Driven Stream
+---------------------------------
+-> Client Will Send Request to the Application, Request goes to DB and Process the Data. And Finally It will return Response back to Client.
+-> But What if few Record is Inserted or Modified in Middle.
+-> Now, Client dont have those Updated information.
+-> To get the Updated information, Again he may need to do a Separate Rest API Call.
+
+-> But in Reactive Programming, Any changes done in DB, Then it will fire or It will "Publish" an Event saying "There is a New Data Found".
+-> Whoever Subscribe, They can Stream the Data.
+-> In this Case, Client is a Subscriber and DB is the Producer.
+-> Any Changes happens in DB, It will Publish a Event, As Client is Consuming the Application as a Subscriber, Client can Easily Stream the Data.
+-> In this Scenario, Connection will be Always in Open State. Thats the Reason We can Perform "Publisher Subscriber" Operation.
+-> This is How the Data will Transfer as an Event on the "Publisher Subscriber" Model.
+Ex:- We can Consider Any Streaming Platform that Works in Reactive Programming Manner. Best Example is Cricket Live Score. Any Update Happen in the
+Application, We could see Current Score with he Updated Details.
+
+====================================================================================================================================================
+====================================================================================================================================================
+
+Backpressure on Data Streams
+----------------------------
+-> Lets Assume, I want to get All the Items from DB/Inventory.
+-> Application send Request to DB, and DB will return response as a Large Volume of Data.
+-> In this Case, Application May not be able to Handle huge amount of Data and Application may Crash with OutOfMemory because "No Back Pressure" feature
+was available for Traditional RestAPI
+
+-> But in case of Reactive Programming, There is Concept called "Back Pressure".
+-> If DB Return Huge Data and Application not be able to handle it, We can Simply tot DB "Please slow down the response. Let me process with whatever
+data i have with me, then you can push other data". This is Back Pressure support, Only Applicable for Reactive Programming.
+-> We can Add a Limitation on DB Driver, How much data we are Expecting.
+-> We dont want to load all Data, We can inform to our DB Driver, DB can Slow down your data based on your Configuration.
+
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+
+
+Specification or Rules of Reactive Programming
+----------------------------------------------
+-> Reactive Programming has 4 Interfaces, which are Pillars of Reactive Programming.
+1) Publisher
+2) Subscriber
+3) Subscription
+4) Processor
+-> Each Interface has couple of abstract methods
+
+
+1) Publisher or Producer
+-> Publisher is a Datasource who will always publish an Event.
+-> Publisher have 1 Abstract Method called subscribe()
+
+Ex:-
+public interface Publisher<T> {
+ public void subscribe(Subscriber<? super T› s);
+}
+
+
+
+
+2) Subscriber or Consumer
+-> Subscriber will subscribe/consume the Events from publisher.
+-> Subscriber have 4 Abstract Methods. onSubscribe(), onNext(), onError(), onComplete()
+
+Ex:-
+public interface Subscriber<T> {
+ public void onSubscribe(Subscription s);
+ public void onNext(T t);
+ public void onError(Throwable t);
+ public void onComplete();
+}
+
+-> Subscriber Interface need to call this subscribe() method to register into Publisher.
+-> Each Data Transfer from Publisher to Subscriber, onNext Event will get Trigger. Lets Assume, Publisher is Publishing 10 Events, then 10 times onNext()
+call will get Invoke.
+-> If there is any Error in Event Processing then, onError Event will get Trigger
+-> If there is no Error in Event Processing then, onComplete Event will get Trigger
+
+
+
+3) Subscription
+-> Subscription represents a Unique Relation between a Subscriber and Publisher
+-> Subscription have 2 Methods. request() and cancel()
+
+Ex:-
+public interface Subscription {
+ public void request(long n);
+ public void cancel();
+}
+
+-> Subscriber will call request() method, to get the Details from the Publisher.
+
+
+4) Processor
+-> Processor represents a processing stage, which is both a Subscriber and Publisher and must Obey the contract of both.
+-> Processor Extends Both Subscriber and Publisher
+
+Ex:-
+public interface Processor<T,R> extends Subscriber<T>, Publisher<R> {}
+
+
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+
+
+Workflow of Reactive Programming
+--------------------------------
+1) Subscriber will invoke subscribe() method of Publisher and pass the instance of Subscriber instance as a input.
+2) Publisher will send a Subscription event to the Subscriber, confirming that your Subscription is Successful.
+3) Now, Subscriber will call request(long n) from Subscription interface to get the data from Publisher.
+-> In request(long n), "n" means Subscriber Interface can request any number of data from Publisher.
+4) Publisher will send data stream to Subscriber Interface by invoking onNext().
+-> Lets Assume, Publisher is returning 10 records, then in that case, Publisher will fire onNext() 10 event.
+-> If Publisher sends n no. of Data, then n times onNext() event gets executed.
+5) Once All the Records Received by Subscriber then Publisher will invoke on onComplete() method of Subscriber Interface to Confirm Execution is
+Successful. If There is any error Then Publisher will fire onError() Event.
+
+6) There is an Option for Subscriber to ask Limited no. of data from Publisher.
+-> Lets Say, Publisher has 10 items and you want to Fetch only 2 Items, then Subscriber can Control that.
+-> In request(n), If We pass request(2), then we can fetch only 2 record from Publisher. This is Called as "Back Pressure".
+
+
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+
+
+Reactive Programming Library
+----------------------------
+Below are the Libraries or Framework to Design a Reactive Programming
+1) Reactor (Project Reactor)
+2) RxJava
+3) Jdk9 Flow Reactive Stream
+
+Q) What are the Data type available in Reactive Programming
+A) Flux and Mono are the 2 Reactor Data type through which we can design our Reactive Programming.
+-> Flux can handle "0-N" no. of Objects.
+-> Mono can handle Single Object.
+
+
+
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+
+Project Creation for Test/Junit Method
+---------------------------------------
+
+After creation of Project, We added "Spring Reactive Web" Dependency.
+
+-> We can create Mono Object by using Mono.just()
+-> Mono.just() is 1 of the way to create the Object for Mono.
+-> As we know, Mono can handle only 1 Element or Object.
+Ex:- Mono.just("Mono-String") //Data type can be anything. For now i am going with Integer.
+-> Now the return type will be Mono<String>
+Ex:- Mono<String> monoString = Mono.just("Mono-String");
+-> If we go Inside of our Mono class Implementation, We could see package of Publisher. It means, Mono and Flux will act as a Publisher.
+-> To Access any Publisher, 1st Subscriber need to call subscribe() of Publisher.
+-> In this case, My Publisher is monoString i.e. variable
+-> By Using monoString.subscribe(System.out::println), We are publishing the Event directly using Sysout.
+-> Once we run the Test Case, We could see Event as "Mono-String" in Console as Response.
+
+Flow:- Once we Call Publisher.subscribe() i.e. monoString.subscribe(), then Immediately publisher will start producing the Event.
+-> Each Execution we can see in console by adding .log() in Mono.just("Mono-String")
+Ex:- 
+----
+Mono<String> monoString = Mono.just("Mono-String").log();
+monoString.subscribe(System.out::println)
+
+Below is the Response we get once we Execute Test Method,
+Response:-
+----------
+18:34:25.283 [main] INFO reactor.Mono.Just.1 -- | onSubscribe([Synchronous Fuseable] Operators.ScalarSubscription)
+18:34:25.289 [main] INFO reactor.Mono.Just.1 -- | request(unbounded)
+18:34:25.290 [main] INFO reactor.Mono.Just.1 -- | onNext(Mono-String)
+Mono-String
+18:34:25.291 [main] INFO reactor.Mono.Just.1 -- | onComplete()
+
+Test Scenario for onError Event
+-------------------------------
+-> In the Above Test Method, We will Forcefully Throw the Error while Processing the Mono to analyse onError Event.
+Ex:-
+---
+Mono<?> monoString = Mono.just("Mono-String").then(Mono.error(new RuntimeException("Exception Occured"))).log();
+monoString.subscribe(System.out::println);
+
+-> Once we run the Test Class, We could see, there is no onNext() and onComplete() Event, But onError() will get Invoke, Since we Forcefully Throw the Error.
+
+
+Test Scenario for Flux Event
+----------------------------
+-> We will try writing Test Method for Flux.
+Ex:-
+----
+Flux<?> fluxString = Flux.just("Spring","Hibernate","SpringBoot","Microservice").log();  //.log() to check the internal Events
+fluxString.subscribe(System.out::println);
+-> After Running the Above Flux Test Method, Below is the Response
+Response:-
+----------
+14:21:13.683 [main] INFO reactor.Flux.Array.1 -- | onSubscribe([Synchronous Fuseable] FluxArray.ArraySubscription)
+14:21:13.688 [main] INFO reactor.Flux.Array.1 -- | request(unbounded)
+14:21:13.689 [main] INFO reactor.Flux.Array.1 -- | onNext(Spring)
+Spring
+14:21:13.689 [main] INFO reactor.Flux.Array.1 -- | onNext(Hibernate)
+Hibernate
+14:21:13.689 [main] INFO reactor.Flux.Array.1 -- | onNext(SpringBoot)
+SpringBoot
+14:21:13.689 [main] INFO reactor.Flux.Array.1 -- | onNext(Microservice)
+Microservice
+14:21:13.689 [main] INFO reactor.Flux.Array.1 -- | onComplete()
+
+-> Since, Flux can process n no. of Events, we are Passing multiple Elements in Flux.just().
+-> We could see, For Each Event, onNext() method is Called.
+-> Each Data Published as a Separate onNext() call. To verify, we added .log() in above Test Flux Example.
+-> At End we get onComplete(), Since we didn't get any Error.
+
+-> If we want to add something in Middle, we can use .concatWithValues(). Below is the Example
+Ex:-
+----
+Flux.just("Spring","Hibernate","SpringBoot","Microservice").concatWithValues("AWS").log();
+
+-> After Running the Test case, we could see, onNext() Event has triggered for 5 Times, since we have total 5 Elements in FLux to Publish.
+
+
+Test Scenario for Flux onError() Event - 1
+------------------------------------------
+Ex:-
+----
+Flux<?> fluxString = Flux.just("Spring","Hibernate","SpringBoot","Microservice")
+                .concatWithValues("AWS")
+				.thenMany(Flux.error(new RuntimeException("Exception Occured In Flux")))
+				.concatWithValues("Cloud")
+				.log();
+				
+-> In Above Test Method, We are Forcefully Throwing Error By using .thenMany(Flux.error()).
+-> In this case, onNext() wont get Called even for the Success Elements. Below is the Response,
+Response:-
+----------
+14:43:40.160 [main] INFO reactor.Flux.ConcatArray.1 -- onSubscribe(FluxConcatArray.ConcatArraySubscriber)
+14:43:40.165 [main] INFO reactor.Flux.ConcatArray.1 -- request(unbounded)
+14:43:40.167 [main] ERROR reactor.Flux.ConcatArray.1 -- onError(java.lang.RuntimeException: Exception Occured In Flux)
+
+Test Scenario for Flux onError() Event - 2
+------------------------------------------
+lux<?> fluxString = Flux.just("Spring","Hibernate","SpringBoot","Microservice")
+				              .concatWithValues("AWS")
+				              .concatWith(Flux.error(new RuntimeException("Exception Occured In Flux")))
+				              .concatWithValues("Cloud")
+				              .log();
+				
+-> In Above Test Method, We are Forcefully Throwing Error By using .concatWith(Flux.error()).
+-> In this case, Unlike .thenMany(Flux.error()), As per the Sequence, 1st Success Elements will gets Published and then onError Event will gets Triggered.
+-> Here, 5 times onNext() event will gets Triggered and then onError() event gets Triggered. Below is the Response,
+Response:-
+----------
+14:49:35.637 [main] INFO reactor.Flux.ConcatArray.1 -- onSubscribe(FluxConcatArray.ConcatArraySubscriber)
+14:49:35.643 [main] INFO reactor.Flux.ConcatArray.1 -- request(unbounded)
+14:49:35.644 [main] INFO reactor.Flux.ConcatArray.1 -- onNext(Spring)
+Spring
+14:49:35.644 [main] INFO reactor.Flux.ConcatArray.1 -- onNext(Hibernate)
+Hibernate
+14:49:35.644 [main] INFO reactor.Flux.ConcatArray.1 -- onNext(SpringBoot)
+SpringBoot
+14:49:35.644 [main] INFO reactor.Flux.ConcatArray.1 -- onNext(Microservice)
+Microservice
+14:49:35.644 [main] INFO reactor.Flux.ConcatArray.1 -- onNext(AWS)
+AWS
+14:49:35.646 [main] ERROR reactor.Flux.ConcatArray.1 -- onError(java.lang.RuntimeException: Exception Occured In Flux)
+
+-> If We add or Try to concat any new Element after Throwing Error, Then That New Element Won't get Published as shown in Above Example and Response.
+
+
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+====================================================================================================================================================
+
+Flow Creation for Traditional RestAPI
+--------------------------------------
+-> We have Written 1 API called as "/getAllCustomers", which will get 50 Customer Records as JSON Format.
+-> We will do Thread.sleep(1000) (1 Sec) for Each Customer record to Differentiate between Synchronous and Asynchronous.
+-> CustomerDao will act as Publisher and Postman will act as a Subscriber/Consumer.
+-> In CustomerDao, We have Written Logic to publish 50 Customers with id and Name variables.
+-> Once we Run this API  "/getAllCustomers", We could see It will Keep Process and Loading Until it Will process 50 Customers, since we used Thread.sleep()
+-> We wont get Response Until 50 Customers gets Process. This Scenario is Called Synchronous or Blocking.
+
+Flow Creation Using Reactive Programming RestAPI
+------------------------------------------------
+-> We have Made changes like Changing "List<Customer>" to "Flux<Customer>", with a New API called "/getAllCustomersByStreams".
+-> In order to work this new API in Reactive Programming, We need to pass "produces = MediaType.TEXT_EVENT_STREAM_VALUE"
+Ex:- @GetMapping(value = "/getAllCustomersByStreams", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+-> By This, We are Sending the Data to Subscriber as a "Event Stream" and Not "Entire Object" (Typical Rest API).
+-> After Hitting the New API "/getAllCustomersByStreams", which is developed in Reactive Programming, We Will See the Response is Getting 1 after Another.
+-> Here, Request is not waiting to complete the 10 Customers Record.
+-> Once It Completed the 1 Customer Object, There will be doOnNext() call from the Subscriber and Subscriber can receive the Data as Stream, Without any
+Blocking Unlike Synchronous Flow where User will gets Blocked and has to wait for the response till all the 10 Customers will process.
+-> Here, In Asynchronous Flow, User Dont have to wait as 1 after another, Data will gets process as Response.
+-> Publisher will keep pushing the event as a Stream to Subscriber. And each Stream will be Transferred through a doOnNext() call.
+-> If Subscriber cancels the Request in Middle, Immediately Publisher stops the Execution. No Data Stream will happen.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

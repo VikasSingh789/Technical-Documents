@@ -1,0 +1,275 @@
+Saga Pattern (Recommended for Simplicity and Scalability)
+============================================================
+
+-> Saga is a sequence of local transactions. Each service performs its local transaction and publishes an event or calls the next service. 
+-> If one transaction fails, a compensating transaction is triggered in previous services to undo the work.
+
+
+Two Saga Variants:
+------------------
+1) Choreography (event-driven, no central orchestrator)
+2) Orchestration (a central controller orchestrates the flow)
+
+
+1) Choreography-Based Saga (Event-Driven)
+------------------------------------------
+Communication: Via events (e.g., Kafka, RabbitMQ)
+Flow: Decentralized — no central coordinator; each microservice reacts to events independently.
+Compensation:
+   -> When a service detects failure, it publishes a failure event.
+   -> Other services listen for failure events and trigger their own compensations (rollbacks) as needed.
+Advantages: Loosely coupled, scalable, asynchronous, no single point of failure.
+Rollback trigger: Kafka events or messages that indicate failure → services handle rollback internally.
+
+
+
+2) Orchestration-Based Saga (Central Controller)
+------------------------------------------------
+Communication: Via direct API calls (e.g., HTTP calls using WebClient, REST, gRPC)
+Flow: Centralized — a Saga orchestrator service controls the entire saga flow, telling each service when to perform forward or compensating actions.
+Compensation: Orchestrator calls compensation APIs on services explicitly to rollback transactions if a failure occurs downstream.
+Advantages: Explicit control, easier to visualize and manage complex workflows.
+Rollback trigger: Direct API calls (e.g., WebClient) from the orchestrator to rollback.
+
+===============================================================================================================================================
+===============================================================================================================================================
+
+Saga Orchestration (Machines + Reports + WebClient)
+----------------------------------------------------
+
+
+Concept:-
+----------
+Machines Service — Starts the saga, creates machine, calls Reports, rolls back if needed
+Reports Service — Creates a report based on Machine info
+Communication — Reactive REST using Spring WebClient
+Basic exception handling and compensation (rollback machine if report fails)
+
+
+
+Reports Microservice
+--------------------
+
+Steps:-
+-------
+Step 1: Reports Service (Add JPA, DB Related jars and Webflux in Pom.xml)
+
+Step 2: Report.java (JPA Entity)
+
+@Entity
+@Table
+@Data
+public class Report {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Long machineId;
+    private String description;
+
+}
+
+Step 3: ReportRepository.java
+
+@Repository
+public interface ReportRepository extends JpaRepository<Report, Long> {}
+
+
+Step 4: ReportsController.java
+
+@RestController
+@RequestMapping("/reports")
+public class ReportsController {
+
+    @Autowired
+    private ReportRepository reportRepository;
+
+    @PostMapping
+    public Mono<ResponseEntity<Report>> createReport(@RequestBody Map<String, Object> payload) {
+        Long machineId = Long.valueOf(payload.get("machineId").toString());
+        // Simulate failure to test rollback - uncomment to test
+        // if (machineId % 2 == 0) throw new RuntimeException("Report generation failed!");
+
+        Report report = reportRepository.save(new Report(machineId, "Report for machine " + machineId));
+        return Mono.just(ResponseEntity.ok(report));
+    }
+}
+
+Machines Microservice
+--------------------
+Steps:-
+-------
+Step 1: Machines Service (Add JPA, DB Related jars and Webflux in Pom.xml)
+
+Step 2: Machine.java (JPA Entity)
+
+@Entity
+@Table
+@Data
+public class Machine {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+}
+
+Step 3: MachineRepository.java
+
+@Repository
+public interface MachineRepository extends JpaRepository<Machine, Long> {}
+
+
+Step 4: SagaStatus.java
+
+public enum SagaStatus {
+    STARTED, MACHINE_CREATED, REPORT_CREATED, FAILED
+}
+
+
+Step 5: MachinesService.java
+
+@Service
+public class MachinesService {
+
+    @Autowired
+    private MachineRepository machineRepository;
+
+    private final WebClient webClient;
+
+    public MachinesService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8081").build(); // Reports service URL
+    }
+
+    public Mono<String> createMachineAndReport(String machineName) {
+        SagaStatus sagaStatus = SagaStatus.STARTED;
+
+        return Mono.fromCallable(() -> {
+            // Step 1: Create Machine (local transaction)
+            Machine machine = machineRepository.save(new Machine(machineName));
+            sagaStatus = SagaStatus.MACHINE_CREATED;
+            return machine;
+        })
+        .flatMap(machine -> {
+            // Step 2: Call Reports Service to create report
+            Map<String, Object> request = new HashMap<>();
+            request.put("machineId", machine.getId());
+
+            return webClient.post()
+                    .uri("/reports")
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(resp -> {
+                        // Report created successfully
+                        sagaStatus = SagaStatus.REPORT_CREATED;
+                        return "Machine and Report created successfully!";
+                    })
+                    .onErrorResume(error -> {
+                        // Compensation: Rollback machine creation
+                        machineRepository.deleteById(machine.getId());
+                        sagaStatus = SagaStatus.FAILED;
+                        return Mono.error(new RuntimeException("Report creation failed, rolled back machine creation."));
+                    });
+        });
+    }
+}
+
+
+or By Using Without Reactive Programming
+
+@Service
+public class MachinesService {
+
+    @Autowired
+    private MachineRepository machineRepository;
+
+    private final WebClient webClient;
+
+    private static final String REPORTS_SERVICE_URL = "http://localhost:8081/reports";
+
+    // Constructor injection for WebClient
+    public MachinesService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.build();
+    }
+
+    public String createMachineAndReport(String machineName) {
+        SagaStatus sagaStatus = SagaStatus.STARTED;
+
+        // Step 1: Create Machine (local transaction)
+        Machine machine = machineRepository.save(new Machine(machineName));
+        sagaStatus = SagaStatus.MACHINE_CREATED;
+
+        // Step 2: Call Reports Service using WebClient
+        try {
+            Map<String, Object> request = new HashMap<>();
+            request.put("machineId", machine.getId());
+
+            String response = webClient.post()
+                    .uri(REPORTS_SERVICE_URL)
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block(); // Blocking call, like RestTemplate
+
+            sagaStatus = SagaStatus.REPORT_CREATED;
+            return "Machine and Report created successfully!";
+
+        } catch (Exception e) {
+            // Compensation: rollback machine if report creation fails
+            machineRepository.deleteById(machine.getId());
+            sagaStatus = SagaStatus.FAILED;
+            return "Report creation failed with error: " + e.getMessage() + ", rolled back machine creation.";
+        }
+    }
+}
+
+
+Step 6: MachinesController.java
+
+@RestController
+@RequestMapping("/machines")
+public class MachinesController {
+
+    @Autowired
+    private MachinesService machinesService;
+
+    @PostMapping
+    public Mono<ResponseEntity<String>> createMachine(@RequestBody Map<String, String> payload) {
+        String name = payload.get("name");
+        return machinesService.createMachineAndReport(name)
+                .map(successMsg -> ResponseEntity.ok(successMsg))
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage())));
+    }
+}
+
+
+Step 7: Webclient Configuration
+
+    @Bean
+    public WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
+    }
+    
+==================================================================================================================================
+==================================================================================================================================
+    
+Testing:-
+---------
+-> Hit API:- http://localhost:8080/machines with Payload:- {"name": "Machine-A"}
+-> It will create a Machine and call Reports to create a report.
+-> If Reports fails (you can uncomment the failure simulation in ReportsController), Machines will rollback the machine creation.
+
+==================================================================================================================================
+==================================================================================================================================
+Q) Where we are writing the compensation Logic in Saga Orchestration
+A) In the Saga Orchestration Example, the compensation logic is written inside the catch block (or .onErrorResume in the reactive version). 
+-> This is a manual compensation strategy, which is common in simple Saga implementations.
+
+
+Q) Why is the Compensation Logic in the Catch Block?
+A) Because we’re treating the entire saga as a single logical unit of work, and once a failure happens:
+-> We cannot roll back the remote call to Reports (it's already failed or unreachable).
+-> So, we rollback the local change in Machines service instead (the Machine record).
+-> This pattern is manual compensation — a common practice in orchestration when no automatic rollback is available.
+
+

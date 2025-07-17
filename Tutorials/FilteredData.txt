@@ -1,0 +1,277 @@
+//This method is responsible for downloading active records reporting excel:
+	@PostMapping(path = ACTIVE_REPORTS)
+	public Mono<ResponseEntity<InputStreamResource>> activeReports(@RequestBody filterActivityDTO filterDTO) {
+		return Mono.fromCallable(() -> {
+			ByteArrayInputStream stream = null;
+			ResponseEntity<InputStreamResource> response = null;
+
+			if (!ObjectUtils.isEmpty(filterDTO) && manditoryCheck(filterDTO)) {
+				userRoleDTO userRole = activityService.getUserRoleByUserId(filterDTO.getUserId().get(0));
+				List<activityDTO> activityList = getOverAllSummary(filterDTO, userRole);
+				
+				//Logic for Filter
+				FiltersDTO activityRecordsfilteredData = activityService.setDataForActivieRecordsByAgeFilteredData(filterDTO);
+				//Calling Svc-Unit API to get FilteredData from PM_Filters Table
+				//activityRecordsfilteredData = activityService.getActiveRecordsByAgeFilteredData(activityRecordsfilteredData);
+				List<Options> orgs = new ArrayList<>();
+				Options opt = new Options();
+				opt.setId("AIML");
+				opt.setName("AIML");
+				orgs.add(opt);
+				activityRecordsfilteredData.setOrgs(orgs);
+				
+//				List<Options> options = new ArrayList<>();
+//				Options opt1 = new Options();
+//				opt1.setId("Siri00");
+//				opt1.setName("Siri00");
+//				options.add(opt1);
+//				activityRecordsfilteredData.setSubOrgs(options);
+				
+				List<String> listOfStatus = new ArrayList<>();
+				String status1 = "In Review";
+				String status2 = "Inactive";
+				String status3 = "In Progress";
+				listOfStatus.add(status1);
+				listOfStatus.add(status3);
+				listOfStatus.add(status2);
+				activityRecordsfilteredData.setStatus(listOfStatus);
+				activityRecordsfilteredData.setAwaitingFeedback(true);
+//				
+//				List<String> requestTypes = new ArrayList<>();
+//				String requestType1 = "PIA Request";
+//				String requestType2 = "ROP Record";
+//				requestTypes.add(requestType1);
+//				requestTypes.add(requestType2);
+//				activityRecordsfilteredData.setRequestType(requestTypes);
+////				
+//				List<String> assignedTo = new ArrayList<>();
+//				String assignedTo1 = "Debbie Graham";
+//				String assignedTo2 = "Megan Lenigk";
+//				assignedTo.add(assignedTo1);
+//				assignedTo.add(assignedTo2);
+//				activityRecordsfilteredData.setAssignedTo(assignedTo);
+////				
+//				List<String> aging = new ArrayList<>();
+//				String aging1 = "0-30";
+//				String aging2 = "31-60";
+//				String aging3 = "61-90";
+//				String aging4 = ">90";
+//				aging.add(aging1);
+//				aging.add(aging2);
+//				aging.add(aging3);
+//				aging.add(aging4);
+//				activityRecordsfilteredData.setAging(aging);
+				
+				List<activityDTO> filteredList = activityService.getListOfUnitIdFromProfileToActivieRecordsByAge(activityRecordsfilteredData, activityList);
+				
+				Workbook workbook = new XSSFWorkbook();
+				stream = activityService.excelFileActiveReports(filteredList, workbook);
+
+				response = ResponseEntity.ok().contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+						.header("Content-Disposition", "attachment; filename=" + "ActiveRecordsReporting.xlsx")
+						.body(new InputStreamResource(stream));
+				LOGGER.info("Active Records Reporting Excel successfully downlaoded.");
+			}
+
+			return response;
+		}).subscribeOn(Schedulers.boundedElastic());
+	}
+	
+	
+
+
+
+ServiceImpl
+------------------------------------------------------------------------------------------------------------------------------------------------------
+@Override
+	public FiltersDTO getActiveRecordsByAgeFilteredData(FiltersDTO activieRecordsByAgeFilteredData) {
+		FiltersDTO filteredData = null;
+		try {
+			filteredData = authServiceCaller.getWebClient().post()
+					.uri("http://localhost:8007/polestar/unit/api/filters/v1.0/getProfileFilter").body(BodyInserters.fromValue(activieRecordsByAgeFilteredData))
+					.retrieve().bodyToMono(FiltersDTO.class).block();
+		} catch (Exception e) {
+			LOGGER.error("error in retrieving userrole by userId", e);
+		}
+		return filteredData;
+	}
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	
+	
+	
+ServiceImpl
+------------
+
+@Override
+	public List<activityDTO> getListOfUnitIdFromProfileToActivieRecordsByAge(FiltersDTO profilefilteredData,
+			List<activityDTO> activityList) {
+		List<activityDTO> filteredList = new ArrayList<>();
+		List<activityDTO> appendfilteredList = new ArrayList<>();
+		List<String> listOfOrgs = new ArrayList<>();
+		List<String> listOfSubOrgs = new ArrayList<>();
+		List<String> listOfStatus = new ArrayList<>();
+		List<String> listOfRequestType = new ArrayList<>();
+		List<String> listOfAssignedTo = new ArrayList<>();
+		List<String> listOfAging = new ArrayList<>();
+		
+		
+		if(profilefilteredData.getOrgs()!=null) {
+			List<Options> orgs = profilefilteredData.getOrgs();
+			for (Options options : orgs) {
+				listOfOrgs.add(options.getId());
+			}
+			activityList.forEach(activityDto->{
+				Optional<activityDTO> filteredActivityDto = listOfOrgs.stream()
+				 .filter(filteredOrgs->activityDto.getTenantName().equals(filteredOrgs))
+				 .map(filteredOrgs->activityDto)
+				 .findFirst();
+			filteredActivityDto.ifPresent(filteredList::add);
+			});
+		}
+		if(profilefilteredData.getSubOrgs()!=null) {
+			List<Options> subOrgs = profilefilteredData.getSubOrgs();
+			for (Options options : subOrgs) {
+				listOfSubOrgs.add(options.getId());
+			}
+			if(!filteredList.isEmpty()) {
+				appendfilteredList.addAll(filteredList);
+			}else {
+				appendfilteredList.addAll(activityList);
+			}
+			filteredList.clear();
+			for(activityDTO activityDto : appendfilteredList) {
+				for(String filteredSubOrgs : listOfSubOrgs) {
+					if(activityDto.getUnitName().equalsIgnoreCase(filteredSubOrgs)) {
+						filteredList.add(activityDto);
+					}
+			}
+			}
+			appendfilteredList.clear();
+		}
+		if(profilefilteredData.getStatus()!=null) {
+			listOfStatus = profilefilteredData.getStatus();
+			if(!filteredList.isEmpty()) {
+				appendfilteredList.addAll(filteredList);
+			}else {
+				appendfilteredList.addAll(activityList);
+			}
+			filteredList.clear();
+			for(activityDTO activityDto : appendfilteredList) {
+				for(String status : listOfStatus) {
+					if(activityDto.getStatus().equalsIgnoreCase(status) && !(filteredList.contains(activityDto))) {
+						filteredList.add(activityDto);
+					}
+			}
+			}
+			appendfilteredList.clear();
+		}
+		if(profilefilteredData.getRequestType()!=null) {
+			listOfRequestType = profilefilteredData.getRequestType();
+			if(!filteredList.isEmpty()) {
+				appendfilteredList.addAll(filteredList);
+			}else {
+				appendfilteredList.addAll(activityList);
+			}
+			filteredList.clear();
+			for(activityDTO activityDto : appendfilteredList) {
+				for(String requestType : listOfRequestType) {
+					if(activityDto.getItemType().equalsIgnoreCase(requestType) && !(filteredList.contains(activityDto))) {
+						filteredList.add(activityDto);
+					}
+			}
+			}
+			appendfilteredList.clear();
+		}
+		if(!(CollectionUtils.isNullOrEmpty(profilefilteredData.getAssignedTo()))) {
+			listOfAssignedTo = profilefilteredData.getAssignedTo();
+			if(!filteredList.isEmpty()) {
+				appendfilteredList.addAll(filteredList);
+			}else {
+				appendfilteredList.addAll(activityList);
+			}
+			filteredList.clear();
+			for(activityDTO activityDto : appendfilteredList) {
+				for(String assignedTo : listOfAssignedTo) {
+					if(activityDto.getAssignedUser().equalsIgnoreCase(assignedTo) && !(filteredList.contains(activityDto))) {
+						filteredList.add(activityDto);
+					}
+			}
+			}
+			appendfilteredList.clear();
+		}
+		if(!(CollectionUtils.isNullOrEmpty(profilefilteredData.getAging()))) {
+			int greaterThan90 = 0, startRange = 0, endRange = 0;
+			listOfAging = profilefilteredData.getAging();
+			if(!filteredList.isEmpty()) {
+				appendfilteredList.addAll(filteredList);
+			}else {
+				appendfilteredList.addAll(activityList);
+			}
+			filteredList.clear();
+			for(activityDTO activityDto : appendfilteredList) {
+				for(String aging : listOfAging) {
+					List<String> listOfNumbers = removeSpecialCharactersFromAging(aging);
+					if(listOfNumbers.size()==1) {
+						greaterThan90 = Integer.valueOf(listOfNumbers.get(0));
+					}else {
+						startRange = Integer.valueOf(listOfNumbers.get(0));
+						endRange = Integer.valueOf(listOfNumbers.get(1));
+					}
+					int dateDifference = commonUtils.calculateDateDifference(activityDto.getCreatedDate(), false);
+					if(greaterThan90!=0 && dateDifference>=greaterThan90 && !(filteredList.contains(activityDto))) {
+						filteredList.add(activityDto);
+						break;
+					}
+					else if(dateDifference>=startRange && dateDifference<=endRange && !(filteredList.contains(activityDto))){
+						filteredList.add(activityDto);
+						break;
+					}
+			}
+			}
+			appendfilteredList.clear();
+		}
+		if(profilefilteredData.isAwaitingFeedback()) {
+			if(!filteredList.isEmpty()) {
+				appendfilteredList.addAll(filteredList);
+			}else {
+				appendfilteredList.addAll(activityList);
+			}
+			filteredList.clear();
+			for(activityDTO activityDto : appendfilteredList) {
+					if(activityDto.getFeedBackUserId()!=null && activityDto.getFeedBackUserName()!=null && activityDto.getFeedBackUserEmail()!=null && !(filteredList.contains(activityDto))) {
+						filteredList.add(activityDto);
+					}
+			}
+		}
+		
+		if(!filteredList.isEmpty()) {
+			return filteredList;
+		} else {
+			return activityList;
+		}
+	}
+	
+	private List<String> removeSpecialCharactersFromAging(String aging) {
+		List<String> listOfAgingNumbers = new LinkedList<String>();
+		
+		if(aging.contains("-")) {
+			String[] str= aging.split("-");
+			listOfAgingNumbers.add(str[0].trim());
+			listOfAgingNumbers.add(str[1].trim());
+		} 
+		if(aging.contains(">")) {
+			aging = aging.replace(">", "");
+			aging.trim();
+			listOfAgingNumbers.add(aging);
+		}
+		return listOfAgingNumbers;
+	}
+
+	@Override
+	public FiltersDTO setDataForActivieRecordsByAgeFilteredData(filterActivityDTO filterDTO) {
+		FiltersDTO activieRecordsByAgeFilteredData = new FiltersDTO();
+		activieRecordsByAgeFilteredData.setReportType(filterDTO.getReportType());
+		activieRecordsByAgeFilteredData.setUserId(filterDTO.getUserId().get(0));
+		return activieRecordsByAgeFilteredData;
+	}

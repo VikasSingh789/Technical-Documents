@@ -1,0 +1,112 @@
+Circuit Breaker States:- Closed, Open and Half Open.
+=====================================================
+
+Closed State:-
+-> Everything is working fine.
+-> Calls go to the service as usual.
+-> If a few calls start failing, it counts them.
+
+Open State:-
+-> Too many recent failures.
+-> circuit breaker "opens" to stop more calls.
+-> Any new request, gets blocked immediately (or a fallback is used).
+
+Half Open:-
+-> Its a Testing mode.
+-> After waiting for a bit, the circuit breaker allows a few test calls.
+-> If they succeed → it goes back to Closed.
+-> If they fail    → it goes back to Open again.
+
+Circuit Breaker Pattern
+=======================
+
+resilience4j.circuitbreaker:
+  instances:
+    externalService:
+      registerHealthIndicator: true
+      slidingWindowSize: 5
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10s
+      permittedNumberOfCallsInHalfOpenState: 3
+      minimumNumberOfCalls: 5
+
+
+slidingWindowSize:- In Closed State, Tracks outcomes based on number of recent calls defined in slidingWindowSize. Number of recent calls to track.
+slidingWindowSize >= minimumNumberOfCalls
+
+failureRateThreshold:- Based on this Threshold %, We Decide to transit from Closed to Open State.
+
+waitDurationInOpenState:- no. of time we define, it will remain for that time in Open state and once it crosses that time, if
+we make another request then it will transit to half-open. It Wont automatically transit from Open to HalfOpen if no request made though time surpassed. As,
+Resilience4J works on lazy evaluation.
+
+permittedNumberOfCallsInHalfOpenState:- Out of 3 Calls, Based on failureRateThreshold, it will move to closed or to Open.
+
+minimumNumberOfCalls:- To Move from Closed to Open state, minimumNumberOfCalls has to be made. So once minimumNumberOfCalls is made, It will look for
+slidingWindowSize which is 5 now. So it will calculate failure %.
+
+================================================================================================================================================
+================================================================================================================================================
+
+Scenario - 1
+------------
+slidingWindowSize: 10
+failureRateThreshold: 50
+minimumNumberOfCalls: 5
+-> 6 Calls has been made. Let’s say 4 out of 6 calls have failed and % is 66.7% which surpasses threshold.
+-> Since, we have made minimumNumberOfCalls = 5. (Total 6 calls, so it's okay to evaluate)
+-> The circuit breaker will transition to OPEN at this point, even though slidingWindowSize is not full yet.
+-> The system won’t wait to reach slidingWindowSize to start evaluating failure rate cos failure % and minimumNumberOfCalls already reached.
+
+Scenario - 2
+------------
+slidingWindowSize: 10
+failureRateThreshold: 50
+minimumNumberOfCalls: 5
+-> 6 Calls has been made. Let’s say 2 out of 6 calls have failed and % is 33.3% which is < threshold of 50%.
+-> Since, we have made minimumNumberOfCalls = 5. (Total 6 calls, so it's okay to evaluate)
+-> The circuit breaker stays closed and will not transit to OPEN.
+-> It does not need to wait till 10th call, if 8th call is made and failure % > 50. Circuit breaker will make transition to Open state.
+-> After minimumNumberOfCalls reaches, for each new call, it checks the latest N calls (up to slidingWindowSize) to calculate the failure rate.
+-> if minimumNumberOfCalls and threshold reaches, It does not need all 10 calls to be made before breaking.
+
+Scenario - 3
+-------------
+slidingWindowSize : 10
+failureRateThreshold : 50%
+minimumNumberOfCalls : 11
+-> If Out of slidingWindowSize 10, 6 are failed, which is > 50% threshold, Even though it surpassed threshold, state wont change from Closed to Open, because
+no. calls has to be >= what we define in minimumNumberOfCalls. Then Only it will start calculation % on defined slidingWindowSize calls.
+-> "Okay, I’ve seen 11 calls total, let me check failure rate over the last 10 (sliding window)."
+
+Scenario - 4
+------------
+slidingWindowSize: 4
+failureRateThreshold: 50
+waitDurationInOpenState: 10s
+permittedNumberOfCallsInHalfOpenState: 3
+failureRateThreshold: 50
+-> Once we make 3 fail calls out of 4, State changes from Closed to Open.
+-> In Open State, It will remain for 10 secs.
+-> In 11th Sec, If we sit alone and wont make any request, state would still be in Open State only, though it has crossed 10 secs.
+-> In Open State, Once 10secs is crossed, State won't change automatically from Open to half-Open, unless we make a new request.
+-> Once we make any request irrespective (fail or pass), Then only it will change to Half-Open State. Since it works on Lazy Evaluation.
+-> In Half-Open State, It will check for 3 new requests. And based on those 3 request, It will change to Closed or Open, based on failureRateThreshold %.
+
+Note:- For Automatic Transition from Open to Half-Open, Add this Property:- automatic-transition-from-open-to-half-open-enabled: true
+
+Scenario - 5
+------------
+slidingWindowSize: 4
+failureRateThreshold: 50
+waitDurationInOpenState: 10s
+-> Once we make 3 fail calls out of 4, State changes from Closed to Open.
+-> In Open State, It will remain for 10 secs.
+-> Since state is in Open State, though u make success calls, It will always return failed or fallback response only.
+
+
+Note:- Circuit Breaker only considers fail request. If Something failed and we are catching Exception in Catch Block, Then CB Wont consider it as
+a failure, since we have handled properly without throwing any Exception.
+-> To Consider a Fail Request, Use "throw e" in Catch Block. This will throw Exception from Catch Block and CB Considers this a Fail request to change state.
+================================================================================================================================================
+================================================================================================================================================

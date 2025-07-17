@@ -1,0 +1,43 @@
+Git Commands:-
+----------------------
+git checkout -b US4108333-SMAHTML
+git push -u origin US4108333-SMAHTML
+==================================================================
+git clone {repourl} -b {branchName}  or git clone {branchName}
+git pull origin dev
+git pull
+git status
+git gui
+git commit -m "Description-for-Changes"
+git push
+git checkout {branchName}
+==================================================================
+remove changes and get deleted changes in another branch:-
+
+git stash
+git pull
+git checkout {branchName}
+git stash pop
+==================================================================
+git reset --hard (to remove changes permanently
+==================================================================
+Fork Repository cmds:-
+
+git clone {forkRepository}
+git remote -v
+git remote add upstream {actualRepository}
+git pull upstream dev
+==================================================================
+git cherry-pick 890efb6f8c8ef5bc65d20893885c75eee10a3bd0
+git cherry-pick {commit-id}
+==================================================================
+To Increase Github Push/Buffer Size
+
+git config --global http.postBuffer 524288000
+
+git reset --soft HEAD~
+==================================================================
+To Stage multiple files in one time
+
+git add -A
+==================================================================

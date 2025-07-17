@@ -1,0 +1,214 @@
+We need to download and install redis in local Machine, to leverage Redis over Microservices.
+
+cmd to start redis server once Redis is installed in local machine:- redis-server
+==================================================================================
+
+Add Dependency in Pom.xml
+--------------------------
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+
+Add Below Properties in application.properties
+------------------------------------------------
+spring.redis.host=localhost
+spring.redis.port=6379                //Redis Default Port No.
+spring.cache.cache-names=User         //Cache Name we are declaring to store cache data in redis. We can declare Multiple Channels
+spring.cache.redis.key-prefix=test    //Prefix is needed while we store our cache data in Redis
+============================================================
+
+Important Commands in Redis in Mac:-
+-----------------------------------------
+cmd to start redis server:- redis-server
+cmd to stop  redis server:- redis-cli shutdown
+cmd to monitor redis server:- redis-cli
+
+CLearing all the Data from the Cache
+redis-cli flushall
+redis-cli flushdb
+
+Monitor Redis Logs:-
+redis-cli
+monitor
+
+============================================================
+Important Annotations in Redis:-
+--------------------------------
+@Cacheable:- To fetch the record from DB and store data in cache
+@CacheEvict(value="products", allEntries=true):- When we want to delete some record and want to update this operation in cache
+@CachePut:- Want to update in DB and want to reflect in our cache.
+ex:- @CachePut(key="#student.id")
+================================================================================================================================================
+Redis Youtube Tutorial:- https://www.youtube.com/watch?v=oUDpmINwJ5g
+https://javatechonline.com/how-to-implement-redis-cache-in-spring-boot-application/
+====================================================================================
+
+
+
+================================================================================================================================================
+================================================================================================================================================
+================================================================================================================================================
+Note:- We can declare Ttl(TimeToLive) in 2 Places.
+1) In RedisConfig. ex:- ".entryTtl(Duration.ofDays(1))", Like Below Example,
+
+@Configuration
+public class RedisConfig {
+
+	@Bean
+	public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+		RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+				// .entryTtl(Duration.ofDays(1))
+				.disableCachingNullValues().serializeValuesWith(RedisSerializationContext.SerializationPair
+						.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+
+		return RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(config).build();
+	}
+}
+
+2) In Properties File. ex:- spring.cache.redis.time-to-live=86400000, like below,
+
+# Redis connection settings
+spring.redis.host=localhost
+spring.redis.port=6379
+# Enable Redis as cache
+spring.cache.type=redis
+# 1 day in milliseconds
+spring.cache.redis.time-to-live=1
+
+RedisSerializationConfig
+-------------------------
+@Configuration
+public class RedisSerializationConfig {
+
+    @Value("${spring.cache.redis.time-to-live}")
+    private long ttlInHours;
+
+    @Bean
+    public RedisCacheConfiguration redisCacheConfiguration() {
+        return RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofHours(ttlInHours))  // <- TTL injected from props
+            .serializeValuesWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())
+            );
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        return RedisCacheManager.builder(connectionFactory)
+            .cacheDefaults(redisCacheConfiguration())
+            .build();
+    }
+}
+
+Note:- We can declare Ttl(TimeToLive) in 2 Places.
+1) Here, In RedisConfig. ex:- ".entryTtl(Duration.ofDays(1))" and
+2) in Properties File.   ex:- spring.cache.redis.time-to-live=1
+
+========================================================================================================================
+========================================================================================================================
+
+Q) Where to Declare TTL:-
+A) You should prefer declaring TTL in the application.properties file for centralized configuration management (this is the most common approach), 
+and remove it from the Java config class.
+-> So, We are not using Ttl in Config File and Reading Ttl value from Properties file.
+
+Q) When to Define Own RedisCacheManager
+A) If we define our own RedisCacheManager, Then we are overriding Springboots auto-configure.
+-> It Means Will have Full Control over, TTLs and Serializers (Converting Our Custom to Json Object. Avoiding Binary Format)
+-> By Defining our own RedisCacheManager, We can Replace the default JDK serializer(binary) with GenericJackson2JsonRedisSerializer as shown in 1st Example.
+
+Q) What happens if we do not define our own RedisCacheManager
+A) If we dont define our own RedisCacheManager, Then Springboot will auto-configure and will create one Internally.
+-> With This, TTL will be Infinite unless explicitly set in application.properties.
+-> By Default, It Will Use JDK serialization (JdkSerializationRedisSerializer (binary)). So will get Data stored in cache as binary and not in Json Format.
+-> To Convert this default binary to Json, we must override GenericJackson2JsonRedisSerializer.
+-> This Can Happen through by custom RedisCacheConfiguration bean wired into the manager. As Mentioned in 2nd Example.
+-> We are using RedisCacheConfiguration as Bean wired to RedisSerializationConfig Manager, to Convert binary to Json and also to read TTl from props file.
+
+========================================================================================================================
+========================================================================================================================
+
+
+Multiple Cache Data Config
+--------------------------
+
+@Configuration
+public class RedisSerializationConfig {
+
+    @Value("${spring.cache.redis.time-to-live}")
+    private long defaultTtlInMillis;
+
+    @Bean
+    public RedisCacheConfiguration defaultCacheConfiguration() {
+        return RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofMillis(defaultTtlInMillis))
+            .serializeValuesWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(
+                    new GenericJackson2JsonRedisSerializer()
+                )
+            );
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+       
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+
+        // Define TTL per cache name
+        cacheConfigurations.put("machineFeatureInfoCache", defaultCacheConfiguration().entryTtl(Duration.ofSeconds(30)));
+        cacheConfigurations.put("employeeCache", defaultCacheConfiguration().entryTtl(Duration.ofMinutes(10)));
+        cacheConfigurations.put("permanentCache", defaultCacheConfiguration().entryTtl(Duration.ZERO)); // No expiration
+        
+        return RedisCacheManager.builder(connectionFactory).cacheDefaults(defaultCacheConfiguration())
+            .withInitialCacheConfigurations(cacheConfigurations).build();
+    }
+}
+
+================================================================================================================================================
+Below is the Cache Implementation for 1 of the Service
+--------------------------------------------------------
+
+public interface RedisCacheService {
+	List<MachineFeatureInfo> getMachineFeatureInfoFromCache(String vin, boolean flag);
+}
+
+
+@Slf4j
+@Service
+public class RedisCacheServiceImpl implements RedisCacheService {
+
+	@Override
+    @Cacheable(
+    		value = "machineFeatureInfoCache",
+    		key = "'machineFeatureInfo:vin:' + #vin + ':flag:' + #flag",
+    		unless = "#result == null || #result.isEmpty()"
+    )
+    public List<MachineFeatureInfo> getMachineFeatureInfoFromCache(String vin, boolean flag) {
+    	log.info("In RedisCacheServiceImpl::getMachineFeatureInfoFromCache()");
+    	log.info("Data Fetched From DB");
+    	MachineFeatureInfo mf1 = new MachineFeatureInfo("Vin1","CANBHL",true,new Date());
+    	MachineFeatureInfo mf2 = new MachineFeatureInfo("Vin2","CANBHL",true,new Date());
+    	List<MachineFeatureInfo> listOfMFI = Arrays.asList(mf1,mf2);
+    	return listOfMFI;
+    }
+}
+================================================================================================================================================
+================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
