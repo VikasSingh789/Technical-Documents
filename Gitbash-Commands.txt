@@ -1,0 +1,71 @@
+Git Commands:-
+----------------------
+git checkout -b US4108333-SMAHTML
+git push -u origin US4108333-SMAHTML
+==================================================================
+git clone {repourl} -b {branchName}  or git clone {branchName}
+git pull origin dev
+git pull
+git status
+git gui
+git commit -m "Description-for-Changes"
+git push
+git checkout {branchName}
+==================================================================
+Delete changes and get deleted changes in another branch:-
+
+git stash
+git pull
+git checkout {branchName}
+git stash pop
+==================================================================
+git reset --hard (to remove changes permanently
+==================================================================
+Fork Repository cmds:-
+
+git clone {forkRepository}
+git remote -v
+git remote add upstream {actualRepository}
+git pull upstream dev
+==================================================================
+git cherry-pick 890efb6f8c8ef5bc65d20893885c75eee10a3bd0
+git cherry-pick {commit-id}
+==================================================================
+To Increase Github Push/Buffer Size
+
+git config --global http.postBuffer 524288000
+==================================================================
+To Stage multiple files in one time
+
+git add -A
+==================================================================
+
+Below CMD's to delete commit/ history from Github
+---------------------------------------------------
+git rebase -i HEAD~26
+git push origin main --force
+
+Steps to Perform "git rebase -i HEAD~26"
+----------------------------------------
+1) Once we hit "git rebase -i HEAD~26", A Text Editor Opens.
+2) Press i to enter in insert mode
+3) Replace pick with drop, to clear or remove the commits u want.
+4) After Replacing "pick" with "drop", Press ESC then enter ":wq!". It will come out of Editor
+5) Run "git push origin main --force" cmd. You will see, commits will be removed from Github.
+
+
+==============================================================================================================================
+Below Github CMD's to get Commiter User Details in "VikasSingh789 authored on Mar 26, 2024" Format after staging changes in Github.
+----------------------------------------------------------------------------------------------------------------------------
+GIT_AUTHOR_NAME="VikasSingh789" \                                           
+GIT_AUTHOR_EMAIL="vks.singhf@gmail.com" \
+GIT_AUTHOR_DATE="2024-11-01T10:00:00" \
+GIT_COMMITTER_NAME="VikasSingh789" \
+GIT_COMMITTER_EMAIL="vks.singhf@gmail.com" \
+GIT_COMMITTER_DATE="2025-07-17T10:00:00" \
+git commit -m "Added Text file"
+
+git log -1 --pretty=format:"%an authored on %ad." --date=format:'%b %-d, %Y'
+
+git push
+==============================================================================================================================
