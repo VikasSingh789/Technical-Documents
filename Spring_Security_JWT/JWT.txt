@@ -1,0 +1,53 @@
+Q) Explain JWT Authentication. JWT lives on the client, so why can't users edit it ?
+A) A JWT has three parts:- Header, Payload and Signature.
+Header -> algorithm used
+Payload → user data (id, role, expiry)
+Signature → cryptographic verification
+
+-> When Server Issues the Token, Signature will be signature = sign(header + payload, secret_key)
+When request comes back:
+1️⃣ Server recalculates signature
+2️⃣ Compares with token signature
+If payload was modified:
+-> signature no longer matches
+-> token is rejected
+
+So the client can read the token, but cannot forge the signature.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How JWT Works
+A) JWT works because of cryptographic signing.
+Common algorithms:
+• HS256 (shared secret)
+• RS256 (public/private key)
+This allows:
+• stateless authentication
+• scalable distributed systems
+• no session lookup on server
+
+But remember:
+JWT is signed, not encrypted.
+Anyone can read payload data.
+
+🎯 𝗜𝗡𝗧𝗘𝗥𝗩𝗜𝗘𝗪 𝗙𝗟𝗘𝗫
+JWT integrity is ensured through cryptographic signatures that allow the server to verify that the payload has not been altered without knowing the signing key.
+
+🔥 𝗙𝗜𝗡𝗔𝗟 𝗧𝗥𝗨𝗧𝗛
+JWT stored on the client doesn’t mean users control it. They can read it. They just can’t fake the signature.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How do you Secure your API's
+A) Security is handled at multiple layers. API Gateway protects the entry point, while backend services enforce authentication, authorization, and validation.
+
+1) API Gateway Security:- All requests first go through the API Gateway which handles authentication, rate limiting, IP whitelisting and threat protection.
+2) Authentication:- Every endpoint requires authentication using JWT/OAuth2 tokens to verify the user.
+3) Authorization:- We enforce role-based access control (RBAC) so only authorized users can access specific endpoints.
+Example:
+/admin/* → only admin users
+/user/profile → authenticated users only
+4) Rate Limiting:- Applied at the API Gateway or service layer to prevent abuse and protect endpoints from traffic spikes.
+5) Token Expiry:- Use short-lived tokens and refresh tokens to reduce risk if a token is compromised.
+
+--------------------------------------------------------------------------------------------------------------------------------------------

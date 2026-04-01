@@ -1,0 +1,228 @@
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Service-Registry-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-API-Gateway-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Mobile-Authentication-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Machines-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Alerts-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Reports-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Common-Data-Process-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Machine-Data-Process-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Alerts-Data-Process-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Data-Pull-BS4-Common-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Data-Pull-BS5-Common-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-DB-CRUD-Index-Operations-0.0.1-SNAPSHOT.jar & disown
+
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Authentication-0.0.1-SNAPSHOT.jar & disown
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-User-0.0.1-SNAPSHOT.jar & disown
+
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Machines-0.0.1-SNAPSHOT.jar --spring.profiles.active=preprod & disown
+
+Preprod:- Aplication
+=====================
+ssh apiuser@10.210.196.206
+pwd:- Welcomeaws@2026#
+ps aux |  grep JCB-    //Status to check what jars are running
+kill -15 1031631         //to kill jar based on jar no. (beside apiuser)
+ps aux |  grep JCB-    //Check Status again after killing jar
+cd /data5/MS_Testing   //move into this directory, since jars are placed in this folder
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Machines-0.0.1-SNAPSHOT.jar & disown  // to deploy the jar
+ps aux |  grep JCB-    //Check Status again after deploying the jar
+tail -f /data5/MS_LOGS/JCB-Common-Data-Process/JCB-Common-Data-Process.log   //TO Check Specific MS Logs
+
+Preprod:- DB (Server)
+=====================
+ssh deepthr@10.210.196.240
+yes
+pwd:- Julyaws@2025
+sudo su
+export PATH=$PATH:/user/Percona-Server-5.7.16-10-Linux.x86_64.ssl101/bin/
+mysqld_multi report 333 - to check db Status
+mysqld_multi start 333  - to start DB
+mysqld_multi stop 333   - to stop DB
+
+Preprod:- Redis
+===============
+ssh jcbuser1@10.210.196.206
+pwd:- Welcomeaws@2022
+sudo su
+Check status of Redis:- ps -ef | grep redis  (Check with port 29555) (or) sudo ss -tlnp | grep 29555
+Start Redis:- nohup /etc/init.d/redis_29555 start & disown
+Stop Redis:- /etc/init.d/redis_29555 stop  (or)  kill -15 {pid}
+Clear Redis:- redis-cli -p 29555 FLUSHALL
+
+==============================================================================================================================================
+==============================================================================================================================================
+Stopping Sequence in Prod:-
+-----------------------------
+MS's -> Kafka -> Redis -> DB
+
+Starting Sequence in Prod:-
+-----------------------------
+DB -> Redis -> Kafka -> MS's
+
+
+nohup java -jar JCB-Service-Registry-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-API-Gateway-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Mobile-Authentication-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Alerts-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Machines-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Reports-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Machine-Data-Process-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Alerts-Data-Process-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Data-Pull-BS4-Common-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Data-Pull-BS5-Common-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-DB-CRUD-Index-Operations-0.0.1-SNAPSHOT.jar & disown
+
+nohup java -jar JCB-Asset-Identity-Data-Process-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Asset-Telemetry-Data-Process-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Customer-Account-Data-Process-0.0.1-SNAPSHOT.jar & disown
+nohup java -jar JCB-Subscription-Entitlement-Data-Process-0.0.1-SNAPSHOT.jar & disown
+
+nohup /data5/Softwares/jdk-17-linux/bin/java -jar JCB-Machines-0.0.1-SNAPSHOT.jar --eureka.instance.hostname=10.210.196.38 & disown
+
+Prod:- Web Application
+====================
+ssh jcbuser1@10.210.196.25
+Welcomeaws@2022
+
+Prod:- Application
+====================
+ssh JCBMobAppServ@10.210.196.8
+AWSJCBWelcome@1235#
+cd /user1/JCB-MOB-API-Artifacts         //move into this directory, since jars are placed in this folder
+
+ssh jcbuser1@10.210.196.58
+WelcomeawsJCB@2025
+cd /user1/JCB-MOB-API-Deployment-Jars   //move into this directory, since jars are placed in this folder
+
+ssh jcbuser1@10.210.196.38
+WelcomeawsJCB@2025#
+
+ps aux |  grep JCB-    //Status to check what jars are running
+kill -15 1771358         //to kill jar based on jar no. (beside apiuser)
+ps aux |  grep JCB-    //Check Status again after killing jar
+nohup java -jar JCB-Service-Registry-0.0.1-SNAPSHOT.jar & disown  // to deploy the jar
+ps aux |  grep JCB-    //Check Status again after deploying the jar
+tail -f JCB-Alerts-Data-Process.log  //TO Check Specific MS Logs
+
+Prod:- DB (Server)
+===================
+ssh JCBMobDBServ@10.210.196.80
+pwd:- AWSJCBWelcome@123#
+sudo su -    //This cmd will change user from JCBMobDBServ to root
+export PATH=/user/Percona-Server-8.0.42-33-Linux.x86_64.glibc2.28/bin/:$PATH
+mysqld_multi start
+mysqld_multi report
+mysqld_multi stop
+
+
+Prod:- Redis
+=============
+ssh jcbuser1@10.210.196.58
+WelcomeawsJCB@2025
+Check status of Redis:- ps -ef | grep redis  (Check with port 29555) (or) netstat -antlp | grep 29555 | grep 'LISTEN' (or) sudo ss -tlnp | grep 29555
+Start Redis:- nohup /etc/init.d/redis_29555 start & disown
+Stop Redis:- /etc/init.d/redis_29555 stop
+Clear Redis:- redis-cli -p 29555 FLUSHALL
+
+sudo chown jcbuser1:jcbuser1 UserProfile CommonImages
+
+
+Kafka Production
+-----------------
+ssh JCBMobAppServ@10.210.196.8
+AWSJCBWelcome@1235#
+sudo su
+
+Start Kafka
+-----------
+nohup /opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties & disown  //Start Zookeeper
+ps -ef | grep zookeeper  (or) sudo ss -tlnp | grep 2181   //Verify If Zookeeper is running
+nohup /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties & disown         //Start Broker
+ps -ef | grep kafka  (or)  sudo ss -tlnp | grep 9092      //Verify Kafka Broker is running
+
+Stop Kafka
+----------
+/opt/kafka/bin/kafka-server-stop.sh      //Stop Broker
+/opt/kafka/bin/zookeeper-server-stop.sh  //Stop Zookeeper
+
+sudo ss -tlnp | grep 9092 //To Check Kafka Status
+sudo kill 59153           //To Kill Kafka By PID
+
+==============================================================================================================================================
+==============================================================================================================================================
+
+Kafka Logs and Topic Details
+----------------------------
+
+cd /user1/Kafka/kafka-logs/machineData-0
+/opt/kafka/bin/kafka-dump-log.sh --print-data-log --files "$(ls -1v *.log | tail -1)" | grep -a "VINHAR3DXSSL02983985_20260220"
+grep -a 'HAR3DXSSV02982025' /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log | grep -a '|VINHAR3DXSSV02982025|2025100211' | tail -1
+top -c -u JCBMobAppServ  //Check RAM Memory Consumption
+==============================================================================================================================================
+==============================================================================================================================================
+cd /opt/kafka/bin
+./kafka-consumer-groups.sh --bootstrap-server localhost:9092  --group Client_machineData --describe
+
+to check the last 20 or 200 lines of logs use following tail command 
+tail -n 20 /user1/JCB-MOB-API-Logs/JCB-Alerts-Data-Process/JCB-Alerts-Data-Process.log
+tail -n 20 /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log | grep "PUN8FCB8VT3629683"
+
+cd /user1/Kafka/kafka-logs
+tail -n 20 /user1/JCB-MOB-API-Logs/JCB-Asset-Identity-Data-Process/JCB-Asset-Identity-Data-Process.log | grep "Vin:HAR3DXSSL02983985"
+tail -n 20 /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log | grep "Vin:HAR3DXSSL02983985"
+tail -f /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log
+grep -a 'HAR3DXSSL02983985' /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log
+
+Combined History:-
+-------------------
+grep -a '"vin":"RAJ3DXSSJ02840378"' /user1/JCB-MOB-API-Logs/JCB-Asset-Telemetry-Data-Process/JCB-Asset-Telemetry-Data-Process-2026-02-24.log | tail -1
+
+Machine Data:-
+===============
+Check Topic Details:- /opt/kafka/bin/kafka-consumer-groups.sh --bootstrap-server 10.210.196.8:9092 --describe --group Client_machineData
+
+To check the last 20 lines of logs use following tail command Without Filter
+-----------------------------------------------------------------------------------
+tail -n 20 /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log
+
+To check the last 20 lines of logs use following tail command With Filter
+--------------------------------------------------------------------------------
+tail -n 20 /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log | grep "Vin:HAR3DXSSL02983985"
+
+To check the last 20 lines of logs use following tail command With Filter from .log.zc file
+--------------------------------------------------------------------------------------------
+zgrep -a "RAJ3DXE5C03593770" /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process-2026-03-12-13.log.gz | tail -n 2
+
+Keeps the terminal open and continuously displays new lines as they are appended to the file
+----------------------------------------------------------------------------------------------
+-> tail -f /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log
+-> tail -f /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log | grep --color=always "[MissingFirmware] Firmware"
+
+To Check Logs Based on Filter across log files which date has "2026-03-18-*" in log.gz
+---------------------------------------------------------------------------------------
+(zgrep -a '|VINHAR3DXS5J03613683|20260326' /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process-2026-03-26-*.log.gz ;tail -f /user1/JCB-MOB-API-Logs/JCB-Machine-Data-Process/JCB-Machine-Data-Process.log | grep -a --color=always '|VINHAR3DXS5J03613683|20260326')
+
+To Check Logs in .25 Producer Kafka Server
+---------------------------------------------------------------------------------------
+-> cd /user7/APIGateWay/log/ApiGateWayLogs/InfoLog/
+-> grep -a HAR3DXSSL02814582 infoLogger.log | grep -a 'machineData'
+==============================================================================================================================================
+==============================================================================================================================================
+BS4
+---
+Contus - 0 0 2 * * *(GMT) <==> 7:30 AM (IST)
+Wipro  - 0 0 2 * * *(IST) <==> 0 30 7 * * *
+
+BS5
+---
+Contus - 0 0 7 * * *(GMT) <==> 12:30 PM (IST)
+Wipro  - 0 0 7 * * *(IST) <==> 0 30 12 * * *
+============================================================================================================================================
+============================================================================================================================================
+
+
+
+
+
+
+

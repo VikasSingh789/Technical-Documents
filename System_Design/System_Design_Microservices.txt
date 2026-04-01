@@ -1,0 +1,298 @@
+Q) Your API is Getting Abused. Should you Rate Limit or Throttle. Whats the Difference
+A) Both control traffic - but they solve different problems
+
+1️⃣ Rate Limiting (Hard Stop)
+👉 Limits how many requests a user can make in a time window.
+Use when: You want to block abuse completely.
+Example:
+User allowed 100 requests/min → 101st request gets rejected (429)
+
+2️⃣ Throttling (Slow Down)
+👉 Slows requests instead of blocking them.
+Use when: You want to protect the system without breaking users.
+Example:
+User refreshes a page rapidly → app still works, but responses get slower each time.
+⸻
+
+When to Use What
+👉 Rate limit → Stop bots, scrapers, brute-force attacks.
+👉 Throttle → Handle traffic spikes, bursty clients, peak hours.
+
+Real-World Use Together
+👉 Most systems use both.
+Example:
+• Throttle normal users during peak traffic
+• Rate limit suspicious users aggressively
+
+One-Liner:- Rate limiting protects fairness. Throttling protects stability.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How do you Trace a single User Request across Multiple Microservices
+A) To trace a single user request across multiple microservices, I use Distributed Tracing.
+
+1️⃣ Generate a Unique Trace ID:- A Trace ID is created at the entry point (like API Gateway) for the request.
+2️⃣ Propagate Trace ID Across Services:- The same Trace ID is passed to all downstream services via HTTP headers.
+3️⃣ Create Spans in Each Microservice:- Each service creates a span to capture its operation within the request.
+4️⃣ Centralize Traces & Logs:- All traces and logs are collected in a centralized system (like Zipkin or Jaeger) to visualize the complete request flow.
+
+One Liner:- In Spring Boot, I’ve used tools like Spring Cloud Sleuth with Zipkin to automatically handle Trace ID propagation and logging.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Your APl is slow. You already added cache. It's still slow. How will you fix it ?
+A) 1️⃣ Cache Effectiveness (First check):- If cache hit ratio is low, requests still hit DB/services.
+✅ Fix: Improve cache keys, increase TTL
+
+2️⃣ Database Bottleneck:- Slow queries or missing indexes can still dominate response time.
+✅ Fix: Optimize queries, add indexes, avoid N+1 problems.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How would you make an API idempotent ?
+A) Idempotency is a property where you perform an operation multiple times and it produces same result.
+
+To make an API idempotent use idempotency key and combine with server side logic to de duplicate requests.
+Steps :
+➡️ Client generates unique key say UUID.
+➡️ Client send this key in custom header like idempotency key
+➡️ On receiving a request, server checks if key exist in cache or database say Redis or Dynamodb
+➡️ If key is new, server process the keys , store result with key with ttl say 24 hours and returns response.
+➡️ If key already exists, validates body hash matches, if it exists, returns cached response.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Since you are Reading Data and Not Inserting ot Updating. What Technique You use to Improve API Performance.
+A) We use the "readOnly" property inside the Transactional annotation and set it to true. Below is Example,
+Example:-
+@Transactional (readOnly = true)
+public List<Employee> getEmployees{}
+
+-> When we set readOnly = true, Persistance Provider like Hibernate can skip some heavy work like dirty checking.
+-> Dirty checking means tracking and comparing entity changes.
+-> It also avoids Keeping extra snapshots of entity state in memory.
+
+-> Because of all this, Memory Usage Becomes Lower and Performance Improves.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How would you handle distributed transactions in a fund transfer system?
+Implement Saga Pattern (Best Practice)
+----------------------------------------
+-> Split the fund transfer into multiple local transactions.
+-> Each step publishes an event to trigger the next step.
+-> On failure, execute a compensating transaction.
+
+Ensure Idempotency
+-------------------
+-> Assign a unique transaction ID for each transfer.
+-> Prevent duplicate debit/credit during retries.
+-> Safe handling of repeated requests.
+
+Maintain Transaction State
+---------------------------
+Track statuses like INITIATED, DEBIT_SUCCESS, CREDIT_SUCCESS, COMPLETED, FAILED. Helps in recovery and reconciliation.
+
+Apply Retry and Dead Letter Queues
+-----------------------------------
+If a step fails due to temporary issues (network or service downtime), the system should automatically retry the event.
+After repeated failures, the message can be moved to a Dead Letter Queue for manual investigation.
+
+Summary:
+I handle distributed transactions using the Saga pattern with event-driven communication, ensuring idempotency, fault tolerance, and eventual consistency in fund transfer systems.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) You need centralized configuration for all services across dev, QA, and prod. How would you design it ?
+A) 1️⃣ We Can use a centralized configuration service such as Spring Cloud Config.
+-> All microservices connect to this server to fetch their configuration at startup, ensuring consistency across environments.
+
+2️⃣ Environment-Based Configuration Management
+-> Configurations are separated by environment (Dev, QA, Prod) using environment profiles.
+-> Each microservice loads only the configuration relevant to the environment it is deployed in, preventing configuration leakage between environments.
+
+3️⃣ Externalized and Version-Controlled Storage
+-> All configurations are stored outside the application in a version-controlled repository (for example, Git).
+-> This provides: Configuration history, Easy rollback, Auditability and Safer production changes.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How laod balancer decides which server to send traffic ?
+A) A load balancer decides where to send traffic based on multiple factors:
+
+1️⃣ Health Checks:- 1st it performs health checks (HTTP/TCP/ping). Removes unhealthy servers from rotation and routes traffic only to healthy instances.
+
+2️⃣ Load Balancing Algorithm:- It uses algorithms like:
+-> Round Robin (rotate requests)
+-> Least Connections (send to least busy server)
+-> Weighted (based on server capacity)
+
+3️⃣ Session Persistence (Sticky Sessions):- If enabled, the same user is routed to the same server for consistency.
+
+One-line:- A load balancer routes traffic by checking server health, then applying algorithms like round robin or least connections, sometimes considering load, session stickiness, and latency.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Your API is fetching 1 million records in a single request. Servers start failing. How do you prevent a total crash ?
+A) Pagination – Return data in chunks (limit + offset / cursor-based pagination).
+Streaming / Lazy loading – Process records in batches instead of loading everything into memory.
+Add proper indexing – Optimize DB queries to reduce scan time.
+Rate limiting & throttling – Prevent abuse and sudden traffic spikes.
+Caching – Cache frequent queries (Redis) to reduce DB load.
+Async processing – For large exports, trigger background jobs instead of synchronous API response.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) If an API works in Postman but fails in browser, how u will troubleshoot the issue ?
+A) If an API works in Postman but fails in the browser, it’s usually due to environment differences (headers, CORS, auth, cookies, etc.)
+
+-> CORS issue (Most common):- Browser blocks cross-origin requests, Postman doesn’t. Backend must allow frontend origin.
+-> Missing Headers:- Authorization, Content-Type, or custom headers may not be sent from frontend properly.
+-> Authentication issue:- Token or cookies may not be attached in browser request.
+-> CSRF Protection:- Backend may require CSRF token for browser requests.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) You deployed new servers. why did your system suddenly become slower ?
+A) Adding servers increases application capacity, but the bottleneck may still exist elsewhere.
+Common reasons systems become slower after scaling:
+1️⃣ Database bottleneck:- More servers -> more queries -> DB overload.
+2️⃣ Lock contention:- Multiple servers competing for the same resources.
+• shared database rows
+• shared cache keys
+• shared file systems
+3️⃣ Load balancer imbalance:- Traffic may not distribute perfectly across servers.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) What is Dual Write Problem in SpringBoot Microservices
+A) Dual write problem occurs when a service updates the database and publishes an event separately, and one of them fails—leading to inconsistent data across systems.
+Leads to Data Inconsistency:- Different services see different states -> hard-to-debug production issues.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Your load balancer returns 503 for 20-30% of requests. How will you fix it
+A) 1️⃣ Service is Down:- Target microservice is not running or crashed.
+2️⃣ No Healthy Instances:- Service is registered, but all instances are failing health checks (e.g., via Eureka/Discovery).
+3️⃣ Timeout / Slow Response:- Backend service is too slow → gateway times out → returns 503.
+4️⃣ Circuit Breaker Open:- If using Resilience patterns, repeated failures open the circuit → requests are blocked → 503 returned.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Your Spring Boot has a Memory Leak. How Do you Find it ?
+A) 1st Check Whether Its Actually a Memory leak.
+-> Check if Heap memory is growing consistently and never drops even after Garbage Collection.
+-> We can monitor this with help of Springboot Actuator.
+-> Take Dump of Heap from server to analyze. Take this Dump before Application Crashes.
+
+Common Spring Boot Memory leak Culprits
+---------------------------------------
+-> Entity Manager / Session Not Closed. (Streams from JPA Left Open)
+-> Caching Data But not Evicting (Removing).
+-> Static Collections Keep Growing.
+-> @Scope("singleton") beans loading file or data into Memory on Startup but never released.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How to check that 2 conditions are satistied while creating a bean based on application properties values
+A) In application.properties, Based on Below 2 properties, I want to create beans. Below are the properties,
+controller.enabled = true  //Boolean
+some.value = 15  //Integer
+
+-> We can use @ConditionalOnExpression. Below is the Example
+@RestController
+@ConditionalOnExpression("${controller.enabled} and ${some.value} > 10")
+public class OrderController{}
+
+-> If Both property is Boolean, Then we can use @ConditionalOnProperty. Below is the Example
+property1 = true
+property2 = true
+
+@RestController
+@ConditionalOnProperty({"property1", "property2"})
+public class OrderController{}
+
+Note:- For Non Boolean, we use @ConditionalOnExpression
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Why do most large companies place an API Gateway in front of their microservices ?
+A) Single entry point for all services
+• Centralized auth & security
+• Rate limiting & DDoS protection
+• Load balancing & fault tolerance
+• API versioning without breaking clients
+• Faster responses (request aggregation)
+• Central logging & monitoring
+• Hide internal services from public access
+
+In short:-
+API Gateway = control, security, simplicity at scale.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) If a microservice suddenly starts receiving a high number of requests, how would you handle it?
+1) Monitor and Detect the Spike
+-> Use monitoring tools like New Relic, Prometheus, Grafana.
+-> Check request rate, CPU, memory, thread pool usage and slow APIs.
+
+2) Apply Rate Limiting
+-> Use API Gateway or Nginx to limit requests.
+-> Allow 1000 requests per second per client. Prevents system overload.
+
+3) Use Circuit Breaker. Implement using Resilience4j.
+-> If downstream service fails repeatedly, stop calls temporarily and return fallback response.
+
+4) Scale the Service (Horizontal Scaling)
+-> Add more instances of the microservice.
+-> Load balancer distributes traffic across instances.
+
+5) Use Caching
+-> Cache frequently accessed data using Redis or Hazelcast.
+-> Reduces load on database and improves response time.
+
+6) Optimize Database
+-> Check slow queries and missing indexes.
+-> Use indexes, connection pooling, and read replicas.
+
+7) Use Asynchronous Processing:
+-> Move heavy operations to Kafka / RabbitMQ queues.
+-> Example: notifications, emails, report generation.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Two microservices need to communicate - what are your options, and how do you decide?
+A) In microservices, communication can be synchronous or asynchronous
+
+1) Synchronous (REST/gRPC):
+-> Use when you need immediate response (e.g., user-facing APIs).
+⚠️ Tight coupling, can impact latency.
+
+2) Asynchronous (Kafka/RabbitMQ):
+-> Use for event-driven systems, better scalability & fault tolerance.
+⚠️ Eventual consistency, more complex debugging.
+
+How to decide?
+👉 Need real-time response → go sync
+👉 Need scalability & loose coupling → go async
+👉 High traffic systems → prefer event-driven (async)
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

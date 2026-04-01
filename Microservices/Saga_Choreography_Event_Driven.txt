@@ -1,0 +1,156 @@
+Saga Pattern (Recommended for Simplicity and Scalability)
+============================================================
+
+-> Saga is a sequence of local transactions. Each service performs its local transaction and publishes an event or calls the next service. 
+-> If one transaction fails, a compensating transaction is triggered in previous services to undo the work.
+
+
+Two Saga Variants:
+------------------
+1) Choreography (event-driven, no central orchestrator)
+2) Orchestration (a central controller orchestrates the flow)
+
+
+1) Choreography-Based Saga (Event-Driven)
+------------------------------------------
+Communication: Via events (e.g., Kafka, RabbitMQ)
+Flow: Decentralized — no central coordinator; each microservice reacts to events independently.
+Compensation:
+   -> When a service detects failure, it publishes a failure event.
+   -> Other services listen for failure events and trigger their own compensations (rollbacks) as needed.
+Advantages: Loosely coupled, scalable, asynchronous, no single point of failure.
+Rollback trigger: Kafka events or messages that indicate failure → services handle rollback internally.
+
+
+
+2) Orchestration-Based Saga (Central Controller)
+------------------------------------------------
+Communication: Via direct API calls (e.g., HTTP calls using WebClient, REST, gRPC)
+Flow: Centralized — a Saga orchestrator service controls the entire saga flow, telling each service when to perform forward or compensating actions.
+Compensation: Orchestrator calls compensation APIs on services explicitly to rollback transactions if a failure occurs downstream.
+Advantages: Explicit control, easier to visualize and manage complex workflows.
+Rollback trigger: Direct API calls (e.g., WebClient) from the orchestrator to rollback.
+
+===============================================================================================================================================
+===============================================================================================================================================
+
+Choreography-Based Saga (Event-Driven) in Spring Boot Microservices
+---------------------------------------------------------------------
+
+Concept
+-------
+-> No central orchestrator.
+-> Each service emits events after completing local transactions.
+-> Other services listen to these events and react accordingly.
+-> Compensations are triggered via events if something goes wrong.
+-> Uses an event bus or message broker (Kafka, RabbitMQ).
+
+
+Architecture Overview
+----------------------
+Client → API Gateway → Machines Service → (publishes event) → Reports Service → (publishes event)
+Machines Service <— listens for events <— Reports Service
+
+
+Steps:-
+-------
+Step 1: Setup Messaging Infrastructure (I am using Kafka)
+
+Step 2: Machines Service – Produce MachineCreatedEvent
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class MachineCreatedEvent {
+    private String machineId;
+    private String details;
+}
+
+-> When Machines completes its local transaction (e.g., create machine), it publishes MachineCreatedEvent. Below is the Code for the Same,
+
+@Service
+public class MachineService {
+
+    @Autowired
+    private KafkaTemplate<String, MachineCreatedEvent> kafkaTemplate;
+
+    public void createMachine(MachineRequest request) {
+        Machine machine = machineRepository.save(new Machine(...));
+        
+        // Publish event
+        MachineCreatedEvent event = new MachineCreatedEvent(machine.getId(), "details");
+        kafkaTemplate.send("machine-events", event);
+    }
+}
+
+Step 3: Reports Service – Consume MachineCreatedEvent and React
+
+@Component
+public class MachineCreatedEventListener {
+
+    @Autowired
+    private ReportRepository reportRepository;
+
+    @Autowired
+    private KafkaTemplate<String, ReportCreatedEvent> kafkaTemplate;
+
+    @KafkaListener(topics = "machine-events", groupId = "reports-group")
+    public void handleMachineCreated(MachineCreatedEvent event) {
+        try {
+            // Generate Report based on machine info
+            Report report = reportRepository.save(new Report(event.getMachineId(), ...));
+
+            // Publish success event
+            ReportCreatedEvent reportEvent = new ReportCreatedEvent(report.getId(), report.getMachineId());
+            kafkaTemplate.send("report-events", reportEvent);
+
+        } catch (Exception e) {
+            // Publish failure event or compensation event
+            ReportFailedEvent failedEvent = new ReportFailedEvent(event.getMachineId(), e.getMessage());
+            kafkaTemplate.send("report-events", failedEvent);
+        }
+    }
+}
+
+Step 4: Machines Service – Listen to Report Events for Compensation
+
+@Component
+public class ReportEventListener {
+
+    @Autowired
+    private MachineRepository machineRepository;
+
+    @KafkaListener(topics = "report-events", groupId = "machines-group")
+    public void handleReportFailed(ReportFailedEvent event) {
+        // Compensation logic: Rollback machine creation
+        machineRepository.deleteById(event.getMachineId());
+    }
+}
+
+================================================================================================================
+================================================================================================================
+
+
+Summary of the Flow
+--------------------
+-> Machines service creates machine and publishes MachineCreatedEvent.
+-> Reports service listens, generates report, then publishes ReportCreatedEvent or ReportFailedEvent.
+-> Machines service listens to ReportFailedEvent and rolls back machine if needed.
+
+
+Advantages of Choreography-based Saga
+----------------------------------------
+-> Loose coupling: Services don’t depend on a central orchestrator.
+-> Scalable and resilient.
+-> More natural event-driven architecture.
+-> Event logs can be used for auditing and replay.
+
+
+Tools & Dependencies
+--------------------
+-> Spring Boot + Spring Kafka / Spring Cloud Stream
+-> Kafka Cluster (or RabbitMQ)
+-> Avro or JSON for event serialization
+-> Database per microservice
+
+

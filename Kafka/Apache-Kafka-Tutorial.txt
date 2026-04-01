@@ -1,0 +1,269 @@
+Youtube URL:- https://www.youtube.com/watch?v=c7LPlWvxZcQ&t=16583s
+
+Q) What is Apache Kafka
+A) Apache Kafka is am Open-Source Distributed Event Streaming Platform.
+-> Kafka is also Called as Message Broker.
+
+Q) What is Event Streaming
+A) Sending or Generating the Continuous Data or Real-time Data as a Stream from 1 server to another is called Event Streaming.
+Example:- Booking Flights, Booking a Cab, Locations Update etc.
+
+Q) How Does Kafka Work
+A) Publish Subscribe Model, Where Publisher will publish the Event/Messages to Messaging System Like Kafka.
+-> Messages will go and Sit in the Message Broker.
+-> Subscriber will go to the Message Broker and will ask for the Messages (or) Subscriber will Simply Listen to Message Broken to get the Messages.
+
+Q) Kafka Architecture and Its Components
+A) Kafka Components:- Producer, Consumer, Broker, Cluster, Topic, Partitions, Offset, Consumer Groups and Zookeeper.
+
+Producer:- Producer is the Source of Data who wil Publish the Events/Messages.
+
+Consumer:- Consumer will act as Receiver. Responsible for Consuming the Messages.
+-> Each Consumer Instance has to get Mapped with Consumer-Id or Group-Id.
+-> Even Though we have single Consumer Instance, we have to map this consumer instance to a Group-Id.
+-> This Group-Id is to find the Role of Consumer and to Seggregate Consumer by using this Group-Id.
+-> This Group-Id wil be useful when we have multiple consumer instances are Running and also to achieve Performance.
+
+Broker:- Kafka Broker is a Server. Broker is an Intermediate that helps in Message exchange between producer and consumer.
+-> Publisher will push messages to the Broker/Server. Broker will store that Messages. Consumer will consume the Messages from Broker.
+
+Cluster:- Kafka Cluster can have More than 1 Kafka Broker/Server.
+-> In Case, Producer is producing huge volume of Data, In this case, Single Kafka Broker may not able to handle the Load.
+-> We might need to add additional Kafka Server/Broker, to Process Huge Volume of Data.
+-> We can Group multiple broker using a Kafka Cluster.
+
+Topic:- To Categorize Different Types of Messages, We can create Multiple Topics accordingly to store and categorize the Data.
+-> Kafka Server can have multiple Topics.
+-> Broker stores the Message inside the Topic. Kafka Broker can receive Different types of Events/Messages like Payment Transaction and Ticket Booking etc.
+-> To Read/Listen Any 1 Specific Type of Data, We Need Topics where we can Listen only 1 Specific type od Data over Topic.
+-> Multiple Topics can be created for Multiple type of Data like Payment Transaction, Ticket Booking and Online Orders etc.
+-> Publish will Send Payment Related Data to Paymet_Topic, and Same Topic can be Listened By Consumer.
+
+Partitions:- To Achieve Better Performance and High Availability.
+-> Topic can have Multiple Partitions.
+-> When Producer sends a Message, Then the Message can sit on Any Partition inside a Topic based on Round-Robin Principle.
+-> Producer is Publishing the Billions of Messages to the Topic, It Could be a Storage Challenge for Kafka Topic to Store these Messages.
+-> In this Case, We can Break the Kafka Topic into Multiple Parts and These parts is called as Partitions.
+-> Each Partition Concurrently Accept the Messages to Improve the Performance.
+-> If Any Partition goes off, Then Other Partitions are Available to handle the Loads without any Application Down Time.
+
+Offset:- When Message arrives in Partition, A No. is assigned as Sequence to Each and Every Message. This is called Offset like 0,1,2,3...n.
+-> Inside Partition, Each Message has its own Identity with Offset Number.
+-> Purpose of Offset is to Keep Track of which message have already consumed by Consumer.
+-> Lets Say, After Reading 4 Messages from the Partition-0, Consumer went Down. Wehn Consumer Will back to the online, Then this Offset Value will help him
+to know exactly from where the consumer has to start consuming the Messages.
+
+Consumer Groups:- Its a Group of Consumers. Multiple consumers combined to share the workload, Like Dividing a Task among Multiple consumers.
+-> If A single Consumer is Reading Messages from 3 Partitions, then it will Impact the Performance, Since there is no Concurrency.
+-> In this Case, we can create more consumer Instances.
+-> Now, We can Group All these Consumers into a single Unit By Specifying the Group name. This is Called Consumer Group.
+-> Let Say, Payment_Consumer_Group has 3 Consumer Instance, Since we have Multiple Consumer, We can Divide the Workload of Each and Every Consumer to
+achieve Better Performance and Throughput.
+-> Now Payment_Consumer_Group-1 will Consume from partition-0, Payment_Consumer_Group-1 can read from partition-0 and so on.
+-> In this Case, All the 3 consumer instance will read Parallel from Each and every Partition.
+
+Zookeeper:- Zookeeper is used to Keep Track of Kafka CLuster. Also keeps Track of Topic, Partitions, Offset and Other Components of Kafka.
+-> Zookeeper will act as a Manager for Kafka Cluster.
+-> Zookeeper also Manages to Store the Messages into Partitions by Round-Robin Principle if we have Multiple Partitions.
+
+Q) What is Consumer Rebalancing
+A) If we have 3 partitions and 3 Consumers. And these Consumers will read messages from Each Partitions.
+-> If 4th Consumer is Introduced, then this Consumer will sit Ideally without doing anything.
+-> If any Consumer Instance is down, then this 4th Consumer will connect with any Partition.
+
+Q) How to Visualize Kafka Topics and Messages
+A) We can Use Tool Called "Offset Explorer".
+
+Q) How many ways we can create Kafka Topic
+A) There are 2 ways, where we can create Kafka Topic. By CLI or Command Prompt and By Programmatically
+1) By CLI or Command Prompt:- Below Command is to Create Topic Name with Number of Partitions by Command Prompt,
+Command:- bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic NewTopic --partitions 3 --replication-factor 1
+
+2) By Programmatically
+Ex:-
+---
+import org.apache.kafka.clients.admin.NewTopic;
+
+@Configuration
+public class KafkaProducerConfig {
+
+@Bean
+public NewTopic createTopic(){
+ return new NewTopic(name: "javatechie-demo-3", 5, (short) 1);
+}
+}
+
+Note:- In Above NewTopic, 3 arguments are (TopicName, NumberOdPartitions, replication-factor)
+
+
+======================================================================================================================================================
+======================================================================================================================================================
+
+Test Scenario-1
+---------------
+If Kafka-Topic has 3 Partitions and We have 4 Consumer Instances with Same Topic Name Up and Running, Then After Publishing the 10K Recors to the Topic,
+We could see, Out of 4 Consumers, Only 3 Consumers have read the Messages and Last Consumer is not reading any Messages.
+-> This is because, we have only 3 Partition to that Topic and We have 4 Consumer.
+-> In This, Only any 3 Consumer will read Messages and Last Consumer will just sit Idle and will do Nothing.
+-> This Last or 4th Consumer will come into Picture when any of the Consumer out of 4 Instance will go down.
+-> Out of this 4 Consumer Instances, Any 3 Consumer can read this Messages from partitions, like C-0,C-1 and C-4. Its not on Sequential Manner.
+
+Test Scenario-2
+---------------
+Q) How to Verify if Kafka Consumer have Read all the Messages if Consumer is Shutdown in between while Reading Messages. How to Verify, how many
+Messages Consumer has received and How many Messages Consumer has didn't received
+A) To Verify this We have "Offset Explorer", in this we could see, In Each Partion in a topic, How many Messages have been, How many Messages have been
+Read and How many Messages have been Not Read(As Lag).
+
+Test Scenario-3
+---------------
+Q) What is the Use of Serialization and De-Serialization in Kafka.
+A) Kafka only works with bytes. Kafka Will Look for Byte[] as Input.
+-> If we Send any String, It will be converted to byte[] and publish to the Topic, Consumer can consume the Byte[] and convert it to String Internally.
+-> But If we Send any Data such as Custom Object as "Customer" over Kafka Topic, and if Consumer will try to read this Data then will end up getting
+Exception as "ERROR : Can't convert value of class com. javatechie.dto. Customer to class org.apache.kafka. common. serialization.StringSerializer.."
+
+Solution:- To resolve this, we need to Configure key-serializer as String to convert the Key and value-serializer as JsonSerializer to convert the value.
+-> By this Kafka will accept the Input as Json and publish to the Topic.
+-> Consumer will accept this Json, as we have configured JsonDeserializer. Below is the Properties
+
+In Publisher:-
+key-serializer: org.apache.kafka.common.serialization.StringSerializer
+value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+In Consumer:-
+key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+-> Even After Above Configuration in Consumer, We may still get Exception while Making Up Consumer Server, Below might be the Exception,
+Exception:- "Caused by: java.lang.IllegalArgumentException: The class is not in the trusted packages. If you believe this class is safe to deserialize,
+please provide its name. If the serialization is only done by a trusted source.."
+-> Then we also need to configure the below property in application.properties file
+Ex:- spring.kafka.consumer.properties.spring.json.trusted.packages = {Specify the Package Name of Custom Class}
+
+Test Scenario-4
+---------------
+We can Also Have Java based config Approach.
+-> Instead of defining all this configurations in application.properties file, We have another option where we can define our own kafka config.
+-> Where we create a Separate Config Class which will have our own kafka related configurations.
+Ex:-
+----
+@Bean
+public Map<String, Object> producerConfig(){
+	Map<String, Object> props=new HashMap<>;
+	props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+	props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+	props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+}
+@Bean
+public ProducerFactory<String, Object> producerFactory){
+	return new DefaultKafkaProducerFactory<>(producerConfig();
+}
+
+-> And other Bean classes related to Kafka Topic.
+-> Same Config we can define in Consumer Project as well.
+-> After all this Java based config, We could see Kafka is able to send and read messages as earlier.
+
+Test Scenario-5
+---------------
+Q) How to Send and Read Messages from Particular Partition
+A)Below is the code,
+From Publisher,
+Earlier:- KafkaTemplate.send("Topic-Name", messages);
+Now:-     KafkaTemplate.send("Topic-Name", 2, null, messages) //(topic, partition, K key, data)
+
+In Consumer,
+Earlier:- ®KafkaListener(topics = "Topic-Name",groupId = "groupId")
+Now:-     ®KafkaListener(topics = "Topic-Name",groupId = "groupId", topicPartitions = {TopicPartition(topic = "Topic-Name",partitions = {"2"})})
+
+======================================================================================================================================================
+======================================================================================================================================================
+
+Test Scenario-6
+---------------
+Q) How to Handle Failed Messages and How to Avoid to Loose Any Data (Error Handling)
+A) We can Specify No. of Retry Attempts by using @RetryableTopic(attempts="4") //3 Times Retry. (N-1)
+ex:-
+----
+    @RetryableTopic(attempts = "4")// 3 topic N-1
+    @KafkaListener(topics = "${app.topic.name}", groupId = "javatechie-group")
+    public void consumeEvents(User user, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, @Header(KafkaHeaders.OFFSET) long offset) {
+    }
+    
+-> By Defining this Annotation, Internally it will create 3 Topics such as "Topic-Name-retry-0-0"  for Each re-Attempt.
+ex:-
+----
+For 1st Retry Attempt :- Topic-Name-retry-0
+For 2nd Retry Attempt :- Topic-Name-retry-1
+For 3rd Retry Attempt :- Topic-Name-retry-2
+Note:- Topic-Name-retry-2 topic only be created if 1st 2 Retry Fails. If 1st 2 retry attempts, problem gets solved then Topic-Name-retry-2 wont be created.
+
+-> If we do not specify any attempt, then by default Kafka will try 3 attempts.
+-> Even though, After Multiple Retry Attempts, If the Issue is not Resolved, We can Push those Messages to Dead Letter Topic.
+-> In this Case, It will create 1 more Topic as "Topic-Name-dlt" for Dead Letter Topic.
+
+=> Dead Letter Topic:- All Failed Events/Messages will be Stored in Dead Letter Topic with topic name as "Topic-Name-dlt"
+ex:-
+----
+    @DltHandler
+    public void listenDLT(User user, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, @Header(KafkaHeaders.OFFSET) long offset) {
+        log.info("DLT Received : {} , from {} , offset {}",user.getFirstName(),topic,offset);
+    }
+-> Below is Syntax, If any Messages Failed and these failed Messages will get stored in DLT Topic as "Topic-Name-dlt". This Topic will get created
+By Above Annotation and we dont have to handle anything to create the Topic and Store Messages in DLT.
+    
+=> We can decide Interval between each Retry Attempts.
+ex:-
+@RetryableTopic(attempts = "4",backoff = ®Backoff(delay = 3000, multiplier = 1.5,maxDelay = 15000))
+
+=> We can Also exclude various type of Exception which we dont want to handle while Retry Attempts
+ex:-
+----
+@RetryableTopic(attempts = "4", exclude = {NullPointerException.class,RuntimeException.class})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

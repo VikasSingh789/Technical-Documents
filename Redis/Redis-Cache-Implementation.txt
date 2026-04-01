@@ -1,0 +1,619 @@
+In a Spring Boot microservice, you can implement caching for two different objects (e.g., User and Employee) using Redis and Spring Cache.
+You can use different cache keys for each object type, and Spring's caching abstraction provides a clean way to manage caching behavior for different objects.
+
+Below is a step-by-step guide to implement caching for User and Employee objects in a Spring Boot application:
+
+1. Add Dependencies
+--------------------
+You need to include the following dependencies in your pom.xml file to enable Redis caching in your Spring Boot application.
+<dependencies>
+    <!-- Spring Boot Cache Abstraction -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+    
+    <!-- Spring Boot Redis -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+
+    <!-- Jackson for serializing objects to store in Redis -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <!-- Spring Boot Actuator for cache metrics (optional) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+</dependencies>
+
+
+2. Enable Caching in Spring Boot
+---------------------------------
+Enable caching in your Spring Boot application by annotating the main class with @EnableCaching.
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+
+@SpringBootApplication
+@EnableCaching
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+
+3. Configure Redis Cache
+-------------------------
+In your application.properties or application.yml, configure the Redis connection settings. Here's an example of the application.properties:
+
+# Redis Configuration
+spring.cache.type=redis
+spring.redis.host=localhost
+spring.redis.port=6379
+spring.redis.timeout=2000
+
+4. Create Cacheable Service
+-------------------------
+You can create a service to handle both User and Employee objects. In this example, we'll use Spring's @Cacheable annotation to cache data.
+Here’s how you can implement caching for User and Employee objects:
+
+a) Define User and Employee Models
+-------------------------
+public class User {
+    private Long id;
+    private String name;
+    private String email;
+
+    // getters and setters
+}
+
+public class Employee {
+    private Long id;
+    private String name;
+    private String role;
+
+    // getters and setters
+}
+
+b) Create Cache Service
+-------------------------
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CacheService {
+
+    // Caching user data with the key "user:{userId}"
+    @Cacheable(value = "users", key = "#userId")
+    public User getUserById(Long userId) {
+        // Simulating fetching data from DB
+        return new User(userId, "John Doe", "john.doe@example.com");
+    }
+
+    // Caching employee data with the key "employee:{employeeId}"
+    @Cacheable(value = "employees", key = "#employeeId")
+    public Employee getEmployeeById(Long employeeId) {
+        // Simulating fetching data from DB
+        return new Employee(employeeId, "Jane Smith", "Manager");
+    }
+}
+
+@Cacheable(value = "users", key = "#userId") stores the cached data under the key user:{userId}. The value specifies the cache name 
+(which Redis uses as the cache key prefix), and the key specifies the individual cache key.
+
+Similarly, @Cacheable(value = "employees", key = "#employeeId") stores the employee data in a separate cache.
+
+c) Configure Cache Manager for Redis
+-------------------------------------
+Spring Boot automatically configures a RedisCacheManager when the spring-boot-starter-data-redis dependency is included.
+However, you can define a custom cache manager if necessary.
+
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.redis.RedisCacheConfiguration;
+import org.springframework.cache.redis.RedisCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+
+@Configuration
+public class RedisCacheConfig {
+
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig())
+                .build();
+    }
+}
+
+This configuration will use the default Redis connection and cache configuration for all caches.
+
+5. Using the Cache in Your Controller
+-------------------------------------
+To use the caching logic in your controller, you can inject the CacheService and use it to fetch user and employee data.
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class CacheController {
+
+    private final CacheService cacheService;
+
+    public CacheController(CacheService cacheService) {
+        this.cacheService = cacheService;
+    }
+
+    @GetMapping("/user/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return cacheService.getUserById(id);
+    }
+
+    @GetMapping("/employee/{id}")
+    public Employee getEmployeeById(@PathVariable Long id) {
+        return cacheService.getEmployeeById(id);
+    }
+}
+
+6. Cache Expiration (Optional)
+-------------------------------------
+If you want to add cache expiration (TTL) for each object type, you can do this in the cache configuration. For instance:
+
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.redis.RedisCacheConfiguration;
+import org.springframework.cache.redis.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.cache.CacheManager;
+import java.time.Duration;
+
+@Configuration
+public class RedisCacheConfig {
+
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofMinutes(60)); // Set TTL for 1 hour
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(cacheConfig)
+                .build();
+    }
+}
+This ensures that cached entries will expire after 1 hour (you can set different TTLs for User and Employee by creating separate cache configurations).
+
+7. Cache Invalidation
+-----------------------
+If you need to invalidate the cache (e.g., after updating a user's or employee's data), you can use @CacheEvict. For example:
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CacheService {
+
+    @CacheEvict(value = "users", key = "#userId")
+    public void deleteUserFromCache(Long userId) {
+        // logic to delete user from DB or perform some other action
+    }
+
+    @CacheEvict(value = "employees", key = "#employeeId")
+    public void deleteEmployeeFromCache(Long employeeId) {
+        // logic to delete employee from DB or perform some other action
+    }
+}
+
+Conclusion
+-------------------------------------
+-> By following the above steps, you can effectively cache both User and Employee objects in Redis for a Spring Boot microservice. 
+You use different cache names and keys to ensure each type of data is stored separately and can be retrieved or invalidated independently.
+-> Cache Separation: Use distinct cache names (users, employees) and keys (user:{userId}, employee:{employeeId}) for different object types.
+-> Cache Expiration: Optionally configure TTL for your cache entries.
+-> Cache Invalidation: Use @CacheEvict for cache invalidation when data changes.
+
+===============================================================================================================================================
+===============================================================================================================================================
+
+Q) How to Set Different TTLs for User and Employee by creating separate cache configurations) ?
+
+To set different TTLs (Time-to-Live) for the User and Employee caches in a Spring Boot application, you can configure separate cache configurations 
+for each cache type. By using a custom CacheManager, you can specify different expiration times for each cache. Here's how you can do that:
+
+Steps to Set Different TTLs for User and Employee Caches:
+=========================================================
+1. Define Custom Cache Configuration for Each Cache
+--------------------------------------------------------
+You can create different cache configurations with different TTLs for User and Employee caches. Spring's RedisCacheConfiguration allows you to specify 
+different settings for each cache, such as the TTL (time to live).
+
+2. Create Cache Manager with Multiple Cache Configurations
+-----------------------------------------------------------
+In this approach, you define a RedisCacheManager that has different configurations for different cache names (such as "users" and "employees"), 
+where each cache can have its own TTL.
+
+Here’s how you can implement this:
+
+Example Code:
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.redis.RedisCacheConfiguration;
+import org.springframework.cache.redis.RedisCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import java.time.Duration;
+
+@Configuration
+@EnableCaching
+public class RedisCacheConfig {
+
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+
+        // Define cache configuration for "users" cache with TTL of 1 hour
+        RedisCacheConfiguration userCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1)) // Set TTL to 1 hour
+                .disableCachingNullValues(); // Optional: Prevent caching null values for users
+
+        // Define cache configuration for "employees" cache with TTL of 24 hours
+        RedisCacheConfiguration employeeCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(24)) // Set TTL to 24 hours
+                .disableCachingNullValues(); // Optional: Prevent caching null values for employees
+
+        // Build the CacheManager with both cache configurations
+        return RedisCacheManager.builder(connectionFactory)
+                .withCacheConfiguration("users", userCacheConfig) // Assign user cache configuration
+                .withCacheConfiguration("employees", employeeCacheConfig) // Assign employee cache configuration
+                .build();
+    }
+}
+
+Explanation:
+-------------
+User Cache Configuration:
+--------------------------
+RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1)) sets the TTL for the "users" cache to 1 hour.
+
+Employee Cache Configuration:
+-----------------------------------------------------------
+RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(24)) sets the TTL for the "employees" cache to 24 hours.
+
+-> RedisCacheManager.builder(connectionFactory): This creates a RedisCacheManager with the necessary configurations.
+->.withCacheConfiguration("users", userCacheConfig) and .withCacheConfiguration("employees", employeeCacheConfig): 
+These methods specify which TTL configuration to use for the respective caches.
+
+3. Cacheable Service with Different Cache Names
+-----------------------------------------------------------
+Now, you can use the cache annotations with specific cache names (users and employees), which correspond to the cache configurations defined above.
+
+a) Cache Service
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CacheService {
+
+    // Caching user data in the "users" cache with TTL of 1 hour
+    @Cacheable(value = "users", key = "#userId")
+    public User getUserById(Long userId) {
+        // Simulating fetching data from DB
+        return new User(userId, "John Doe", "john.doe@example.com");
+    }
+
+    // Caching employee data in the "employees" cache with TTL of 24 hours
+    @Cacheable(value = "employees", key = "#employeeId")
+    public Employee getEmployeeById(Long employeeId) {
+        // Simulating fetching data from DB
+        return new Employee(employeeId, "Jane Smith", "Manager");
+    }
+}
+
+The @Cacheable(value = "users", key = "#userId") will store the User object in the users cache with a TTL of 1 hour (as defined in the configuration).
+
+Similarly, the @Cacheable(value = "employees", key = "#employeeId") will store the Employee object in the employees cache with a TTL of 24 hours.
+
+4. Verify TTL Expiration
+--------------------------
+When you access the cache for the first time, the data will be stored in Redis with the configured TTL for each cache.
+After the TTL expires (1 hour for users, 24 hours for employees), the cache entries will be evicted automatically.
+
+5. Optional - Cache Eviction with TTL
+-------------------------------------
+If you want to manually evict the cache entries when necessary, you can use @CacheEvict. For example:
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CacheService {
+
+    @CacheEvict(value = "users", key = "#userId")
+    public void deleteUserFromCache(Long userId) {
+        // logic to delete user from DB or perform some other action
+    }
+
+    @CacheEvict(value = "employees", key = "#employeeId")
+    public void deleteEmployeeFromCache(Long employeeId) {
+        // logic to delete employee from DB or perform some other action
+    }
+}
+
+This will remove the cached entry for a specific User or Employee.
+
+6. Customizing Cache Names and Keys
+------------------------------------
+You can also customize cache names and keys further by adding custom logic to key generation or setting TTL dynamically.
+
+Conclusion
+By configuring separate cache configurations for User and Employee with different TTLs, you can control the cache expiration time individually for each type of object. The cache TTLs for each cache (users and employees) are set through the RedisCacheConfiguration, and these configurations are applied when the cache manager is created.
+
+
+
+
+================================================================================================================
+================================================================================================================
+Q) SpringBoot Microservice Scenario:- I have created MS where this MS is only Responsible to Authenticate user based on Username and Password.
+Note:- We are using JWT Token for Authentication. Hence we are encrypting password using BCryptPasswordEncoder
+So, Once we Send the Request for Authentication/Login API, in which RequestBody or Payload contains username and password.
+So this payload will go and gets verified via Authentication manager.
+For Every request it will go and Check in DB to veriy username and password.
+
+So tell me, How can i implement and where can i use this Redis Cache to avoid this DB Round this and make efficient JWT Token Generation by avoiding DB Hit 
+and get quick response
+
+Redis Cache Implementation for JWT Login
+-----------------------------------------
+
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private RedisTemplate<String, UserDetails> redisTemplate;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private final String CACHE_PREFIX = "auth_user::";
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        String cacheKey = CACHE_PREFIX + username;
+        UserDetails user = redisTemplate.opsForValue().get(cacheKey);
+
+        if (user != null) {
+            return user;
+        }
+
+        // Fetch from DB
+        User userFromDb = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // Cache the user (with roles and hashed password)
+        redisTemplate.opsForValue().set(cacheKey, userFromDb, Duration.ofMinutes(30)); // Optional TTL
+
+        return userFromDb;
+    }
+}
+
+
+
+public JwtResponse authenticateUser(LoginRequest loginRequest) {
+    UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+
+    if (!passwordEncoder.matches(loginRequest.getPassword(), userDetails.getPassword())) {
+        throw new BadCredentialsException("Invalid credentials");
+    }
+
+    String token = jwtUtil.generateToken(userDetails);
+    return new JwtResponse(token);
+}
+
+
+@CacheEvict(value = "auth_user", key = "#username")
+public void clearUserCache(String username) {
+    // do nothing, just evicts cache
+}
+
+================================================================================================================
+================================================================================================================
+
+Q) Yes Please. Help me with the code where how JWT Token can be Blacklisted once its Generated. 
+Lets Say API call is "/Logout", where this API is responsible to Expire or Blacklist the Token and Also help me showing Message to user saying 
+"Logout Successfull" after invoking "/Logout API"
+
+Logout Functionality for JWT
+----------------------------
+@Component
+public class JwtUtil {
+
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    public Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public Date getExpirationDate(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    public long getRemainingTime(String token) {
+        Date expiration = getExpirationDate(token);
+        long remaining = expiration.getTime() - System.currentTimeMillis();
+        return Math.max(remaining, 0);
+    }
+}
+
+
+@Component
+public class JwtBlacklistFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+
+            if (Boolean.TRUE.equals(redisTemplate.hasKey("blacklist::" + token))) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token is blacklisted. Please login again.");
+                return;
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}
+
+
+@RestController
+@RequestMapping("/api/auth")
+public class LogoutController {
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body("Invalid token");
+        }
+
+        String token = authHeader.substring(7);
+        long ttl = jwtUtil.getRemainingTime(token);
+
+        // Add to Redis blacklist with TTL
+        redisTemplate.opsForValue().set("blacklist::" + token, "true", Duration.ofMillis(ttl));
+
+        return ResponseEntity.ok("Logout Successful");
+    }
+}
+
+
+spring:
+  redis:
+    host: localhost
+    port: 6379
+
+
+Optional: Add RedisTemplate Bean Config
+---------------------------------------
+@Configuration
+public class RedisConfig {
+
+    @Bean
+    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+        return template;
+    }
+}
+
+================================================================================================================
+================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

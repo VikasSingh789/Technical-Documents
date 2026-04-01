@@ -1,0 +1,162 @@
+Step	Component	                                             Responsibility	                              Notes
+----  --------------------------------------------------   -----------------------------------      ----------------------------------------------
+1️⃣	  AuthenticationManager	                                Entry point for authentication	         Delegates to AuthenticationProvider
+2️⃣	  AuthenticationProvider (DaoAuthenticationProvider)	Performs actual authentication	         Calls UserDetailsService
+3️⃣	  UserDetailsService	                                Loads user details from DB	             Returns UserDetails object
+4️⃣	  PasswordEncoder	                                    Validates raw vs encoded password	     Used internally by DaoAuthenticationProvider
+5️⃣	  Authentication Success	                            Creates authenticated object	         Stored in SecurityContextHolder
+6️⃣	  JWT Generation	                                    Custom logic after authentication	     Returns token to client
+7️⃣	  JWT Validation (Filter)	                            Validates token on each request	         Populates SecurityContextHolder
+8️⃣	  Authorization	                                        Checks roles/permissions	             Defined in SecurityFilterChain or annotations
+
+-> AuthenticationManager receives the login request and wraps the credentials inside a UsernamePasswordAuthenticationToken.
+-> It then delegates the authentication process to the AuthenticationProvider (typically DaoAuthenticationProvider).
+-> The DaoAuthenticationProvider calls the UserDetailsService to load user details from the database.
+-> Once the user’s details are retrieved, the PasswordEncoder validates the raw password against the stored encoded password.
+-> If the credentials are valid, Spring Security creates an authenticated Authentication object and stores it in the SecurityContextHolder.
+-> After successful authentication, your application generates a JWT token containing user information and returns it to the client.
+-> For subsequent requests, a JWT Authentication Filter intercepts each request, validates the token, and repopulates the SecurityContextHolder.
+-> Finally, Spring Security’s Authorization layer checks the user’s roles or authorities to determine whether the user can access the requested resource.
+
+
+====================================================================================================================================
+====================================================================================================================================
+
+@Configuration
+@EnableWebSecurity
+public class AuthConfig {
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new CustomUserDetailsService();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> auth.requestMatchers(
+                "/auth/login", "/auth/updatePassword", "/auth/refreshToken", "/auth/resetPassword","/auth/forgotUsername",
+                "/auth/deleteAllExpiredToken","/auth/appconfig","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/mobileauth/actuator/**")
+                .permitAll()).httpBasic(Customizer.withDefaults()).build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+}
+
+Q1) By Above Code, It Seems, I have Separated JWT Related Config from SecurityFilterChain Class. Is My UnderStanding Correct ?
+A) In your AuthConfig class, the securityFilterChain method is currently handling:
+-> CSRF disable
+-> Public endpoint configuration (via .authorizeHttpRequests() and .permitAll())
+-> Basic authentication configuration (httpBasic(Customizer.withDefaults()))
+
+That means your SecurityFilterChain is defining general security rules — what endpoints are open and what are protected.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) In SecurityFilterChain, I am Only Handling csrf Disable and Request Matchers. Rest all related to JWT Validation, I have created seprate Bean.
+A) Your SecurityFilterChain defines the rules (which endpoints are open, which are protected)
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Why We need to make csrf disable here ? And It will be Stateless or StateFull. Explain Both What happens in them and Why we are Opting for Stateless.
+A) What is CSRF (Cross-Site Request Forgery)?
+CSRF is an attack where a malicious website tricks a logged-in user’s browser into sending unwanted requests to your server (using their existing session cookies).
+-> Spring Security enables CSRF protection by default for web applications that use session-based authentication (like form login).
+-> It works by requiring a special CSRF token in each POST/PUT/DELETE request to verify that the request originated from your own site.
+
+Why Disable CSRF in JWT-Based APIs
+In a JWT-based REST API, you don’t rely on browser sessions or cookies — every request carries its own authentication token in the Authorization header.
+
+That means:
+-> There’s no session to hijack.
+-> Each request is independently authenticated using the JWT.
+-> So CSRF protection becomes unnecessary and can safely be disabled.
+
+✅ Hence:
+http.csrf(AbstractHttpConfigurer::disable); is standard practice in stateless JWT-based APIs.
+
+Stateful vs Stateless Authentication
+------------------------------------
+Feature	                       Stateful	                                        Stateless
+Session	                       Server maintains session per user	            No session; each request is independent
+Authentication Storage	       Stored in server memory (HttpSession)	        Stored in JWT token on client
+Scalability	                   Harder to scale (session replication needed)	    Easy to scale (no shared state)
+CSRF Protection	               Required	                                        Not required
+Example	                       Traditional web apps (form login)	            REST APIs with JWT or OAuth
+
+
+Why We Opt for Stateless in Microservices
+In microservices:
+-> Each service should be independent and stateless.
+-> You don’t want to store session data across multiple instances.
+-> JWT tokens allow each service to validate requests without needing shared session storage.
+✅ Therefore:
+We disable CSRF and set session policy to STATELESS because:
+-> JWT already provides authentication per request.
+-> No session data is needed.
+-> It scales better across distributed services.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) What Does This Below Code Means .httpBasic(Customizer.withDefaults()).build();
+A)
+1) What httpBasic() Does
+-------------------------
+httpBasic() enables HTTP Basic Authentication.
+
+HTTP Basic Auth means:
+-> The client sends credentials (username:password) encoded in Base64 in the Authorization header.
+Example: Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+-> Spring Security decodes it and authenticates the user using your configured AuthenticationProvider.
+
+2) What Customizer.withDefaults() Means
+---------------------------------------
+This simply means: “Use the default configuration for HTTP Basic Authentication.”
+So ".httpBasic(Customizer.withDefaults())" enables Basic Auth with default behavior — no custom entry points, no special handlers.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Putting It All Together — Your Configuration Explained
+-------------------------------------------------------
+Section	                                       Purpose	                                       Explanation
+-------------------------------------     -----------------------------------------       --------------------------------------------
+@EnableWebSecurity	                       Activates Spring Security	                   Enables web security configuration
+userDetailsService()	                   Loads user details from DB	                   Used by DaoAuthenticationProvider
+securityFilterChain()	                   Defines endpoint access and basic rules	       Handles CSRF, public endpoints, basic auth
+csrf(AbstractHttpConfigurer::disable)	   Disables CSRF	                               Not needed for stateless JWT APIs
+.authorizeHttpRequests()	               Defines which endpoints are public	           /auth/login, /swagger-ui/**, etc.
+.httpBasic(Customizer.withDefaults())	   Enables Basic Auth	                           Optional; not needed for JWT
+passwordEncoder()	                       Encodes passwords	                           Used by DaoAuthenticationProvider
+authenticationProvider()	               Validates credentials	                       Uses UserDetailsService + PasswordEncoder
+authenticationManager()	                   Entry point for authentication	               Delegates to AuthenticationProvider
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Q1: Separated JWT config from SecurityFilterChain?	
+✅ Yes, JWT handled separately (usually via custom filter).
+
+Q2: SecurityFilterChain only handles CSRF & matchers?	
+✅ Correct — it defines general rules, not JWT logic.
+
+Q3: Why disable CSRF? Stateless or Stateful ?
+✅ Disable CSRF for stateless JWT APIs; stateless = no session, scalable, secure.
+
+Q4: What does .httpBasic(Customizer.withDefaults()) mean?
+✅ Enables HTTP Basic Auth (username/password via header); not needed for JWT.

@@ -1,0 +1,437 @@
+Features Introduced in Java-17
+-------------------------------
+1) Switch Statement Enhancements
+2) Sealed Classes
+3) Text Blocks
+4) Record Class
+5) Pseudorandom Number Generators
+6) Pattern Matching with InstaneOf
+
+
+======================================================================================================================================
+======================================================================================================================================
+
+1) Switch Statement Enhancements
+--------------------------------
+-> Before Java 17, Below is the Switch Statement Code
+int num = 2;
+String result;
+switch(num){
+case 1 : 
+    result = "one";
+    break;
+case 2 : 
+    result = "two";
+    break;
+default :
+    result = "unknown";
+    break;
+}
+
+
+-> Whereas in Java 17, We can Assign value to result variable using "->" Operator.
+int num = 2;
+String result = switch(num){
+	case 1   -> "one";
+	case 2   -> "two";
+	default  -> "unknown";
+};
+
+Multiple Values per Cases
+-------------------------
+-> Before Java 17, Below is the Multiple Value Switch Statement Code
+int num = 2;
+String result;
+switch(num){
+case 1 : 
+    result = "one";
+    break;
+case 2 : 
+    result = "two";
+    break;
+default :
+    result = "unknown";
+    break;
+}
+
+-> After Java 17, Below is the Multiple Value Switch Statement Code
+int num = 2;
+String result = switch(num){
+	case 1   -> "one";
+	case 2,3,4   -> "two Three Four";
+	default  -> "unknown";
+};
+
+Note:- Even Though We dont have break keyword, Particular Case Block Will Still get Executed in Java-17.
+-> Break is Not Required and particular Case will get Executed Automatically and will come out from Switch Statement.
+-> Use of "->"(Arrow) Operator is used to define the block of Statements for a Particular Case.
+
+Important Notes
+---------------
+-> We use "->"(Arrow) Operator to assign value to result variables.
+-> "->"(Arrow) Operator is used to define the block of Statements for a Particular Case.
+-> We Dont Need break Statements to Execute Switch Statement.
+-> default case or default keyword is mandatory if we are Dealing with Primitive Types in Java-17 Switch Statement.
+-> default case or default keyword may or may not be mandatory if we are Dealing with Enums Constants
+-> Before Java-17, If we pass "null" value to switch statement, then will end up getting NullPointerException.
+-> From Java-17, We can also pass "null" value to switch statement like "case null -> "Null Values";
+-> From Java-17, We can Also Pass Objects as Switch Statements. 
+-> Pattern Matching:- Before Java 17, We were allowed to pass only Numbers, ENUMS and String Values to Switch Statement.
+-> Passing Objects to Switch Statement is called Pattern Matching in Java-17. Based on Type of Object, Respective Case will get Executed.
+
+Pattern Matching
+----------------
+public static String objectType(Object obj) {
+		return switch (obj) {
+		case Integer i -> "Object is of Integer Type";
+		case String s -> "Object is of String Type";
+		case null -> "Object is Null";
+		default -> "Unknown Type";
+		};
+	}
+
+Note:- Earlier we used to use "insatnceOf" keyword to check the Type of Object. Below is the Example,
+public static String objectType(Object obj) {
+		String formatted = "UnKnown";
+		if(obj instanceOf Integer i){
+			formatted = String.format("int %d", 1)
+		} else if(obj instanceOf Long i){
+			formatted = String.format("long %d", 1)
+		}
+		return formatted;
+	}
+	
+Guarded Patterns
+----------------
+-> Writing some conditions inside case label itself is called Guarded Patterns. Below is the Example,
+public static String classifyNumber(Number number) {
+		return switch(number) {
+		case Integer i -> i%2==0 ? "Even Number" : "Odd Number";
+		case Double d -> d > 0 ? "Positive Double" : "Positive Double";
+		case default d -> "Unknown Number";
+		};
+	}
+-> As Shown in Above Program, We can now add guard clause to case labels using the "->" symbol, followed by a boolean expression.
+-> If expression evaluates to true, code associated with that case label will be executed.
+	
+
+Note:- Guarded Patterns can be used with various types os patterns, Including
+-> Type Pattern
+-> Record Pattern
+-> Array Patterns
+
+public static String classifyNumber(Object obj) {
+		return switch(obj) {
+		case String s -> "Object is of String Type";  //Pattern matching
+		case String s when s.length() > 5 -> "Long String";  //Type Patterns
+		case Rectangle r when obj.getWidth() > 10 -> System.out.println("Width of Rectangle");  //Record Patterns
+		case Rectangle r when obj.getWidth() > 10 && obj.getHeight() > 10 -> System.out.println("Width and Height of Rectangle");
+		default -> System.out.println("Not a Rectangle");
+		};
+		
+	}
+	
+======================================================================================================================================
+======================================================================================================================================
+
+2. Sealed Classes
+-----------------
+-> Sealed Classes Provide a way to Control which classes or interfaces can extend or Implement a particular Class or Interface.
+-> To make a class or interface sealed, we use the "sealed" modifier followed by a "permits" clause that lists the classes allowed to extend it.
+-> The "sealed" modifier + "permits" clause defines the allowed subclasses.
+-> Only the classes(Child Classes) or interfaces listed in the permits clause can extend or implement the sealed classe(Parent Class) or interface.
+-> These Sub Classes can themselves be either final, sealed or non-sealed.
+-> Permitted subclasses must explicitly extend or implement the sealed type.
+-> permits is only valid on sealed classes/interfaces.
+-> Jus Like Java Doesn't Support Multiple Inheritance, It doesn't Support Multiple Sealed Class Inheritance
+-> If the sealed class is public, all permitted subclasses must also be public.
+-> If the sealed class is package or private, the permitted subclasses must be in the same package.
+
+Important Notes:-
+-----------------
+-> PaymentSealedClass (Parent Class) and CreditCardSealedClass, BankTransferSealedClass and OnlineTransferSealedClass (Sub Class)
+-> If PaymentSealedClass is marked as sealed class, Then we must need to define "permits" clause as well to tell which classes declares "PaymentSealedClass" as their SuperClass.
+Ex:- public sealed class PaymentSealedClass permits CreditCardSealedClass {}
+
+-> If Sealed class i.e PaymentSealedClass permits child class i.e CreditCardSealedClass, then in CreditCardSealedClass also must need to use "extends" keyword to declare that PaymentSealedClass is direct superclass of CreditCardSealedClass. Below is Example,
+Ex:- public class CreditCardSealedClass extends PaymentSealedClass {}
+
+-> If a class CreditCardSealedClass is a Subclass of a sealed class PaymentSealedClass, Then Subclass "CreditCardSealedClass" should be declared either final, sealed, or non-sealed.
+Ex:- public final class CreditCardSealedClass extends PaymentSealedClass {}
+
+-> If CreditCardSealedClass extends PaymentSealedClass, then We may or may not override method of PaymentSealedClass. Its Optional
+-> We cannot apply "permits" clause if class is "non-sealed". permits clause is only allowed on a sealed class or interface.
+-> If CreditCardSealedClass and BankTransferSealedClass are in same class of PaymentSealedClass, Then "permits" clause is not required.
+Ex:- File: PaymentSealedClass.java
+public sealed class PaymentSealedClass {}
+
+// Subclasses in the same file
+final class CreditCardSealedClass extends PaymentSealedClass {}
+-> If Subclasses are in Different files then only we need to use "permits" clause.
+
+-> If we are making any class like "BankTransferSealedClass" as non-sealed, Then this "BankTransferSealedClass" class must be permitted by Sealed Class like "PaymentSealedClass".
+Ex:- public sealed class PaymentSealedClass permits CreditCardSealedClass, BankTransferSealedClass {}
+     public non-sealed class BankTransferSealedClass extends PaymentSealedClass {}
+
+-> No Class can only be non-sealed. If its a non-sealed then it should have either a sealed direct superclass or a sealed direct superinterface.
+Ex:- public non-sealed class BankTransferSealedClass{}    // Compilation Error.
+
+-> Jus Like Java Doesn't Support Multiple Inheritance, It doesn't Support Multiple Sealed Class Inheritance as well.
+Ex:- public sealed class PaymentSealedClass permits CreditCardSealedClass{}
+     public sealed class OnlineTransferSealedClass permits CreditCardSealedClass{}
+     public non-sealed class CreditCardSealedClass extends PaymentSealedClass, OnlineTransferSealedClass {}  // Compilation Error
+     
+-> We can make sealed class as abstract but not a final sealed class. That would make no sense, because final already prevents extension.
+public abstract sealed class PaymentSealedClass permits CreditCardSealedClass, BankTransferSealedClass {}
+
+======================================================================================================================================
+======================================================================================================================================
+
+3) Text Blocks
+---------------
+-> Text Blocks allows you to create multi-line String literals in a more readable and convenient way.
+-> Text Blocks are a new way to create String literals in java that can span multiple lines. They are enclosed in triple quotes """ and can contain any characters including newlines, Tabs and Spaces.
+
+Before Java-17:- String str = ""This is a text block.\nIt can span multiple lines."";
+Java-17:- Which is Equivalent to above String Response.
+String str = """
+				This is String
+				It can Span Multiple Lines
+			""";
+        
+Advantages of Text Blocks
+--------------------------
+-> Easier to read and maintain multi-line strings
+-> No need for manual \n or concatenation
+-> Preserves formatting (useful for JSON, SQL, HTML, etc.)
+-> Reduces errors and improves code clarity
+
+TextBlock Methods
+-----------------
+1) String::stripIndent():- Removes common leading whitespace that appears on every non-blank line of the text block.
+Ex:- 
+----
+String stripIndent = """
+                Line 1
+                    Line 2
+                Line 3
+                """;
+
+        System.out.println("Original text:");
+        System.out.println(stripIndent);
+
+        String stripped = stripIndent.stripIndent();
+        System.out.println("\nAfter stripIndent():");
+        System.out.println(stripped);
+        
+Output:-
+--------
+Original text:
+Line 1
+    Line 2
+Line 3
+
+After stripIndent():
+Line 1
+    Line 2
+Line 3
+
+Note:-
+------
+if we visualize the spaces (each dot represents one space):
+
+........Line 1
+............Line 2
+........Line 3
+
+Line 1 → 8 spaces before “Line 1”
+Line 2 → 12 spaces before “Line 2”
+Line 3 → 8 spaces before “Line 3”
+
+The minimum common indentation among all lines is 8 spaces.
+
+So stripIndent() removes 8 spaces from every line.
+After stripIndent(), the result is:
+Line 1
+    Line 2
+Line 3
+(Notice that Line 2 still has 4 spaces left — because it had 12 originally, and only 8 were removed.)
+
+2) String::translateEscapes():- Converts escape sequences (like \n, \t, \\, \", etc.) into their actual characters.
+Ex:-
+----
+String text = """
+                First Line\\nSecond Line\\tTabbed
+                """;
+
+        System.out.println("Before translateEscapes():");
+        System.out.println(text);
+
+        String translated = text.translateEscapes();
+        System.out.println("\nAfter translateEscapes():");
+        System.out.println(translated);
+        
+Output:-
+--------
+Before translateEscapes():
+First Line\nSecond Line\tTabbed
+
+
+After translateEscapes():
+First Line
+Second Line	Tabbed
+
+Note:- In Above String, "\\n" converted into NextLine and "\\" converted to tabs space.
+
+3) String::formatted(Object...):- It replaces placeholders (%s, %d, %f, etc.) with provided values.
+Ex:-
+----
+String json = """
+                Name: %s
+                Age: %d
+                City: %s
+                """;
+
+        String result = json.formatted("Alice", 25, "London");
+        System.out.println(result);
+        
+Output:-
+--------
+Name: Alice
+Age: 25
+City: London
+
+======================================================================================================================================
+======================================================================================================================================
+
+4) Record Class
+-> Record Class is used to create Immutable class in a shorter way and to handle boiler plate code like Constructors, hashCode() and equals() and toString() methods.
+-> Example to create a Record Class,
+public record PersonRecord(String name, int age){}
+
+In Above Example, person record class automatically Provides,
+=> A Constructor that takes name and age as parameters.
+=> name() and age() getter methods and Accessors (getter-like methods)
+=> Implementations of hashCode() and equals() and toString() methods.
+
+Notes:-
+-------
+-> Records implicitly extend java.lang.Record
+-> Record Components like Fields will become private and final automatically.
+-> Record Class automatically overrides hashCode() and equals() and toString() methods. No Need to override manually.
+-> Record PersonRecord cannot be extended and cannot be superclass of Any Class, Since record is final and cannot be extended.
+-> We Can't Declare Non-Static Fields inside Record Class. Static Fields are only Allowed.
+-> We can Declare instance or non-static methods.
+-> You cannot mark a record as abstract or final explicitly — it’s already final.
+-> Records can implement one or more interfaces, just like normal classes.
+-> Record classes do not have an automatically generated no-argument constructor.
+-> We can Declare Canonical Constructor By Providing Default Values Manually. Below is the Example,
+Ex:- Canonical Constructor (Used to initialize all fields)
+-----------------------------------------------------------
+public record PersonRecord(int age, String name) implements Bank, Account {
+	
+	public PersonRecord() {  // Canonical Constructor
+		this(1,"Vikas");
+	}
+	
+}
+
+Canonical Rules:-
+------------------
+-> Canonical is the main constructor that takes all record components in order and initizalize the Fields.
+-> Basically, Whenever i create a record class like PersonRecord as .java file name. Its a Record with Canonical Constructor.
+-> In Canonical Constructor, we cannot Swap and Choose limited fields in custom canonical constructor.
+         
+Record
+-------
+public record UserEntityRecord(Long id, String name, String email, String phone, String address) {}  //Actual Record
+public record UserEntityRecord(Long id, String name, null, null, null) {}  ✅ Correct
+public UserEntityRecord(String name, Long id, String email, String phone, String address) // ❌ wrong order in custom constructor
+public UserEntityRecord(Long id, String name) // ❌ missing components in custom constructor
+
+
+
+-> We can also declare Compact constructors. This validate or transform components without repeating parameter declarations.
+Ex:- Compact Constructor (Used for validation)
+----------------------------------------------
+public record PersonRecord(String name, int age) {  // Compact Constructor
+    public PersonRecord {
+        if (age < 0) throw new IllegalArgumentException("Age cannot be negative");
+    }
+}
+
+-> We can use annotations on record components which can be used for frameworks or validation.
+Ex:- public record PersonRecord(@NotNull int age, String name) {}
+
+-> Records are serializable by default (if components are serializable)
+Ex:- public record PersonRecord(String name, int age) implements Serializable {
+	// No additional code needed for Serialization
+}
+
+-> We Can't declare a top-level record as private or protected.
+Ex:-
+----
+public record PersonRecord(String name, int age) {}  // ✅ public record
+record AddressRecord(String city, String country) {} // ✅ package-private record
+private record AddressRecord(String city, String country) {} // ❌ Compile-time error
+
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+
+DTO Example
+-----------
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserEntity {
+	@Id
+	private Long id;
+	private String name;
+	private String email;
+	private String phone;
+	private String address;
+}
+
+public record UserEntityRecord(Long id, String name, String email, String phone, String address) {
+	
+	public UserEntityRecord(Long id, String name, String email, String phone) {
+		this(id,name,email,phone);  // ❌ Problem Here. Compilation Error
+	}
+
+	public UserEntityRecord(Long id, String name) {
+		this(id,name);  // ❌ Problem Here. Compilation Error
+	}
+
+}
+
+Note:- The Fileds which i am not using, atleast i have to initialize as null or 0 based on dataType cause all fileds are final. Like Below,
+public record UserEntityRecord(Long id, String name, String email, String phone, String address) {
+
+    public UserEntityRecord(Long id, String name, String email, String phone) {
+        this(id, name, email, phone, null); // ✅ calls canonical constructor
+    }
+
+    public UserEntityRecord(Long id, String name) {
+        this(id, name, null, null, null); // ✅ calls canonical constructor
+    }
+}
+
+======================================================================================================================================
+======================================================================================================================================
+
+
+	
+
+
+	
+	
+
+ 	
+
+
+
+
+
+

@@ -1,0 +1,241 @@
+Q) A consumer crashes after processing a message but before committing offset. What happens and how do you handle it ?
+A) If a consumer crashes after processing a message but before committing the offset, Kafka will re-deliver the message, leading to duplicate processing (at-least-once delivery).
+
+1️⃣ Understand the Problem
+Since the offset wasn’t committed, Kafka assumes the message wasn’t processed and re-delivers it which Leads to Duplicate Processing
+
+2️⃣ Make Consumer Idempotent (Most Important)
+Ensure processing the same message multiple times gives the same result.
+Example: Use a unique ID (orderId/transactionId) and check if it’s already processed.
+
+3️⃣ Commit Offset After Processing
+Always commit offsets only after successful business logic execution to avoid data loss.
+
+4️⃣ Use Manual Offset Control
+Disable auto-commit and commit offsets explicitly for better reliability.
+
+5️⃣ Handle Failures Properly
+Use retries for temporary issues and send failed messages to a Dead Letter Topic (DLT) to avoid infinite retries.
+
+One-line:- I handle this using idempotent consumers, committing offsets after processing, and using retries with a DLT for failures.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) One consumer instance is slower than others in the same group. How do you handle ?
+1️⃣ Increase parallelism:- Scale consumers or increase topic partitions so load is evenly distributed
+(Consumers ≤ Partitions).
+2️⃣ Optimize message processing:- Remove blocking calls, use async processing, batch DB operations, and reduce payload size.
+3️⃣ Isolate heavy workloads:- Route heavy messages to separate topics or consumer groups.
+4️⃣ Tune consumer configurations:- Adjust max.poll.records, max.poll.interval.ms, session.timeout.ms, and fetch settings to match processing speed.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) 1 microservice publishes events and another updates DB and publishes another event. How do you avoid infinite loops ?
+1️⃣ Event Ownership (Source-Based Filtering)
+-> Each event must have a single owner.
+-> Only the service that owns the data is allowed to publish events about it.
+-> Other services consume but never re-emit the same business event.
+Example
+-------
+-> Order Service publishes OrderCreated
+-> Inventory Service updates stock
+-> Inventory Service does not republish OrderCreated
+
+2️⃣ Idempotent Consumers
+Ensure event processing is idempotent.
+Store processed eventIds
+If the same event arrives again -> skip it
+This handles: Retries, Duplicates, Replayed messages
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) One Kafka topic is heavily used while others are idle. How do you rebalance load ?
+1️⃣ Increase partitions for the hot topic
+-> Kafka scales within a topic via partitions, not across topics.
+-> Add more partitions to the heavily used topic so load spreads across brokers and consumers.
+-> Ensure the consumer group has at least the same number of consumers as partitions.
+Note: ordering is still guaranteed per partition, not globally.
+
+2️⃣ Use a better message key strategy
+-> Uneven keys cause partition gets most traffic.
+-> Use composite keys (e.g., userId + region).
+-> Apply hashing carefully to spread records evenly.
+Why it helps:
+Balanced keys = balanced partitions = balanced brokers.
+
+3️⃣ Split the topic by domain or workload
+-> If one topic handles multiple use cases, split it into multiple logical topics:
+orders-created
+orders-updated
+orders-payments
+-> Route producers based on business intent.
+
+4️⃣ Scale consumer groups independently
+Add more consumers only for the hot topic’s consumer group.
+Keep idle topics with smaller consumer groups to save resources.
+Why it helps:
+Consumers scale independently per topic.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) You have Multiple Consumers interested in the same Event. How do you design topics and Consumer Groups
+1️⃣Create one topic per event type so producers publish events only once and all consumers read from the same source.
+2️⃣Use different consumer groups for consumers that need the same event independently, ensuring each group receives all messages
+3️⃣Use multiple consumers inside a consumer group to scale processing, where partitions are distributed across consumers
+4️⃣Decide the delivery model early, where multiple consumer groups provide pub-sub behavior and a single group provides load sharing.
+5️⃣Configure topic partitions carefully to control parallelism and maintain ordering based on keys like orderId or userId.
+6️⃣Maintain separate offsets per consumer group, allowing independent replay, failure isolation, and safe reprocessing.
+7️⃣Add new consumer groups instead of new topics when new systems need the same events, keeping the architecture clean
+
+Summary:
+One topic handles the event, consumer groups decide who receives it, partitions decide scalability, and offsets ensure isolation and reliability. This approach is scalable, flexible, and production-ready.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Is Pub/Sub and Queue are Both Same ?
+1️⃣ Queue (Point-to-Point Model)
+🔹 Producer sends message to a Queue.
+🔹 Only one consumer receives and processes the message.
+🔹 Used for task processing and load balancing.
+🔹 If multiple consumers exist, messages are distributed among them.
+🔹 Message is removed after it is consumed.
+
+Common tools:
+🔹 RabbitMQ
+🔹 Amazon SQS
+🔹 ActiveMQ
+
+2️⃣ Pub/Sub (Publish–Subscribe Model)
+🔹 Publisher sends message to a Topic/Channel.
+🔹 Multiple subscribers receive the same message.
+🔹 Used for event broadcasting and notifications.
+🔹 Each subscriber gets its own copy of the message.
+
+Common tools:
+🔹 Apache Kafka
+
+Key Difference
+🔹 Queue → One message → One consumer
+🔹 Pub/Sub → One message → Multiple subscribers.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Kafka consumer is lagging behind and not processing messages in real-time. How would you troubleshoot and fix it ?
+1️⃣ Check Consumer Lag:- Difference between current offset and log end offset. Which partition or consumer instance has the highest lag.
+
+2️⃣ Analyze Consumer Processing Performance:- If the consumer application is slow, it cannot keep up with incoming messages.
+Common reasons include:
+------------------------
+Heavy business logic
+Slow database queries
+External API calls
+Large message processing
+CPU or memory bottlenecks
+
+3️⃣ Increase Consumer Parallelism
+-> Kafka processes messages in parallel using partitions. If there are fewer consumers than partitions, each consumer has to process more partitions, which can create a bottleneck.
+-> To fix this:- Increase the number of consumers in the consumer group
+-> Ensure the topic has enough partitions to support parallel processing
+-> This allows the workload to be distributed across multiple consumers.
+
+4️⃣ Check Consumer Configuration
+-> max.poll.records
+-> fetch.min.bytes / fetch.max.bytes
+-> max.poll.interval.ms
+-> Misconfiguration can slow consumption.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) You have multiple consumers in the same group. How does Kafka ensure load balancing?
+A) Kafka ensures load balancing by assigning partitions across consumers in a group.
+-> Each partition is assigned to only one consumer, and distribution depends on the number of partitions vs consumers.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) You need to guarantee message ordering for a specific account ID. How would you design the producer logic ?
+A) To ensure strict ordering for a specific account in Kafka, the producer logic must be designed carefully around partitioning and controlled message flow.
+
+1️⃣ Use Account ID as the Message Key
+-> Kafka guarantees ordering only within a partition, not across partitions.
+👉 So the key idea is:
+Assign account ID as the message key. Kafka will always send messages with the same key to the same partition
+
+✅ Result:
+All events for one account go to a single partition
+Order is preserved automatically.
+
+2️⃣ Enable Idempotent Producer
+-> Retries can cause duplicate or out-of-order messages.
+👉 Solution:
+Use an idempotent producer. This ensures: No duplicates Order is preserved even during retries.
+
+3️⃣ Use Reliable Acknowledgment Settings
+To avoid data loss and maintain order:
+Wait for full acknowledgment from Kafka (all replicas) before sending the next message.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Your producer is sending messages faster than consumers can process. How would you handle backpressure ?
+1️⃣ Control Producer Throughput
+-> The first step is to slow down the producer so it doesn’t overwhelm Kafka or consumers.
+-> Configure batching using batch.size and linger.ms
+-> Limit request rate using max.in.flight.requests.per.connection
+-> This ensures producers send data in a controlled manner instead of flooding the system.
+
+2️⃣ Scale Consumers Horizontally
+-> Kafka is designed for parallel consumption using partitions.
+-> Increase the number of consumers in a consumer group
+-> Ensure topic has enough partitions to support parallelism
+-> More consumers = faster processing = reduced lag
+
+3️⃣ Increase Topic Partitions
+-> If consumer scaling is limited, Increase number of partitions in the topic
+-> This allows more parallel consumption.
+
+4️⃣ Implement Consumer Flow Control
+-> Consumers can control how much data they fetch by max.poll.records
+-> Adjust fetch.min.bytes and fetch.max.wait.ms
+-> This prevents consumers from getting overwhelmed with too many records at once.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Messages are produced successfully but not visible to consumers. How do you debug this issue ?
+-> Confirm that both producer and consumer are connected to the same Kafka cluster and listening to the exact same topic. Topic name or environment mismatch is one of the most common real-time issues.
+-> If the consumer is configured to start from the latest offset, it will skip previously produced messages. This is a frequent issue during application restarts and testing.
+-> Check that the consumer application is running without errors and continuously polling. Any exception, blocking logic, or misconfiguration can stop message consumption.
+-> Messages may be present in the topic, but the consumer may fail to deserialize them due to a format mismatch, making them appear invisible.
+
+Summary:- When messages are produced but not visible to consumers, I systematically check topic alignment, consumer group offsets, offset reset behavior, polling logic, serialization compatibility, monitoring metrics, and security permissions to quickly identify and resolve the issue.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

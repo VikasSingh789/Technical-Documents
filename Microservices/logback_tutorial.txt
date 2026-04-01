@@ -1,0 +1,194 @@
+1) Create logback.xml in each microservice (Say Machines)
+-----------------------------------------------------------
+
+<configuration>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/machines.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>logs/machines.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>
+
+
+2) Directory structure and permissions
+---------------------------------------
+-> Each microservice will create a logs/ folder at runtime in the current directory unless you specify an absolute path.
+-> You can use absolute paths if you want logs to go somewhere specific, e.g. /var/log/machines.log.
+-> Make sure your app has write permissions to the folder.
+
+
+3) Optional: Include Console appender
+---------------------------------------
+-> If you want logs both in file and console:
+
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+        <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+</appender>
+
+<root level="INFO">
+    <appender-ref ref="FILE" />
+    <appender-ref ref="STDOUT" />
+</root>
+
+
+============================================================================================================
+============================================================================================================
+
+Log file naming pattern for Machine MS:
+----------------------------------------
+Current log file:-                 logs/machines.log
+Rolled over (archived) log files:- logs/machines.YYYY-MM-DD.log
+
+where YYYY-MM-DD is the date when the rollover happened (e.g., machines.2025-05-28.log)
+
+============================================================================================================
+============================================================================================================
+
+Q) How Old Logs will be Deleted automatically from logs folder in each MS
+A) By setting <maxHistory>30</maxHistory> in the TimeBasedRollingPolicy, Logback automatically deletes log files older than 30 days. No extra code needed.
+
+Q) If 32 Days Passes, What happens in Log Folder
+A) maxHistory=30 means Logback keeps logs for the last 30 days.
+-> Each day at rollover, it checks and deletes only the log files older than 30 days.
+-> So if 32 days have passed since a log file’s date, that single log file (or any others older than 30 days) gets deleted during that day’s rollover.
+-> It does not delete all 30 logs at once, just the ones that have crossed the 30-day threshold.
+
+In other words:
+----------------
+On day 31, the log file from day 1 gets deleted.
+On day 32, the log file from day 2 gets deleted.
+And so on...
+
+Q) How to manage log file size, Since Logs may get generated in MB or GB
+A) You can combine time-based and size-based rolling policies by using a SizeAndTimeBasedRollingPolicy.
+
+Example logback.xml snippet for Machines MS with size + time rolling:
+----------------------------------------------------------------------
+<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>logs/machines.log</file>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <!-- Daily rollover + size limit 100MB -->
+        <fileNamePattern>logs/machines.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+        <maxFileSize>100MB</maxFileSize>
+        <maxHistory>30</maxHistory>
+        <totalSizeCap>3GB</totalSizeCap> <!-- Optional: max total size of all logs -->
+    </rollingPolicy>
+
+    <encoder>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+</appender>
+
+Explanation:
+-------------
+-> Logs roll over daily or when the log file reaches 100MB (whichever comes first).
+-> Rolled logs get a sequence number (%i), e.g., machines.2025-05-28.1.log.gz, machines.2025-05-28.2.log.gz.
+-> Older logs beyond 30 days get deleted automatically (maxHistory=30).
+-> totalSizeCap limits the total size of all archived logs (here 3GB). If exceeded, oldest logs are deleted to stay under this cap.
+-> Logs are compressed automatically with .gz (saving disk space).
+
+Q) Why use size + time rolling?
+A) Keeps individual log files manageable in size (easier to open and process).
+-> Avoids a single huge file growing indefinitely.
+-> Keeps disk usage under control with totalSizeCap.
+
+Q) If File size is set to 100 MB and 101th MB comes then another file will get generated for the same date but with +1 version ?
+A) Size-based rollover with <fileNamePattern> and %i
+-> You set <maxFileSize>100MB</maxFileSize>.
+-> The appender writes to machines.log during the day.
+-> Once the file size exceeds 100MB, it rolls over to a new file for the same date with an index (%i) added.
+
+For example:
+------------
+machines.2025-05-28.0.log.gz (first chunk)
+machines.2025-05-28.1.log.gz (second chunk, after first hits 100MB)
+machines.2025-05-28.2.log.gz (third chunk, and so on)
+
+
+Q) What Happens if it crosses 3 GB
+A) totalSizeCap limits the total size of all archived/compressed log files combined in that directory (e.g., all machines.*.log.gz files).
+-> When the total size exceeds 3GB, Logback will start deleting the oldest archived log files to reduce the total size below the cap.
+-> This deletion is automatic and happens during rollover or startup.
+-> It ensures your log directory doesn’t grow uncontrollably and fill up disk space.
+
+Note:- Active log file machines.log is never compressed until it rolls over.
+Only archived files (with date & index, e.g. machines.2025-05-28.0.log.gz) count towards totalSizeCap.
+
+
+Q) <totalSizeCap>3GB</totalSizeCap>, is not for a 1 log with many Index. But Its for Whole Directory ?
+A) <totalSizeCap>3GB</totalSizeCap> applies to all archived log files managed by that rolling policy, not just a single log file or a single day’s logs.
+
+To clarify:
+-----------
+Say your log directory has:
+-> machines.2025-05-20.0.log.gz (500MB)
+-> machines.2025-05-21.0.log.gz (700MB)
+-> machines.2025-05-22.0.log.gz (1GB)
+-> machines.2025-05-22.1.log.gz (1GB)
+
+Total = 3.2GB (over 3GB cap)
+
+Logback will delete the oldest one(s), e.g., machines.2025-05-20.0.log.gz (500MB), to get back under 3GB.
+
+
+
+============================================================================================================
+============================================================================================================
+
+Below logback.xml is clean and will log to both file and console.
+------------------------------------------------------------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Application name property -->
+    <property name="APP_NAME" value="JCB-Data-Pull-BS4-Common"/>
+    <property name="LOG_PATH" value="/data5/MS_LOGS/${APP_NAME}"/>
+
+    <!-- Console appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern> -->  //prints thread name and other extra info
+                 <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File appender with daily rolling -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <!-- <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern> -->  //prints thread name and other extra info
+                 <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root logger logs to both console and file -->
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <!-- Logger for your app package:
+         Logs to both console and file, no duplicate logs -->
+    <logger name="com.wipro.jcb.livelink.app" level="debug" additivity="true" />
+</configuration>
+
+Note:- additivity="true" is the default behavior, so you can even write the logger like this <logger name="com.wipro.jcb.livelink.app" level="debug" />
+
+

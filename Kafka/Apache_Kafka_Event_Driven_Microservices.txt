@@ -1,0 +1,2516 @@
+Important Kafka CLI Commands
+-----------------------------
+To Start Zookeepr:- bin/zookeeper-server-start.sh config/zookeeper.properties
+To Start Kafka Broker or Kafka Server:- bin/kafka-server-start.sh config/server-1.properties
+
+To Stop Zookeepr:- bin/zookeeper-server-stop.sh (or) ps aux | grep zookeeper => kill {id}. (From 2nd row and 2nd column after grep cmd)
+To Stop All Kafka Brokers:- ./bin/kafka-server-stop.sh
+
+To Wipe Out or Clean Zookeeper Data Directory:- rm -rf /tmp/zookeeper
+To Check if All Brokers ids which are registered on Zookeeper:2181:- bin/zookeeper-shell.sh localhost:2181 ls /brokers/ids
+
+To Create Kafka Topic:- bin/kafka-topics.sh --create --topic topic1 --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092,localhost:9094
+To Delete Specific Kafka Topic:- bin/kafka-topics.sh --delete --topic topic1 --bootstrap-server localhost:9092
+To See Kafka Topic List:- bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+To See Specific Kafka Topic In-Details:- bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic product-created-events-topic
+bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic topic3
+
+To Publish Data:- ./bin/kafka-console-producer.sh  --topic topic1 --bootstrap-server localhost:9092,localhost:9094 --property "parse.key=true" 
+--property "key.separator=:"
+
+To Consume Data:- ./bin/kafka-console-consumer.sh --topic topic1 --bootstrap-server localhost:9092,localhost:9094 --from-beginning --property print.key=true
+
+To Read DLT Kafka Topic:- ./bin/kafka-console-consumer.sh --topic product-created-events-topic-dlt --bootstrap-server localhost:9092,localhost:9094 --from-beginning --property print.key=true --property print.value=true
+
+============================================================================================================================================
+============================================================================================================================================
+
+Q) What is Microservice
+A) Microservice is a very small, autonomous application that is usually designed to perform one specific business functionality.
+-> Microservice application is a very small and this is why it is called micro.
+-> Microservice is a very small application that is responsible for one specific functionality only
+-> It can be a small standalone application, or it can be a very small building block of a larger application.
+-> But it is always loosely coupled so that if needed, it can be easily scaled horizontally.
+
+Q) Microservice vs Monolithic application
+Monolithic
+----------
+-> Monolithic is a Single Springboot Application with multiple controllers.
+-> If we make any change in controller classes, then we have to build and redeploy the entire application
+
+Microservice
+------------
+-> In Microservice, We have Multiple Smaller Applications.
+-> Each Microservice is responsible for specific functionality.
+-> Each Microservice works with its own Database. This is called Database per Service Pattern.
+-> Making MS using its own DB, makes MS's Loosely Couple and More Scalable.
+
+Q) Microservices Communication
+A) One of the ways microservices can communicate with each other is by sending direct Http request and wait for Http response.
+-> When it comes to direct communication, then you will come across synchronous and asynchronous Http requests.
+
+Synchronous Communication (Synchronous HTTP Request)
+-----------------------------------------------------
+-> Example where 1 MS will wait until it receives HTTP Response from another MS, is called Synchronous Communication between 2 Microservices.
+
+Asynchronous Communication (Asynchronous HTTP Request)
+------------------------------------------------------
+-> Order MS needs to notify Email notification microservice that a new order is created.
+-> To do that, orders microservice will send http post request to email notification microservice API endpoint.
+-> But in this case, order microservice will not wait for immediate response from email notification microservice.
+-> It can send the request and immediately continue executing next job without waiting for email notification microservice to respond.
+-> Even if the request was sent asynchronously, it is just response will come a little bit later.
+
+Problem with Direct HTTP Request Communication
+-----------------------------------------------
+-> If email notification ms is temporarily not available even for 5 minutes, then it can loose many http requests.
+-> If Any New MS is Introduced, and to start receiving notifications from Order MS, We need to Update Order MS to Send HTTP Request to New MS's.
+
+-> And this is when Apache Kafka and event driven communication can help.
+
+Q) Event Driven Microservices
+A) We Use Apache Kafka to communicate between MS's.
+-> Where 1 MS will publish the Event and Another MS will Consume the Event. This is called Publisher Subscriber Model.
+-> As soon as Publisher publish the Event, All Subscribed microservices will receive this message.
+
+Advantage
+---------
+-> In the case of direct request and response communication, if destination microservice is down, then most likely it will miss the messages and will
+no longer receive it.
+-> But in event driven architecture with Apache Kafka, if one of the subscribed microservices was down, it will still be able to consume events
+that it missed when it comes back online and resumes working.
+
+
+====================================================================================================================================
+====================================================================================================================================
+
+Q) What is Apache Kafka
+A) Apache Kafka is distributed event streaming platform that is used to collect, process, store and integrate data at scale.
+-> It is a platform that enables developers to build event driven applications that can continuously exchange data with each other, 
+and we can scale this microservices as needed to support larger traffic.
+
+Q) How Apache Kafka can be Used with Microservices
+A) Apache Kafka can be used to help microservices communicate with each other.
+-> Products MS will publish a product created event in the form of Json payload.
+-> Now, because this product microservice can publish or it can produce an event in Kafka, it is called producer.
+-> And to help us publish events, Kafka provides producer API.
+-> So one of the core components in application that uses Kafka is producer.
+-> Consumer is a microservice that consumes event.
+
+Q) What is Kafka Cluster
+A) A Kafka cluster is a group of multiple Kafka brokers working together. 
+-> When we combined All Kafka Broker, they form a cluster that can handle data streaming with fault tolerance, scalability, and high availability.
+-> Kafka Broker = a single Kafka server.
+-> Kafka Cluster = multiple Kafka brokers working together.
+-> Thats Why, to make your system always available and fault tolerant, you can start multiple brokers in a cluster.
+
+Q) What is Kafka Broker
+A) Kafka broker will handle all the work to accept messages from producer, store it reliably in topic partitions, and replicate it across other brokers
+in the cluster.
+-> It will also handle all the work to enable consumer microservices read events from topic partitions.
+-> When a producer publishes data, data does not go directly from the producer to the consumer. Data 1st sent to Kafka broker. 
+-> Broker will store Data in 1 of the Partitions. From there, broker makes the data available to consumers to consume the data.
+-> Each Kafka Broker is a single Kafka Server.
+-> Kafka Broker will replicate data across other brokers in the cluster.
+-> To make our application more reliable, We will usually start more than one Kafka broker, and this way, if one Kafka broker is down, 
+then another Kafka broker that is running can be used to service requests.
+-> Among multiple Kafka brokers, only one broker is the controller (cluster manager).
+-> For a topic with multiple partitions, each broker can be the leader for some of those partitions.
+
+Hierarchy:- Kafka Broker -> Topics -> Partitions -> Offsets.
+-> Kafka Broker stores Topics
+-> Topics have multiple partitions
+-> Partitions contains ordered messages. Each Identified by unique offset.
+
+Q) What is Leader and Follower in Kafka Broker
+A) Among Multiple Kafka Brokers, There will be 1 broker that will act as a leader, and all other brokers will act as followers.
+-> Each of these brokers hosts Kafka topics, and each Kafka topic stores events in partitions.
+-> This way, Kafka can achieve high availability and fault tolerance.
+-> Now, the leader and the follower roles are not fixed to a single broker, but can change dynamically depending on the availability of the broker.
+-> The leader will handle all read and write requests for the partitions, while followers will passively replicate leader's data.
+-> If a Leader Kafka broker goes down for some reason, 1 of the follower brokers will become a new leader and will continue servicing requests.
+-> Kafka broker is customizable and you can configure its behavior using configuration file.
+
+Leader Kafka Broker
+-------------------
+-> A leader is responsible for handling all read and write requests for partitions in a topic. Manages all Operations for Topic Partitions.
+-> Only Leader can perform Write Operations like storing Data in Topic Partitons.
+-> So, Once message is successfully persisted in topic partition, it will be replicated to other Kafka brokers that act as followers.
+-> Followers replicate data from the leader in exact order it was written, maintaining data consistency across cluster.
+-> So leader is a single source of truth for all writes and reads in topic partition.
+-> If followers were allowed to accept writes, it could lead to inconsistencies and conflicts because different followers might have different versions data.
+
+Follower Kafka Broker
+--------------------
+-> A follower in Kafka is a replica of a partition. It copies all the data from the leader.
+-> The main reason it is called a follower is because it follows a leader, meaning that it replicates whatever data the leader has.
+-> Followers are very important for redundancy and fault tolerance.
+-> If leader fails, one of the followers can take over.
+-> If you have only one broker in the cluster and if that broker goes down, then your entire system is down and there is no replicas of your data.
+-> So having multiple brokers in the cluster allows you to have more followers, and this helps you to ensure high availability of the data.
+
+-> In Apache Kafka, Each partition will have a leader assigned to it, and a leader to a partition is assigned when the topic is created.
+-> When you create a topic in Kafka, it also involves specifying the number of partitions for that topic.
+-> Kafka, through its internal processes, assigns a leader for each partition right away, so each partition will have its own leader and followers. Example,
+-> There is no single Kafka server that always acts as a leader.
+-> if 1 Broker is down, Kafka will reassign leaders and followers to make sure that each partition has a healthy Kafka broker to work with as a new leader.
+
+Partition	    Leader	    Follower 1	Follower 2
+P-0	            Broker-1	Broker-2	Broker-3
+P-1	            Broker-2	Broker-3	Broker-1
+P-2	            Broker-3	Broker-1	Broker-2
+
+Note:- Though Broker-2 and 3 are Followers of P-0, But Broker-2 is also Leader for P-1 and Broker-3 is also Leader for P-2 at the same time.
+
+Q) Kafka Topic
+A) Kafka Topic is durable storage of events information, inside the topic.
+-> It is stored on a hard disk and it is replicated to other servers in Kafka cluster, meaning that you will have multiple copies of your data created.
+-> This way if you lose one server, and if you lose all data that is stored on that server, you still have your data stored on other servers in Kafka cluster.
+-> More specifically, Data is stored in a topic, which is managed by the broker.
+-> The Kafka broker stores the data, and topics are the logical containers where the data (messages) are actually kept.
+-> When event is consumed from Kafka topic, this event does not get deleted from topic right away.
+-> It stays in the topic for as long as needed so that other microservices can also read this event.
+
+-> Kafka Topics resides entirely on the Kafka Broker.
+-> There is no concept of storing data in topic from Client end(Publisher). Client Can choose only Kafka Topic to send data.
+-> Broker receives the messages and holds responsibility to store data in topics.
+
+Q) Difference Between Kafka Message and Event
+A) Consider Kafka message as a message envelope that carries something inside, and the event data are the content of this message envelope.
+-> Event Data can be in different formats. It can be a simple string, Json payload or any other format or even null if needed.
+-> Basically anything that can be serialized into an array of bytes you can use as a payload.
+
+Q) Kafka Partitions
+A) A Kafka topic is divided into multiple partitions.
+-> When a publisher (producer) sends a message to a topic, the message is stored in exactly one partition of that topic - not across all partitions.
+-> And Each Partition is replicated across multiple Kafka servers for durability.
+-> In Which partition the message goes to, depends on the partitioning strategy:
+-> If the producer specifies a key with the message, Kafka uses a hash function on the key to determine the partition. This ensures all messages with
+the same key go to the same partition (helpful for message ordering per key).
+-> If no key is provided, Kafka usually distributes messages round-robin or uses some other default partitioner to balance the load across partitions.
+-> So, data is not duplicated across partitions; each message lands in one partition only.
+-> This partitioning allows Kafka to scale horizontally and provides parallelism for consumers, because consumers can consume partitions independently.
+-> Messages published to a topic are spread across partitions based on key or partitioner logic, but each message is stored in only one partition, 
+not all partitions.
+-> By default, when you create a Kafka topic without specifying the number of partitions, Kafka creates 1 partition.
+-> Partitions have no fixed maximum size by default to store data in 1 partition. Instead, they are limited by retention policies (time-based or size-based).
+-> So, partitions don't really "fill up" in the traditional sense, instead, old data gets deleted based on retention settings.
+-> If we create a topic with more than one partition, we can horizontally scale our application and have a separate instance of the same microservice 
+read from its own partition in parallel.
+
+Example:- (Product-Created-Event-Topic)
+---------------------------------------
+Partition-0
+Partition-1
+partition-2
+
+-> Consider SMS_Notification MS is running on 3 Different Servers and ready to consume messages as a consumer.
+-> Now Once Event is Published from Product MS on "Product-Created-Event-Topic" topic, each SMS_Notification MS can read events parallelly from Partitions.
+-> Like, 1st SMS_Notification MS reads from Partition-0, 2nd SMS_Notification MS reads from Partition-1 and so on...
+
+Note:- You can increase the number of partitions in a Kafka topic to scale. But once set, partitions can’t be reduced.
+
+Q) Kafka Partitions and Offset
+A) Each Partition will have no. of Cells and Data is stored in this cells.
+-> Each cell in a partition is numbered. This number is called offset. And this offset is very similar to index in Java array it starts with zero.
+-> When a very first event is stored to partition zero, it will be stored with index zero.
+-> The next event that will be stored to partition zero will be stored at index one, and every time a new event is stored to partition zero, 
+its offset will increase by one.
+-> Each Partition in Topic may have different no. of numbered Cells. Like Below Example,
+
+Example:- (Product-Created-Event-Topic)
+---------------------------------------
+Partition-0 => 0,1,2,3,4..n
+Partition-1 => 0,1,2
+partition-2 => 0,1,2,3
+
+-> So Kafka topic works on "append only" mechanism and a new event is always added at the end.
+-> Now event data that is stored in a partition, it is immutable.
+-> Once you store event to a partition, you cannot change it, you cannot delete it, and you cannot update it.
+-> Event data that is stored in Kafka topic is immutable and that you cannot change it and you cannot delete it.
+
+Scenario (1 Topic, 3 Partitions, 3 Brokers)
+--------------------------------------------
+-> Kafka will assign each partitions to a Leader from Kafka Broker.
+-> Replication Factor = 1 (Each Partition exists on only 1 Broker). In this case, Partion-0 will get assign to only 1 Broker.
+-> Each partition has a leader, which is a broker that handles all read and write requests for that partition.
+
+Partition-0   Broker-1  (Broker-1 is leader for Partition-0. i.e. Broker-1 only can handle read and write requests to Partition-0)
+Partition-1   Broker-2  (Broker-2 is leader for Partition-1. i.e. Broker-2 only can handle read and write requests to Partition-1)
+Partition-2   Broker-3  (Broker-3 is leader for Partition-2. i.e. Broker-3 only can handle read and write requests to Partition-2)
+
+-> When Broker-1 reads data from Partition-0, Kafka does not split data from Partition-0 into smaller partitions. It Will stored as-is.
+-> Broker-2 and Broker-3 are not allowed to read or write operations from Partion-0 cos they are not the Leader
+-> Producers: When they send data to Partition 0 -> they talk to Broker 1.
+-> Consumers: When they read from Partition 0 -> they also talk to Broker 1
+-> If Broker 1 goes down and replication is not enabled, which if we made replication factor = 1 only, then Partition 0 becomes unavailable since Broker
+is down and No Other Brokers are enable to talk to partition-0. That's why replication is crucial for high availability.
+
+-> With Replication Factor = 3, Broker-2 and Broker-3 have replica copies of Partition O.
+-> If Broker-1 fails, Kafka will promote one of the replicas (Broker 2 or 3) to be the new leader.
+-> This way, Partition 0 stays available
+
+Q) How Long Data will get stored in Kafka Topic once Message is Consumed
+A) After the message is consumed from Kafka topic, it remains there and does not get deleted.
+-> It can stay there for as long as needed, but it does not stay there forever.
+-> By default, Kafka Topic is configured to retain events for 7 days, but this value can change through configuration properties if needed.
+-> You can change this value and you can make Kafka topics keep data for as long as you need it.
+
+Q) What If Kafka Publishes Huge Data on Topic. Will Data divided and gets stored in across Partitions
+A) Kafka does not automatically split a single large message across multiple partitions, no matter how large the message is.
+-> Each message (record) published to a Kafka topic is stored in exactly one partition.
+-> Even if the message is huge in size, it will not be split across multiple partitions.
+-> The assignment of the message to a partition is based on:
+a) The partition key (if provided), using a hashing algorithm.
+b) Or, round-robin if no key is given and the producer does not specify a partition.
+
+Q) Core Components of Apache Kafka
+A) Publisher, Consumer, Kafka Broker, Topic, Partitions
+
+Q) Ordering of Events in Apache Kafka.
+A) So let's assume we have a topic "Profile_Update" Topic, that is called profile updated event topic.
+-> Every time user updates their profile, a new event is published to this topic.
+-> When message key is not provided, then this event can be stored in any partition. eg:- Plain String => Sergei
+-> When message key is not provided, Kafka will try to load balance events and store a new event in one of the available partitions.
+-> Let's assume that user changed the spelling of their first name and clicked on the update button.
+-> A new event is published and it is persisted into Partition-0
+-> With this change, the spelling of user's first name has letter I at the end.
+-> Then this user changed their name again and clicked on the update button again.
+-> A new event is published and this time it was stored in a Partition-1 and again new Event if name is changed again and stored in Partition-2.
+
+Example
+--------
+Event-A:- Partition-0 => Sergei
+Event-B:- Partition-1 => Serjei 
+Event-C:- Partition-2 => Sergey
+
+Scenario-1
+----------
+-> Consumer microservice will consume events from topic partitions in parallel.
+-> And because Kafka consumer reads events in parallel, there is no guarantee in what order consumer microservice will receive these events.
+-> It could read event A first, then C, then B, it could read events in order B, A and C, or it could read events in order C, B and A.
+-> And this can be a problem if the order in which these events should be processed is important.
+-> The order in which we want these events to be processed is A, B, and C, and this is very important, because if the order is not followed, 
+we will update user's first name in the database with incorrect value.
+-> So in order to read the Events in the order which events got published, we should always provide message key.
+-> If message key is provided, then Kafka will use it to determine which partition this event should be written to in Kafka topic.
+-> When the same message key is used for different events, those events will be stored in the same topic Partition.
+-> All these 3 Events will get stored in same Partition, since message key will be same and saved end of the cell in each partition for every new Event, like
+below example
+
+Example
+--------
+Key-Value => firstName:Sergei
+Event-A:- Partition-0 => Sergei
+Event-B:- Partition-0 => Serjei
+Event-C:- Partition-0 => Sergey
+
+-> It will take message key, it will hash it, and then it will use this hash value to determine which partition to use to store this event.
+-> And it always stores messages with the same message key in the same partition. And this is how Kafka helps us to achieve ordering of events.
+-> In this case, when consumer microservice reads events from topic partitions, even if it reads events from other partitions in parallel, 
+the order in which events with the same message key is published will get processed in the same order which event got published.
+
+Note:- Kafka ensure message ordering across partitions By using a key for each message and partitioning by the hash of the key.
+
+Scenario-2 (1 Topic, 1 Kafka Broker, 3 Partitions, 1 Consumer)
+--------------------------------------------------------------
+-> 1 Consumer can read data from all partitions. Irrespective in which partition data will get store, Consumer will read data from across partitions.
+-> 1 Consumer can read data from multiple partitions in a non-sequential manner.
+-> When Consumer is reading from Partition-0, It may read Partition-1 as well before completing Partition-0.
+-> Consumer Won't finish 1 partition completely before moving to next partition.
+-> But Within each Partition, Messages are consumed in order (based on their offsets).
+
+Case-1:- Does Consumer read partition in sequence      =>  No. It reads from all partitions but not in fixed order.
+Case-2;- Does Consumer read all assigned partitions    =>  Yes
+Case-3:- Is Order Guarantee across partitions          =>  No. Only Within a partition.
+
+
+Q) How and when it get decided that published data will get stored in 1 partition or distributed across partitions
+Scenario-1:- If Explicit partition Provided                =>    Message goes to that partition only.
+Scenario-2:- If Key Provided and no partition mentioned    =>    partition chosen by hashing the key.
+Scenario-3:- No Key, No Partition specified                =>    Messages Distributed evenly (Round Robin).
+
+-> So, When all data is stored in single Partition, Kafka guarantees order of messages.
+-> But When Data is Spread across multiple partitions, Kafka Does not guarantee the order across those partitions.
+-> So, Partition Selection is typically handled by the Producer and Not Broker.
+
+====================================================================================================================================
+====================================================================================================================================
+
+Q) Run Apache Kafka in Mac OS
+A) We can run Apache Kafka in 2 Different Ways,
+1) Start Apache Kafka with Zookeeper, which is now Old way and its going to be deprecated and will not be available in future Apache Kafka versions.
+2) Another way is to start Apache Kafka with KRaft mode, which is now a new way of starting Apache Kafka.
+
+-> Will start my Apache Kafka server using craft.
+-> Inside Apache Kafka folder, /Users/vi20475016/Downloads/kafka_2.13-3.9.0/config, Will see a folder called KRaft(Kafka raft).
+-> Inside /kafka_2.13-3.9.0/config/kraft Folder, Will see 3 Configuration Files. broker.properties, controller.properties and server.properties.
+
+broker.properties:- It contains configuration for a server that acts as a broker, which is responsible for storing and serving data for topics and partitions
+controller.properties:- If multiple brokers are running, Kafka will elect one broker as the controller, whose job is to manage the cluster and assign partition
+leadership. This election is needed because multiple brokers exist, so Kafka must decide which broker will act as controller and manage those decisions.
+server.properties:- It contains configuration for a server that acts as both controller and broker.
+
+Q) Start Apache Kafka in Mac OS
+A) To Start Kafka, go under Kafka Folder /kafka_2.13-3.9.0/bin/ which contains some executable files under bin Folder.
+-> Now before I can start Kafka Server, there are a couple of commands that I need to run first, and the 1st command is to generate a unique ID
+for my Kafka cluster.
+
+1st Cmd:- From /kafka_2.13-3.9.0/bin/ folder, Open Terminal and execute cmd "kafka-storage.sh random-uuid". This will generate a Unique Identifier which is
+also known as "Cluster ID" that will need to use to configure Kafka Cluster.
+2d Cmd:- "kafka-storage.sh format -t {Cluster ID} -c config/kraft/server.properties", Will need to run, to format log directories using this unique identifier.
+
+-> Now to run Kafka Server, cmd is "./bin/kafka-server-start.sh config/kraft/server.properties". This Will Start Single Kafka Server.
+-> This server.properties file contains basic default configuration properties, which are enough for development purposes.
+
+Q) How to Start Multiple Kafka Server in a Cluster
+A) 1st Stop any Running Kafka Server previously by Pressing ctrl+c.
+-> To run or start more than one Kafka server, will first will need to create a new server.properties file for each new server.
+-> Under Kafka Folder kafka_2.13-3.9.0/config/kraft, create 3 new server.properties and name it as server-1, server-2 and server-3, considering we need to
+start 3 Kafka Servers. server.properties is Default. We are Not Going to Use This Default File.
+-> server-1, server-2 and server-3 represents 3 Kafka Servers in a Cluster and Each Kafka Server will have Unique NodeId.
+-> In "server-1.properties" file, Update node.id=1, node.id=2 in server-2 and node.id=3 in server-3.
+
+-> In Same "server-1.properties" file, will also find "listeners=PLAINTEXT://:9092,CONTROLLER://:9093". This will specify list of Listeners in Kafka Cluster.
+-> Kafka uses this, to communicate with other servers and clients.
+-> Now this "server-1.properties" used to configure Kafka Server that performs 2 Roles.
+1) Role of a Broker
+2) Role of a Controller
+-> And This "server-1.properties" configures that the Broker is listening on port 9092 and controller is listening on port 9093. Below Example,
+Ex:- "listeners=PLAINTEXT://:9092,CONTROLLER://:9093" will find in "server-1.properties".
+-> So, As we have seen, Each Kafka server uses 2 port no.s. 1 to listen (9092) and another for controller listening (9093).
+-> Since, 9092 and 9093 is already in Use, We cant have same port no. in "server-2" and "server-3". So change port no.s accordingly in both server-2,3 files.
+-> Server-2 uses Kafka broker:9094 and controller:9095, Server-3 uses Kafka broker:9096 and controller:9097.
+
+Server-1:- Kafka Broker:9092    Controller::9093
+Server-2:- Kafka Broker:9094    Controller::9095
+Server-3:- Kafka Broker:9096    Controller::9097
+
+-> By default, "server.properties" are meant to run on single Kafka Server, It configured earlier as "controller.quorum.voters=1@localhost:9093".
+-> Now since we are working on multiple servers, we need to change value like below in server-1 file,
+"controller.quorum.voters=1@localhost:9093,2@localhost:9095,3@localhost9097". 
+-> In this Extra line 2@localhost:9095,3@localhost9097, 2 and 3 are node id's and 9095 and 9097 are controller listeners from Both server-2 and server-3.
+-> And this is what we will need to do if we want to run multiple servers in a single cluster.
+-> Copy "controller.quorum.voters=1@localhost:9093,2@localhost:9095,3@localhost9097" and replace with Existing values in server-2 and server-3 files.
+
+-> In server-1, look for key "advertised.listeners".
+-> Its a host and port no. where Broker will advertise to its clients.
+-> We wont change value of "advertised.listeners" in server-1. But will changes value in server-2 and server-2 files.
+-> In Server-2, Look for "advertised.listeners" and change port to 9094. By this Broker-2 or server-2 will listen to port no. 9094
+-> In Server-3, Look for "advertised.listeners" and change port to 9096. By this Broker-3 or server-3 will listen to port no. 9096
+
+Log Directories
+---------------
+-> Since, we are going to run 3 servers, I want each server to store log files in its own directory.
+-> Look for log.dir in server-1 and update its value to "/tmp/server-1/kraft-combined-logs". This will create logs of server-1 in folder "server-1".
+-> Same goes for server-2 and server-3.
+
+Q) Multiple Kafka Broker: Storage Folders
+A) In this, We will prepare a storage directory for Kafka cluster.
+-> These storage directories are local directories on each node in Kafka cluster where Kafka stores its data like for example,
+server logs, metadata and snapshots.
+-> The path to this log directory, we have configured in the "server.properties" file for each server.
+-> Now, to prepare this storage directory for Kafka Server, we will need to first generate a unique identifier for our Kafka cluster.
+-> Open terminal and move to Kafka Folder and run "./bin/kafka-storage.sh random-uuid". This will generate a Unique Identifier.
+-> Will run the following cmd for each server. cmd is "./bin/kafka-storage.sh format -t {UniqueID} -c config/kraft/server-1.properties".
+-> By this, it will prepare storage directory for Kafka server-1 by formatting them with unique clusterID.
+-> Now, this step is a required step to run Kafka in craft mode.
+-> Formatting ensures that the storage directories are compatible with Kraft mode, and they do not contain any data from previous Zookeeper based clusters.
+-> Same steps for server-2 and server-3 with same UniqueId which has been generated.
+server-2:- "./bin/kafka-storage.sh format -t {UniqueID} -c config/kraft/server-2.properties"
+server-3:- "./bin/kafka-storage.sh format -t {UniqueID} -c config/kraft/server-3.properties"
+-> By This, We now should be able to run all 3 servers in this cluster.
+
+Note:- So far, We have prepared configuration files and storage directories for each Kafka server, we are ready to start them.
+
+Q) Starting Multiple Kafka Servers or Broker with KRaft
+A) To Run or Start server-1, cmd is "./bin/kafka-server-start.sh config/kraft/server-1.properties".
+-> By Above cmd Executing, We started server-1 via Kraft mode.
+-> Open New tab in Same Terminal and Execute for server-2. cmd is "./bin/kafka-server-start.sh config/kraft/server-2.properties"
+-> Open New tab in Same Terminal and Execute for server-3. cmd is "./bin/kafka-server-start.sh config/kraft/server-3.properties"
+-> So far, We have started All 3 Servers in the Cluster.
+
+Q) Stop Apache Kafka Servers or Broker
+A) But Before shutting down your servers, it is a good practice to stop all running producers and consumers.
+-> This will also help you avoid losing messages because if you stop your servers, they are down, but your Kafka producers keep on sending messages
+to those offline servers. There is a chance that you lose those messages.
+-> Stopping producers and consumers first also helps you to avoid errors in your system.
+-> This is because if your producers and consumers keep on interacting with the server that is going down, this will cause exceptions.
+-> A Better way to stop one or multiple Kafka servers gracefully is to use CLI script.
+-> By CLI, It allows Kafka Server to execute shutdown hooks and properly close down network connections, flush and commit any in-memory data to disk.
+Log segments are closed and any necessary cleanup is performed.
+-> By executing cmd "./bin/kafka-server-stop.sh" in new Terminal. It will gracefully shutdown all 3 Kafka Servers.
+
+====================================================================================================================================
+====================================================================================================================================
+
+Q) Create New Kafka Topic By CLI(Command Line Interface)
+A) 1st make all 3 servers up and running by executing cmd "./bin/kafka-server-start.sh config/kraft/server-1.properties" and same for server-2 and server-3.
+-> Open New Tab in terminal and move to bin folder and execute below command
+Cmd:- "./kafka-topics.sh --create --topic topic1 --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092,localhost:9094"
+-> By Executing above command, It will create topic with name "topic1"
+
+Topic Name:- topic1
+
+partitions:- No. of Partitions defined in each Kafka topic. No. of Partiton >= No. of Consumer
+Case-1:- 1 Partition and 1 Consumer:- If Consumer goes down, there's no other consumer to consume data.
+Case-2:- 1 partition and 2 Consumer:- 2 Consumers will be Idle and only 1 Consumer will consume data, which is not recommended.
+Case-3:- 3 partition and 3 Consumer:- Data wont loss even if 1 consumer goes down. Recommended.
+
+replication-factor:- How many copies of each partitions are stored across different brokers.
+-> With this, Each partition will have 3 Replicas. 1 of which will be leader and other 2 are followers.
+-> No. of replication-factor <= no. of Kafka Brokers running in Cluster.
+
+bootstrap-server:- With this, We specify a list of addresses of Kafka brokers in our cluster.
+-> We can provide 1 or more addressed of Kafka Broker. Since we have multiple brokers are running, we can address by separatin comma(,) as above cmd.
+-> When using CLI scripts or when using Java code to create topics, it is recommended to provide addresses of at least two brokers,
+so that you can have a backup broker in case one broker is not available.
+
+Q) List and Describe Kafka topics
+A) From Bin Folder, execute "./kafka-topics.sh --list --bootstrap-server localhost:9092". It will only list all the topics we created in cluster.
+-> But, Instead of "list" will use "describe". cmd:- "./kafka-topics.sh --describe --bootstrap-server localhost:9092".
+-> By above cmd with "describe", It will provide additional info like below,
+Topic Name
+Topic ID
+No. of Partitions in Topic
+No. of times the data is replicated across different brokers
+Configured maximum size of a topic segment.
+-> For Specific Kafka Topic Details, below is the cmd
+./kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic {topic-name}
+
+Configured maximum size of a topic segment
+------------------------------------------
+-> Now Kafka stores messages in files that are called logs.
+-> These logs are divided into smaller pieces that are called segments.
+-> Each segment has a maximum size which you can set with the segments byte configuration.
+-> When segment reaches its maximum size, it is closed and a new one is created.
+
+Q) How to Delete Kafka Topics
+A) Deleting topic is permanent. Once you delete topic, it is gone forever.
+-> There is no way to undo it or recover data that was stored in the topic unless you have a backup.
+-> Cmd to delete Kafka Topic is "./kafka-topics.sh --delete --topic topic1 --bootstrap-server localhost:9092", from bin folder.
+-> By above cmd, topic1 will be deleted and can ensure by running "./kafka-topics.sh --describe --bootstrap-server localhost:9092". We wont see topic1.
+-> But in case if topic is not deleted, then ensure "delete.topic.enabled=true" in server.properties file.
+-> By Default value of  "delete.topic.enabled" is true. If its true, we should be able to delete topic. And if false, we may not be able to delete topic.
+
+Q) How to Publish Messages to Kafka Topic By CLI
+A) Make sure All 3 Kafa servers are running. And Move to Bin Folder.
+-> Execute below cmd to Publish Messages on Topic "my-topic",
+./kafka-console-producer.sh --bootstrap-server localhost:9092,localhost:9094 --topic my-topic" (Enter)
+> Hello World  (This line ">" comes in console itself after hitting the above cmd. "Hello World" is a message i want to publish.
+-> Will see error in console after "> Hello world"(publishing message), this is because the topic name "my-topic" does not exist.
+-> But even though I got the error messages, I can still continue sending messages. For example, I will send one more message as "> Hello, world!"
+-> The message is sent and I don't get any other error messages, cos by default, Kafka is configured to automatically create a new topic if that topic
+does not exist.
+-> If you send a message to a topic that does not exist, Kafka Producer will respond with error, but it will also automatically create the topic.
+-> This is the default configuration and it is controlled with the property "auto.create.topics.enable=true" in the broker configuration.
+-> Better to create Topic 1st before sending any Messages.
+-> "...localhost:9092,localhost:9094" in above cmd is better to mention at-least 2 Kafka broker port no.s which is running in a Cluster.
+-> Press ctrl+c to come out of "sending message line", else it will keep asking u to send messages.
+
+Note:- We are Sending these messages were simple and did not have a message key.
+
+Q) How to Publish Messages as Key-Value Pair to Kafka Topic By CLI
+A) One of the reasons we send a message with the key is because those messages that are sent with the same key get stored in the same partition,
+and when messages are stored in the same partition, they are ordered.
+-> So if you want to store and read messages in order, you will need to use the same key for those messages.
+-> Below is cmd to send messages in Key-Value Pair on Kafka Topic,
+./kafka-console-producer.sh --bootstrap-server localhost:9092,localhost:9094 --topic my-topic --property "parse.key=true" --property "key.separator=:"
+>firstName:Sergery
+-> By above cmd executed, It will publish the data in Key-Value Pair.
+-> But If we try to send any plain message like ">test message", will get Error in Console.
+
+Q) How to Consume Messages from Kafka Topic By CLI
+Consume Messages from Kafka Topic from beginning
+------------------------------------------------
+-> Move to Bin Folder, since in this folder only all Kafka CLI Scripts are Placed.
+-> Open New terminal. Below is cmd to consume messages from Beginning from a Kafka Topic,
+./kafka-console-consumer.sh --topic my-topic --from-beginning --bootstrap-server localhost:9092
+-> By Above cmd executed, we could see all messages from beginning from Kafka Topic which has been published earlier.
+-> Now notice that the script we started did not exit it, run it, read all messages, but it did not quit.
+-> It still running and it's waiting for more messages to arrive as soon as new message arrives to this topic.
+
+-> WIll start 1 more consumer from CLI and execute below cmd,
+./kafka-console-consumer.sh --topic my-topic --from-beginning --bootstrap-server localhost:9092
+-> As soon as we execute above cmd, We could see all the Messages have been consumed in this consumer as well from Beginning.
+-> So In Kafka, once consumer consumes a message, it does not destroy it. It keeps the message in the topic so that other consumers can consume it as well.
+-> Since, we have 2 Consumer and 1 Producer. Once u publish any data, we could see, Both the consumers will read data.
+
+Consume New Messages Only from Kafka Topic
+------------------------------------------
+-> Currently, We have 2 Consumers and 1 Publisher Up and Running
+-> To read only new messages from Kafka Topic, Just remove "--from-beginning" in cmd from 1 of the Consumers.
+./kafka-console-consumer.sh --topic my-topic --bootstrap-server localhost:9092
+-> By Executing above cmd, It is now connected to Kafka Cluster, but it did not read any old messages now, which was not happening earlier.
+-> Now Produce a new Message, And will see only new Message will now get consumed.
+-> We updated cmd to read new Message in 1 Consumer Only, But All Consumers which was subscribed will read new Messages only and not any Specific Consumer.
+-> If u Publish Key-Value Pair message like "firstName:Sergery", In Consumer, it will show only value as "Sergery" and not key.
+
+Consume Key-Value Pair Messages from Kafka Topic
+------------------------------------------------
+-> By default, there is nothing on the consumer side that we need to do, to consume key value pairs. Earlier cmd we used to consume is enough.
+-> We only need to make sure that producer produces message as a key value pair.
+-> If u Publish Key-Value Pair message like "firstName:Sergery", In Consumer, it will show only value as "Sergery" and not key.
+-> To make consumer display the key and value as well, we need to provide one additional parameter.
+-> Stop 1 of the Consumer and Execute Below Command with Additional Parameter,
+./kafka-console-consumer.sh --topic my-topic --bootstrap-server localhost:9092 --property print.key=true
+-> Once we execute above cmd, It will connected to cluster and will wait for New Messages.
+-> Now Publish key-Value pair data, and we could see in both consumer, message has been consumed with both Key and Value Pair.
+-> cmd have been updated in 1 of the consumer only to display key-value pair, But it will Effect on all consumers which are subscribed to the topic.
+
+Consume Kafka Messages in Order from Kafka Topic
+------------------------------------------------
+-> If you remember from previous video lessons, Kafka Topic is actually split into multiple partitions.
+-> To determine which partition to choose to store a message, Kafka will use a hash of a message key.
+-> If there is no key, then Kafka will equally distribute messages across multiple partitions using round robin algorithm.
+-> And if you want to read messages in the order they were stored, these messages need to use exactly the same key.
+-> If messages have the same key, they will be stored in the same partition and they will be read in the same order.
+-> Will create a new Topic with "messages-order" Topic name by executing below command,
+./kafka-topics.sh --create --topic messages-order --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092
+-> Now Publish Key Value pair data in Topic by executing below command,
+./kafka-console-producer.sh  --topic messages-order --bootstrap-server localhost:9092 --property "parse.key=true" --property "key.separator=:"
+>1:First message
+>1:Second Message
+>1:third message
+>a:a
+>b:b
+>c:c
+
+-> Now Open new tab in terminal for consumer to consume messages from beginning, execute below cmd from bin folder,
+./kafka-console-consumer.sh --topic messages-order --bootstrap-server localhost:9092 --from-beginning --property print.key=true (Enter)
+1  First message
+1  Second Message
+1  third message
+b  b
+a  a
+c  c
+
+-> Above is the messages will display which has been consumed by consumer.
+-> Now notice that a list of messages with the same key. They are all ordered.
+->And those messages that were stored with a different key, Even though we send them in order, their order is different when we read them.
+-> This is because if message has a key, then its partition will be determined based on the hash of that key.
+-> If messages have the same key, they will go into the same partition and thus will be read in the same order.
+-> If messages are stored without a key, then technically the key is null, and in this case, Kafka will distribute these messages among multiple 
+partitions using a round robin algorithm.
+-> And even if you send these messages in order, when reading them, their order will be different.
+
+Note:- 2 consumers from the same consumer group cannot read messages from the same partition.
+
+Q1) In Single Instance of Machine MS, If i use @KafkaListener 2 times in 2 Different Classes. Does this mean, i am running 2 consumers
+A) Yes
+
+Q2) In Single Instance of MS, 1 Topic, 1 Partition, 2 consumers in same MS. Which Consumer will 1st read data.
+A) This Depends on group-id.
+1) If we use same group-id.
+a) With 1 partition and 2 consumers in the same group, only 1 consumer will read data. No load balancing or distribution happens.
+b) The exact consumer that gets assigned the partition depends on the order in which consumers join the group and how Kafka's coordinator assigns partitions. There is no guarantee which consumer will be chosen—it is determined by Kafka's internal group coordination logic.
+2) If we use different group-id:- Each Consumer will get Independent and All New Msgs will be consumed in Both Consumer.
+
+====================================================================================================================================
+====================================================================================================================================
+
+Project Creation
+----------------
+Product Microservice
+--------------------
+-> Created a Springboot Microservice with "Spring for Apache Kafka" and "Spring Web" Dependency
+
+Q) How Many ways we can configure Kafka Producer
+A) We can configure Kafka Producer in 2 Ways.
+1) By using application.properties file
+2) By using Java code.
+-> For Now, We are going to configure Kafka Producer by using application.properties file
+
+Setting server.port to 0 in application.properties
+---------------------------------------------------
+-> We are making "server.port=0", since we want to run our MS on Multiple instances and not to any specific port no.
+-> Setting port number to zero i.e "server.port=0", will make the spring boot application start up on a random port number
+-> This will guarantee that if you start up more instances of this same microservice, the port numbers will not conflict with each other, 
+and you can have multiple instances of the same microservice running on the same machine.
+
+Kafka Producer Properties - bootstrap servers
+----------------------------------------------
+-> We need to add bootstrap servers for Kafka Producer Configuration. Below is Example
+spring.kafka.producer.bootstrap-servers=localhost:9092,localhost:9094
+-> This configuration property is used to specify bootstrap servers for Kafka producer in your spring boot application.
+-> Bootstrap server is an initial connection point for Kafka client to connect to Kafka cluster.
+-> The value of this property should be set to a comma separated list of host and port number pairs representing addresses of Kafka brokers in cluster.
+-> By specifying this property, your Kafka cluster will be able to establish initial connection with Kafka cluster and will be able to send messages to it.
+-> In this property, we need to provide at least one bootstrap server for development purposes on your local computer.
+-> One server is enough, but if you have more brokers in your cluster, then it is better to provide at least two bootstrap servers here, like below
+spring.kafka.producer.bootstrap-servers=localhost:9092,localhost:9094
+-> And this is because if one bootstrap server is down, the second bootstrap server can still be used to establish this initial connection with the cluster.
+-> And once the initial connection with the cluster is established, Kafka producer will be able to discover other servers as well.
+-> So if you have more servers in cluster, then to add 1 more bootstrap server, will add comma and then provide address of this second bootstrap server.
+ex:- spring.kafka.producer.bootstrap-servers=localhost:9092,localhost:9094
+
+Kafka Producer Properties - Message Key Serializer
+--------------------------------------------------
+-> This configuration property is used to specify the serializer for message keys.
+-> A Message can be sent as a key value pair.
+-> A key will be used to determine which topic partition this message should be stored in.
+-> When Kafka message is sent over the network, its key and its value are serialized into a byte array,
+-> so this configuration property will be used to specify which serializer should be used to serialize a message key.
+-> In this microservice application, the value of the key will be a string, and to convert string keys into byte array, Kafka has its own serializer, 
+and we'll need to specify a fully qualified class name to that serializer. like below
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+-> So in this MS a message key will be a string. And to serialize message key, we used StringSerializer class that comes from Apache Kafka package.
+
+Kafka Producer Properties - Message Value Serializer
+----------------------------------------------------
+-> Just like Key, For a Message to be sent over netwrok, it will need to be serialized into byte array. will use below property
+spring.kafka.producer.value-serializer=
+-> This time it is value serializer property.
+-> Now, This spring boot application will be publishing events in JSON format. So for JSON, I will use JSON serializer. like below
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+-> Now notice that this time the serializer class comes from Spring Framework package rather than from Apache Kafka.
+-> With this, we are done with application properties file for now. Below are the configuration till now for Kafka Producer Properties,
+
+spring.kafka.producer.bootstrap-servers=localhost:9092,localhost:9094
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+
+Q) Create Kafka Topic By Java Code
+A) Before Kafka producer sends a message to Kafka topic. It's a good practice to create that topic first.
+-> Below is the Java class to create Kafka Topic using java code under package:- package com.udemy.kafka.wepapp.producer.config
+
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.kafka.config.TopicBuilder;
+
+@Configuration
+public class KafkaConfig {
+	
+	@Bean
+	NewTopic createTopic() {
+		return TopicBuilder.name("product-created-events-topic")
+				.partitions(3)
+				.replicas(3)
+				.configs(Map.of("min.insync.replicas","2"))
+				.build();
+	}
+}
+-> In Above Code or Java Class, We created topic with name "product-created-events-topic", with 3 Partitions
+-> Also created With 3 Replicas. Replica is a copy of topics data that is stored on a different broker. These 3 replicas must be placed on 3 different brokers.
+-> Set Replicas number based on Number of Kafka Brokers are running in a Cluster.
+
+InSync Replicas
+---------------
+-> Below is 1 more configuration to configure minimum number of replicas that must acknowledge write operation.
+.configs(Map.of("min.insync.replicas","2"))
+-> It specifies the minimum number of replicas that must acknowledge the write operation for this write operation to be considered as successful.
+-> So with below config, when a message sent to this topic, at least two replicas must acknowledge that the data is stored successfully.
+"min.insync.replicas","2"
+-> And if the number of replicas that acknowledge successful write is below this value, then producer will receive exception.
+
+-> Now, because we have to wait for replicas to acknowledge that they have received information.
+-> It makes writing to a topic a little bit more slower, but it also gives us a guarantee that our data is stored more reliably.
+-> With @Bean annotation, it will add the new topic object that is created and returned from this method to spring application context. And it will make 
+this object available to other application services and components.
+
+Run Microservice to Create a New Topic
+--------------------------------------
+-> Before running this MS, make sure that All your Kafka servers are up and running as well.
+-> Run ProductMicroservice and Run Below cmd from Bin Folder to see topic details. Will see, Kafka Topic have been created with 3 Partitions and 3 Replicas.
+./kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic product-created-events-topic   (To See info of Specific Topic)
+
+Partiton-0 has replica on Broker:3,1,2 (i.e Broker 3 is Leader for Partition-0)
+Partiton-1 has replica on Broker:1,2,3 (i.e Broker 1 is Leader for Partition-1)
+Partiton-2 has replica on Broker:2,3,1 (i.e Broker 2 is Leader for Partition-2)
+
+-> ISR (Insync replicas), which are replicas that are up to date with the leader and can take over if the leader fails, in my case, all replicas are in sync.
+
+-> If we try to run our MS with 3 replicas and 2 Brokers up, will face Exception since Replica is 3 and Broker is 2 (running in machine).
+-> Its always should be No. of Replicas <= No. of Brokers.
+-> So, Either 1 have to make up 1 more server i.e server-3 or we can reduce replicas to 2.
+-> I am making up 1 more server i.e server-3 to up 1 more server up and running. Once we run MS to create Kafka Topic via Java Code, we could see Kafka Topic
+will be created with topic name "product-created-events-topic".
+-> Below is the cmd to see that specific Kafka Topic details,
+./kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic product-created-events-topic
+
+Q) Project Related Kafka Config Changes to run All Kafka Servers in Local Mac Machine
+-> I am running Kafka Server via Zookeeper and not with KRaft
+-> In kafka/config Folder, Copied server.properties to 3 times and named server-1, server-2 and server-3.
+-> Made Below Properties Changes in each server files. (We are not using default server.properties)
+
+server-1
+broker.id=1
+listeners=PLAINTEXT://localhost:9092
+advertised.listeners=PLAINTEXT://localhost:9092
+log.dirs=/Users/vi20475016/Documents/kafka-logs/broker-1
+
+server-2
+broker.id=2
+listeners=PLAINTEXT://localhost:9094
+advertised.listeners=PLAINTEXT://localhost:9094
+log.dirs=/Users/vi20475016/Documents/kafka-logs/broker-2
+
+server-3
+broker.id=3
+listeners=PLAINTEXT://localhost:9096
+advertised.listeners=PLAINTEXT://localhost:9096
+log.dirs=/Users/vi20475016/Documents/kafka-logs/broker-3
+
+->"advertised.listeners" tells Kafka clients (producers, consumers, other brokers) how to reach that particular broker. Since each broker runs on a 
+different server, its "advertised.listeners" must reflect the correct hostname or IP and port that clients should use to connect to that broker.
+-> server-1 running on 9092, server-2 running on 9094 and server-3 running on 9094.
+-> Since All 3 Brokers Up and Running, By making up MS, we have created Kafka topic by Java Code. Will Move to Next Steps.
+
+If You Are Running Kafka with Zookeeper (Classic Setup):
+---------------------------------------------------------
+• You do NOT need to specify controller in the listeners configuration.
+• The listeners line looks like in server.properties:- listeners=PLAINTEXT:// :9094
+• The broker automatically knows how to connect to Zookeeper (via zookeeper.connect=...in the config).
+• Zookeeper manages controller election and coordination for all brokers.
+• So no controller listener change is needed
+
+If You Are Running Kafka in KRaft Mode (No Zookeeper):
+------------------------------------------------------
+-> Then you do need to specify controller listeners in addition to broker listeners in server.properties
+-> Example of listeners config in KRaft mode:
+# For broker RPC and client communication:
+listeners=PLAINTEXT://localhost: 9092, CONTROLLER://localhost: 9093
+# Advertised listeners (optional for client access):
+advertised.listeners=PLAINTEXT://your-hostname: 9092
+-> The CONTROLLER: // listener is specifically for intra-cluster communication between brokers and it takes decision to make which broker should get assigned
+as controller among multiple brokers so that partition decision can be taken as a leadership.
+-> Each broker will have a unique controller listener port, usually just one port higher or different from the main listener.
+
+Q) Problems Faced while Publishing and Consuming via project in Local Mac Machine
+A) 1st I Ran Zookeeper with default settings. i.e running only 1 broker.
+-> Then i switched to Multiple Brokers. Made Changes in server-1,server-2 and server-3 changes accordingly.
+-> Since, Zookeeper holds old or stale metadata. i.e of default config, though after re run zookeeper post multiple broker changes, I am able to produce
+but unable to consume data.
+-> To fix this, Ran 2 cmds,
+1) To Wipe Out or Clean Zookeeper Data Directory:- rm -rf /tmp/zookeeper
+2) To Check if All Brokers ids which are registered on Zookeeper:2181:- bin/zookeeper-shell.sh localhost:2181 ls /brokers/ids
+-> After clearing zookeeper, re ran zookeeper, ran all 3 Kafka Brokers, checked broker id's are registered while running 2nd cmd.
+-> Could see [1,2,3] as output by running cmd:- bin/zookeeper-shell.sh localhost:2181 ls /brokers/ids
+-> output was [1,2,3] since my brokers were running on 1,2 and 3 broker id's respectively.
+-> Then, I created kafka topic and able to publish and consume data.
+
+Q) Publishing Data over Kafka Topic Asynchronously and By Message Key using Java Code
+A) We are using "KafkaTemplate" to send or publish data over Kafka topic. below is the syntax.
+-> By below code, we are sending data over Kafka Topic Asynchronously and also by passing messageKey.
+-> In this way, it will not wait for acknowledgement that the message was successfully persisted.
+-> If we want for asynchronous behavior, then below code is how you can send message asynchronously.
+
+@Autowired
+KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate;
+
+-> To send data over kafka Topic asynchronously and by messageKey, below is the syntax
+kafkaTemplate.send("product-created-events-topic", productId,   productCreatedEvent).get();
+                    //topicName           , messageKey,  Object as value itself
+                    
+-> So if I send this message asynchronously and it fails to be persisted in Kafka topic, the client application will not know about it because in 
+response it will receive product ID.
+-> So ideally, I do want to wait for Kafka Broker to confirm that the message was persisted successfully.
+-> So if you want to send message asynchronously and not wait for a result, then above code works.
+
+-> But if you want to send message asynchronously and still be notified when it completes, then below is the code,
+CompletableFuture<SendResult<String, ProductCreatedEvent>> future = kafkaTemplate.send(productCreatedtopicName, productId, productCreatedEvent);
+-> So this Completablefuture is a class in Java concurrency API, and it represents a future result of asynchronous computation.
+-> It is used to perform operation asynchronously and then return result of that operation when it is complete,and to handle that result when operation
+completes, You can use when complete method. below is the syntax,
+		future.whenComplete((result, exception)->{
+			if(exception!=null) {
+				log.error("Failed to send message: "+exception.getMessage());
+			} else {
+				log.info("Message Sent Successfully"+result.getRecordMetadata());
+			}
+		});s
+
+-> So this future.whenComplete() method, is used to handle the result regardless whether it is successful or not.
+
+Q) Check if Kafka Message Event is Published to Kafka Topic Asynchronously
+-> Make Zookeeper and All 3 Kafka Brokers Up and Running.
+-> Open New Tab to run consumer to consume same data. below is the CLI cmd to consume message and to check if product event did get stored in Kafka Topic,
+./bin/kafka-console-consumer.sh --topic product-created-events-topic --bootstrap-server localhost:9092,localhost:9094 --property print.key=true
+-> Above consumer command, will consume messages with both Key and Value.                              
+
+Q) Publishing Data over Kafka Topic Synchronously
+A) If I send Kafka message synchronously, then I can configure my microservice application to wait for acknowledgement from all Kafka brokers that 
+my message is successfully stored in Kafka topic.
+-> When message is sent asynchronously, we do not have the guarantee, and it is possible that we lose this message if an error takes place.
+-> Add below line of code, to make our Kafka Synchronous
+future.join();  //Synchronous code. Only 1 line Change from Asynchronous code.
+
+-> With this line of code, even though the Completablefuture is used, addition of this join method makes this code effectively synchronous, 
+and this means that the thread will wait at this line until the Completablefuture completes.
+-> if we add "future.join();" then your code is synchronous and if you do not have this line, then your code is asynchronous.
+
+-> But the disadvantage of this approach is that it can easily confuse other developers and make them think that this code is asynchronous, 
+and this is because it contains keywords like completablefuture and the variable is called future as well.
+-> Developer reading this code might not notice you calling join at the bottom of this method, and might think that this code is asynchronous.
+-> So another way to write this code so that it sends message synchronously is to remove below lines from code,
+1) future.join();
+2) whole future.whenComplete(..)...
+3) Remove CompletableFuture from CompletableFuture<SendResult...
+4) Change variable from future to result.
+5) Add .get() at the end of the kafkaTemplate.send(..) method.
+
+-> Advantage of sending message synchronously is that we can configure our microservice to wait for acknowledgement from all Kafka brokers that the 
+message is successfully stored in Kafka topic
+-> But because the send method will now wait for a response, the execution will be just a little bit slower.
+-> But at least we have a guarantee that our message is not lost, and it is indeed persisted in Kafka topic.
+
+-> Final Code for Synchronous will look like below,
+SendResult<String, ProductCreatedEvent> result = kafkaTemplate.send(productCreatedtopicName, productId, productCreatedEvent).get();
+return productId;
+
+Q) Rest API to publish data over Kafka Topic
+@RestController
+@RequestMapping("/products")
+public class ProductController {
+	
+	@Autowired
+	ProductServiceImpl productService;
+	
+	@PostMapping("publish-Asynchronous")
+	public ResponseEntity<Object> createProductAsync(@RequestBody CreateProductRestModel product) {
+		
+		String productId;
+		try { 
+			productId = productService.createProductAsync(product);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new ErrorMessage(new Date(), e.getMessage(),"/products"));
+		}
+		return ResponseEntity.status(HttpStatus.CREATED).body(productId);
+	}
+}
+
+HTTP Request:- http://localhost:56114/products/publish-Asynchronous  //port is random since we have configured "server.port=0"
+Payload:-
+{
+    "title": "IPhone",
+    "price": 800,
+    "quantity": 19
+}
+
+Q) Kafka Producer Acknowledgement
+A) TO Enable Kafka Producer Acknowledgement, Below is the Property
+spring.kafka.producer.acks=1   //1 is Default Value
+-> When Kafka producer sends a message, this message is sent to Kafka Broker.
+-> Kafka broker stores this message in Kafka topic.
+-> Inside the topic, Kafka message is stored in one of the partitions.
+
+-> Now, if your Kafka cluster has more than one broker and proper replication factor configured, then topic partitions will be copied over to other 
+brokers as well.
+-> In this case, one broker is a leader and it is the first one to receive Kafka message.
+-> It receives message and then it copies this message over to other brokers that act as followers.
+-> And these brokers that act as followers, They simply replicate messages of the leader broker by default.
+-> Once leader broker stores message successfully, it sends acknowledgement to Kafka Producer that all is good, that it was able to successfully 
+store the message and Kafka producer by default, it is configured to receive this acknowledgement from one broker only i.e from leader.
+-> It is very useful configuration because it confirms that the received message is stored.
+
+Q) What if Leader Broker goes down before sharing this message with its followers and never comes back?
+A) In this case, message is lost. To make our system more reliable, we can configure Kafka Producer to wait for acknowledgment from other brokers as well.
+-> We should configure Kafka Producer to expect acknowledgment from more than one broker, not only from the leader, but also from all followers.
+-> This will make our system work just a little bit slower, because in this case, Kafka producer will wait for acknowledgment from a leader and 
+it will wait for acknowledgment from all followers.
+-> And in this case, when it is critical to ensure that the message does not get lost, you will want to configure your Kafka producer to wait for 
+acknowledgment from all in-sync replicas.
+-> And in Case, if message is not very critical and Okay if lose some messages, you can configure your producer not to wait for any acknowledgment at all.
+
+Scenario-1 (Kafka Producer Will Wait for acknowledgement from all Brokers)
+---------------------------------------------------------------------------
+-> To configure your Kafka producer to wait for acknowledgement from all brokers, below property need to be configured,
+spring.kafka.producer.acks=all
+-> In this case, Kafka producer will wait for a full set of in-sync replicas to acknowledge the record.
+-> This option provides the strongest durability guarantees because no data will be lost as long as at least one in-sync replica is alive.
+
+Scenario-2 (Kafka Producer Will Wait for acknowledgement from Leader Broker Only)
+---------------------------------------------------------------------------------
+-> To configure a Kafka producer to wait for acknowledgment from a leader broker, below property need to be configured,
+spring.kafka.producer.acks=1
+-> It ensures that Kafka message has been received and stored by the leader broker, but it does not guarantee that Kafka message has been replicated to follower brokers.
+-> Some data may be lost if leader broker fails before followers catch up, so this option is faster than waiting for all brokers to acknowledge, but it is less reliable.
+
+Scenario-3 (Kafka Producer Will Not to Wait for any acknowledgement at all)
+----------------------------------------------------------------------------
+-> To configure your Kafka producer not to wait for acknowledgements at all, below property need to be configured,
+spring.kafka.producer.acks=0
+->This might be helpful in those cases when your Kafka producer sends a lot of messages and none of those messages are very critical.
+-> And because Kafka Producer does not wait, your system works faster, but there is no guarantee that all messages will be stored.
+
+Q) If we configure spring.kafka.producer.acks=all. Does it mean that the more brokers we start, the slower our Kafka producer will start working?
+-> Answer is yes and no. Both.
+-> No, because Kafka producer will wait for acknowledgement not just from any broker, but only from in-sync replicas.
+-> You can have more brokers in your cluster, but how many replicas your topic partitions will have, will depend on the replication factor configured 
+at the time when creating a topic.
+-> So Kafka Producer will wait for acknowledgement not just from any broker, but only from in-sync replicas.
+-> Now the 2nd important detail is that you can configure the minimum number of replicas that you want to receive an acknowledgement from.
+-> If you have 5 replicas, then you can configure only 2 of them to acknowledge the write operation, and you do it below property,
+--config min.insync.replicas=2
+-> This will make your Kafka producer work faster, because it does not need to wait for all five replicas to respond with acknowledgement.
+-> And it is still reliable, because you know that at least two brokers have stored your Kafka message in their partition.
+
+Q) How Producer Requests Acknowledgement From Broker
+A) When producer sends a message to Kafka Broker, it can request acknowledgement from that broker to ensure that the message was successfully received and persisted.
+-> Below is the property, where producer will wait for acknowledgement only from a Leader.
+spring.kafka.producer.acks=1 //Default value. It will behave same even if we wont configure this property
+-> This will ensure that Kafka message was successfully written to the leader, but it does not guarantee replication to other replicas.
+
+-> But if leader crashes before data was replicated and broker never comes back, then there is a chance that the message is lost.
+-> And to make your application more durable instead of 1, you can set a different value, which is all. below is the property
+spring.kafka.producer.acks=all //Here "all" is referred to no. of in-sync replicas configured while creation of Topic.
+-> This will mean that producer will wait for acknowledgment from all in-sync replicas, and this guarantees and ensures that all replicas have received and persisted our message. 
+-> But our producer will need to wait for acknowledgement from all in-sync brokers or servers.
+
+Q) Trying How Acknowledgement Works with min.insync.replicas By Java Code
+A) We have created our Topic name "product-created-events-topic" with 3 partitions, 3 replicas and 2 in-sync servers.
+-> Since we have configured with 2 in-sync replicas, though we are running 2 or more servers or brokers in a cluster, Producer will wait acknowledgement from only 2 servers.
+-> Below is the property need to be added in application.properties file for Producer Acknowledgement
+spring.kafka.producer.acks=all  //Here "all" is referred to no. of in-sync replicas configured while creation of Topic.
+-> In our case, we have configured 2 in-sync replicas. So if we run our MS with only 1 Broker or Server and Send Message, we will face Exception.
+-> Exception occurs, cos producer will expect "all" (or) 2 InSynce Replicas Acknowledgment. since we have configured 2-Insync replicas and running only 1 Kafka Broker.
+-> While Sending Message or Request by only 1 server running with 2-Insync replicas, It will take longer than usual, around 2 minutes by default.
+-> Kafka producer keeps retrying to send a message until timeout is reached and will get Error Response because Kafka producer did not receive confirmation
+from all replicas.
+-> The write operation is not successful and there is no message for Kafka consumer to receive.
+-> Below will be the Error in console,
+Error: NOT_ENOUGH_REPLICAS and Exception: Failed to Send
+
+Q) Kafka Producer Retries
+A) Below property is used to specify the number of times Kafka producer will try sending a message to Kafka Broker if it fails to send it the first time.
+spring.kafka.producer.retries=10  //10 represents 10 times, Producer will try for 10 times
+-> In this case Kafka producer will retry sending message to Kafka Broker 10 times.
+-> Retry attempts are made at regular intervals which are controlled by the following property.
+spring.kafka.producer.properties.retry.backoff.ms=1000 //1000 represents 1 sec
+-> So if I set producer retries to 10s and the retry backoff to 1000 milliseconds, then this will make Kafka producer retry sending message ten times with 1 second time interval between each retry.
+-> But if the message does get sent successfully halfway through, then it will stop, retry.
+
+Q) Trying How Kafka Producer Acknowledgement Works with Retries By Java Code
+A) We have created our Topic name "product-created-events-topic" with 3 partitions, 3 replicas and 2 in-sync servers.
+-> And if I send Http request, I expect an error message in response cos I do not have enough brokers running.
+-> Kafka producer expects to receive acknowledgement from two brokers, but I have only 1 broker running.
+-> And because Kafka producer will fail to send this message, It will activate the retry behavior and my Kafka producer should retry sending Kafka message
+10 times with 1 second time interval between each retry.
+-> Below is Error and Exception,
+Error: NOT_ENOUGH_REPLICAS and Exception: Failed to Send
+
+Another Approach to Handle Retries
+----------------------------------
+-> Instead of controlling the no. of retries above way, Kafka documentation recommends us to use the following property instead.
+spring.kafka.producer.properties.delivery.timeout.ms=120000 //Default Value is 2 Minutes.
+-> By Default, delivery property value is 2 mins.
+-> With above property i.e delivery.timeout is used to configure the maximum amount of time.
+-> Producer will wait for a response from all replicas after sending a message, and this is actually the maximum amount of time producer is allowed to wait until the entire send operation is complete, including retry operations.
+-> So with this configuration, if producer sends a message and does not receive acknowledgement from all in-sync replicas within this number of milliseconds, then it will raise an error.
+
+-> But if you want to change the value of this delivery timeout configuration property and set it to something less than 2 minutes, remember that its value should be  >= sum of these 2 below configuration properties.
+spring.kafka.producer.properties.linger.ms=0  //default value is 0
+spring.kafka.producer.properties.request.timeout.ms=30000 //default value is 30000 ms or 30 seconds
+-> And this is because if you have many Kafka brokers and you want to receive acknowledgement from all replicas, then we need to give enough time considering the time which also takes restarting broker if bany roker goes down and time it want to recover.
+
+Q) What is Batch and Linger
+A) Below is a Kafka producer configuration that controls the linger time for batching records before sending them to the Kafka Broker.
+spring.kafka.producer.properties.linger.ms=0
+-> If linger.ms=10 ms:
+• When the 1st message arrives at time 0 ms, the producer starts a timer for 10 ms (because linger.ms=10 ).
+• If any other messages arrive within those 10 ms, like the 2nd message arrived at 5 ms, they are added to the same batch.
+• At the 10 ms mark, the producer sends all the messages collected so far (both the 0 ms and 5 ms messages) together in 1 batch.
+-> If linger.ms=0 ms:
+• The producer sends the first message immediately (at 0 ms).
+• When the 2nd message arrives at 5 ms, it sends that immediately too. It wont wait for 5 ms. 5ms is just the arrival time of the 2nd message.
+-> Below config, configures the maximum time producer can wait after sending a single request.
+spring.kafka.producer.properties.request.timeout.ms=1
+
+Q) Difference between delivery.timeout.ms and request.timeout.ms
+spring.kafka.producer.properties.delivery.timeout.ms=120000 //Default Value is 2 Minutes.
+-> This 2 mins timeout includes
+1) Time the messages sits in the batch waiting for linger.ms to expire
+2) Retries
+3) Time Spent waiting for acknowledgements (affected by acks and request.timeout.ms)
+
+spring.kafka.producer.properties.request.timeout.ms=30000
+-> This is the maximum amount of time the Kafka client (producer) will wait for the broker's response after sending a produce request.
+-> Setting it to 1 (ms) means the producer only waits 1 millisecond for the response from the broker.
+
+• delivery.timeout.ms ≥ request.timeout.ms + (retries x backoff)
+• request.timeout.ms is about broker response wait time. //set to high cos if broker goes down, atleast it will take more than 1ms to restart
+• delivery.timeout.ms is about overall send attempt.
+
+Q) Trying How Kafka Producer Delivery and Request Timeout Works with Java Code
+A) We have created our Topic name "product-created-events-topic" with 3 partitions, 3 replicas and 2 in-sync servers. Running only 1 Broker.
+-> If I send request, Producer is trying to send Kafka message again and again, and the max time that I have configured for this retries is 2 mins
+-> If it does not receive acknowledgement from 2 brokers within 2 minutes, it will throw an exception.
+-> Once Kafka producer stopped retrying the send operation, will see Java Exception in console and cause of this exception is timeout.
+
+Q) Configure Kafka Producer by using java code.
+-> Till Now, We have configured all the producer configs using application.properties like bootstrap-server, producer.key-serializer and producer.value-serializer etc.
+-> By this was, we dont have to type complete name of the class, including its package name to configure key and value serializers.
+-> I don't really like typing entire package name because it's very easy to make a typo.
+-> And the good news is that we can configure Kafka Producer in Java code using a bin method.
+-> There we do not need to type entire package name, and instead we can use predefined constants like we used in producerConfigs()
+
+-> Now we will use existing KafkaConfig Java Class, to configure same above configs.
+-> Below producerFactory() method, is responsible for creating producer factory object that creates Kafka producer instances in Spring Framework.
+-> Factory is a design pattern that is used to create objects, and in this case producer factory is specifically designed to create Kafka producer objects and Kafka Producer is responsible for sending messages to Kafka topics. Below is code,
+@Bean
+	ProducerFactory<String, ProductCreatedEvent> producerFactory() {
+		return new DefaultKafkaProducerFactory<>(producerConfigs());
+	}
+	
+-> Now notice that default Kafka producer factory calls producer Config's method.
+-> producerConfigs() method will return map object with configuration properties that we created, and Kafka Producer Factory will use this configuration to create Kafka Producer object. Below is code,
+Map<String, Object> producerConfigs() {
+		Map<String, Object> config = new HashMap<>();
+		
+		config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+		config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
+		config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
+		config.put(ProducerConfig.ACKS_CONFIG, acks);
+		config.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, deliveryTimeout);
+		config.put(ProducerConfig.LINGER_MS_CONFIG, linger);
+		config.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, requestTimeout);
+		
+		return config;
+	}
+
+
+-> Below method that will be used to create Kafka Template Object and Kafka template object is what we will actually use to send messages to Kafka topic.
+@Bean
+	KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate() {
+		return new KafkaTemplate<String, ProductCreatedEvent>(producerFactory());
+	}
+-> So this Kafka template method, it is annotated with bean annotation, which means that it will create a bin of this type and will register it in spring Application context.
+-> This way we can then inject Kafka template bean into other classes that need to send messages to Kafka topic.
+
+Note:- Since we have "@Configuration" and "@Bean", application.properties file will get ignored and all configs will get read from java file.
+
+Q) Idempotent Kafka Producer
+A) Once you enable Idempotence in your Kafka producer, your application will work this way.
+-> Producer will send a message.
+-> Kafka broker will store this message in Kafka topic and once the message is stored, Kafka Broker will send acknowledgement back to producer.
+-> If network problem takes place and this acknowledgement does not reach Kafka producer, then our producer will retry and send the message again.
+-> But because we have enabled Idempotence in our producer, Kafka broker will see that producer is sending the same message again.
+-> Since, there is already a message like this in Kafka topic. Instead of storing the same message again, Kafka Broker will simply acknowledge that it does have already this message and this time acknowledgement receives by broker.
+-> And in this case, if Kafka producer sends the same message multiple times, there will be only one such message in the topic and there will be no duplicates.
+-> In simple words, Producer can send the same message multiple times, but Kafka Broker will only store it once and keep it in the correct order, and this can prevent inconsistency in Kafka topic, even if there are problems with the network or servers.
+
+Q) Enable Idempotent Kafka Producer
+A) To enable Idempotents in your Kafka producer, you will need to set the following configuration property to true.
+-> If we are using application.properties file, then below is the property
+spring.kafka.producer.properties.enable.idempotence=true
+
+-> If you're using bean method, then your configuration property will look like this.
+props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,true);
+
+-> By Default, Idempotent configuration property is set to true and you do not really need to enable it explicitly.
+-> But it is recommended to set property to true.
+
+Conditions to Enable Idempotent Kafka Producer
+----------------------------------------------
+1) spring.kafka.produce.properties.acks=all
+-> If you are using application.properties file, then for Idempotence to work, acknowledgment property will need to be set to "all"
+2) spring.kafka.produce.properties.retries=2147483647  //2147483647 is by default
+-> All retries must be > 0
+3) spring.kafka.producer.properties.max.in.flight.requests.per.connection=5
+-> maximum in-flight requests per connection must be <= 5.
+-> By Above Property means, Kafka producer can send up to five requests or batches of messages to broker at the same time without waiting for acknowledgements, and this can improve throughput and performance of your broker.
+-> It means, 1st msg sent to broker, and didnt receive acknowledgement from Broker to client. But he can send 2nd message as well upto 5 messages.
+
+Q) Enable Idempotent Kafka Producer By Java Code(In properties file)
+A) Below is the property to enable Idempotent Kafka Producer.
+spring.kafka.producer.properties.enable.idempotence=true
+-> So for idempotence to work, producer acknowledgements must also be set to "all".
+-> So if you do enable Idempotence explicitly, but set acknowledgement to a different value, then your application will throw configuration exception, If you try to produce a message.
+-> And maximum in-flight requests per connection must be <= 5. i.e spring.kafka.producer.properties.max.in.flight.requests.per.connection=5
+
+Q) Enable Idempotent Kafka Producer By Java Code(In Java Class or Bean Method)
+A) To Enable Idempotent Kafka Producer by Bean Method, Below line we need to add In KafkaConfig under producerConfigs(). Below is the line,
+config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,true); //Default value is true
+-> Simply read values of "maximum in-flight requests per connection", "...enable.idempotence" from props file and use in producerConfigs(). like below,
+@Value("${spring.kafka.producer.properties.enable.idempotence}")
+    private Boolean idempotence;
+    
+    @Value("${spring.kafka.producer.properties.max.in.flight.requests.per.connection}")
+    private Integer inflightRequests;
+	
+	Map<String, Object> producerConfigs() {
+		Map<String, Object> config = new HashMap<>();
+		
+		config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+		config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
+		config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
+		config.put(ProducerConfig.ACKS_CONFIG, acks);
+		config.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, deliveryTimeout);
+		config.put(ProducerConfig.LINGER_MS_CONFIG, linger);
+		config.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, requestTimeout);
+		config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,idempotence);
+		config.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,inflightRequests);
+		
+		return config;
+	}
+-> We are not reading spring retries value since by default value will be >0 anyhow, as this is also 1 of the condition to enable idempotent.
+-> The producer will set retries to Integer.MAX_VALUE (if not explicitly set).
+
+Q)Testing Kafka Producer with Idempotent By Microservice
+A) Ran All 3 Kafka brokers and sending HTTP Post Request with API:- http://localhost:62924/products/publish-Synchronous and
+Body {"title": "IPhone","price": 800,"quantity": 19 }
+
+Scenario-1
+----------
+Set spring.kafka.producer.properties.enable.idempotence=true
+Set spring.kafka.producer.acks=all
+spring.kafka.producer.properties.max.in.flight.requests.per.connection=5  //It should be <=5
+Result:- It will Publish the Data
+
+Scenario-2
+----------
+Set spring.kafka.producer.properties.enable.idempotence=true
+Set spring.kafka.producer.acks=all
+spring.kafka.producer.properties.max.in.flight.requests.per.connection=6  //It should be <=5
+Result:- Exception:- "message": "Must set max.in.flight.requests.per.connection to at most 5 to use the idempotent producer."
+
+Scenario-3
+----------
+-> Though i have Implemented idempotence, If I keep publishing the same data, the same data will get stored in the topic because this is intentional.
+-> If you keep publishing same data multiple times (even with the same key and value), each call is considered a new message and will be stored in the topic as a separate record.
+-> Idempotence in Kafka ensures that, in the case of network errors, retries, or broker failures, the same message is not stored multiple times in the topic.
+
+Scenario	                             Idempotence Prevents Duplicate?
+--------                                 --------------------------------
+Producer retries due to network error	  Yes
+Producer retries due to broker failure	  Yes
+You intentionally send the same message	  No
+
+====================================================================================================================================
+====================================================================================================================================
+Kafka Consumer
+--------------
+-> When consumer starts reading messages, it starts pulling messages from Kafka topic at a regular time interval.
+-> When Kafka consumer reads messages from partitions, it reads them in parallel.
+-> There is no order guarantee which messages from which partitions will be read first, but it does read messages in order within a single partition.
+-> So if we take partition one, for example, then the message from offset 0 will always be read before message with offset 1, Next it will read message from offset 2, and next it will read message from offset 3.
+-> So messages within a single partition, They are always read in order, but there is no order guarantee between partitions.
+
+-> For example, there is no guarantee that messages from partition 1 will always be read messages before from partition 2, there is no order in which messages are read between partitions.
+-> If you have a single application, then it will read messages from all three partitions.
+-> But if you have 3 consumers running, then each consumer will be assigned to read messages from 1 partition only.
+-> If we scale and start more than 1 instance of the same consumer MS, then all instances of Kafka consumer can be grouped together and work as a group.
+-> This way, instead of 1 consumer, you will have 3 consumers reading messages from the same topic, each consumer reading messages from its own partition.
+-> And this will help you process messages from Kafka topic faster.
+
+-> Once Kafka consumer reads message from Kafka topic, it does not delete this message from the topic.
+-> The message remains in the topic until it is deleted from there automatically.
+-> By default, Kafka Topic is configured to keep messages for 168 hours, which is 7 days, but if needed, you can change this value using Configuration properties file.
+
+Consumer Project Creation
+-------------------------
+-> Added Spring Web and Spring Kafka Dependency
+-> Made server.port=0 to run consumer ms on multiple ports or instances
+-> Added bootstrap servers where its used for initial connection to Kafka cluster.
+spring.kafka.consumer.bootstrap-servers=localhost:9092,localhost:9094  //where 9092 and 9092 adre addresses of Kafka Brokers
+
+Q) Kafka Consumer Configuration by Properties File
+-> Added consumer key-deserializer property. It is used to specify the Deserializer class for Kafka message keys.
+-> In Kafka, when Messages are produced or sent as key value pairs, both key and value are serialized into an array of bytes.
+-> So, deserializer is responsible for converting these bytes back into their original format. Below is the property
+spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+
+-> Added consumer value-deserializer. It is used to specify the Deserializer class that will be used to deserialize message value.
+-> it will be a Json Deserializer. this Json Deserializer class is provided by Spring Framework, and it will be used to deserialize or convert message value from byte array into Json object that will be processed by our consumer microservice. Below is the property
+spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer
+
+-> Configured consumer group ID as key with value "product-created-events".
+-> In Kafka, consumer Group is a group of microservices or a group of Kafka consumers that work together to consume messages from a topic.
+-> consumer group ID property will allows us to define a unique string that identifies consumer group.
+-> In this case, I'm using "product-created-events" as group ID, and this means that every microservice that uses this group ID will belong to the same group.
+-> And all microservices that belong to the same group, will work together as a group to process messages related to product created events.
+spring.kafka.consumer.group-id=product-created-events
+
+-> Added Consumer trusted Packages Configuration.
+-> we specify 1 or more packages that are considered trusted for deserialization when processing Json messages.
+-> I should provide package name of the product created event class which published data to Kafka Topic as Producer
+-> If you know that application that publishes events is trusted, then you can allow any package and use * instead of a package name.
+-> But in many cases it is advisable to follow principle of least privilege and restrict deserialization to only those packages that this application actually needs. Below is the property
+spring.kafka.consumer.properties.spring.json.trusted.packages=*
+
+-> Below is the Complete property, we have configured till now in application.properties file for Consumer Microservice,
+server.port=0
+spring.kafka.consumer.bootstrap-servers=localhost:9092,localhost:9094
+spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer
+spring.kafka.consumer.group-id=product-created-events
+spring.kafka.consumer.properties.spring.json.trusted.packages=*
+
+Q) Consume Messages or Events By Java Code
+A) To Consume Messages, will use @KafkaListener on top of method.
+-> @KafkaListener can be used above the class name or above the method name, and it is used to mark method or a class as a target for incoming messages from Kafka topic.
+-> When we apply this annotation on top of method, then it means that this method should be invoked whenever a new message is received from specified Kafka topic and the topic name you will provide in brackets. below is the example,
+@KafkaListener(topics="product-created-events-topic")
+public void handle(){}
+
+-> Topic May Publish different types of data like "ProductCreatedEvent" and "OrderCreatedEvent", Both are Different Types of Json Data.
+-> Now if we want to handle different types of data from the same topic, then instead of defining @KafkaListener annotation on method, we can define @KafkaListener on top of class
+-> And in this case, each method we annotate with @KafkaHandler, will handle that different type of data from that topic.
+-> To specify which particular event your method is listening to, you will pass event as a method argument. in our case, we are publishing "ProductCreatedEvent" event. so to consume same message, will use "ProductCreatedEvent" data type.
+-> Below is the over code, we are using for Consumer,
+@Component
+@Slf4j
+@KafkaListener(topics="product-created-events-topic")
+public class ProductCreatedEventHandler {
+	
+	@Value("${product-kafka-topic}")
+    String topicName;
+	
+	@KafkaHandler
+	public void handleProductCreated(ProductCreatedEvent productCreatedEvent) {
+		log.info("Consumed Messages from Topic:{}",topicName);
+		log.info("Messages are:{}",productCreatedEvent);
+	}
+}
+
+-> In Above Code, If a message payload can be deserialized to ProductCreatedEvent, it goes to handleProductCreated, which is what in our case.
+-> In case, If payload matches with OrderCreatedEvent, it goes to handleOrderCreated.
+-> If it’s just a string, it goes to handleString.
+-> This is a powerful feature for handling heterogeneous message types from a single topic in Spring Kafka.
+-> 1 Consumer can consume messages from Multiple Kafka Topics.
+-> No. of @KafkaListener for each topic defines the no. of Consumers we are using.
+
+Q) Problems Faced While Consuming Messages By Consumer Microservice or Java Code via properties file
+A) Since we are working on 2 Different MS's and Not on Multi Module or Centralized or Shared Project, the type of message we are publishing is "com.udemy.kafka.wepapp.producer.dto.ProductCreatedEvent" from ProductMicroservice, We cannot use below property
+spring.kafka.consumer.properties.spring.json.trusted.packages=*
+-> If we use above property, will face exception saying "com.udemy.kafka.wepapp.producer.dto.ProductCreatedEvent" Not Found.
+-> This is cos, we are not working on shared project to detect "com.udemy.kafka.wepapp.producer.dto.ProductCreatedEvent" class in consumer MS.
+-> So below is the Updated properties configuration for Consumer Microservice.
+
+server.port=0
+spring.kafka.consumer.bootstrap-servers=localhost:9092,localhost:9094
+spring.kafka.consumer.key-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+spring.kafka.consumer.properties.spring.deserializer.key.delegate.class=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.consumer.properties.spring.deserializer.value.delegate.class=org.springframework.kafka.support.serializer.JsonDeserializer
+spring.kafka.consumer.properties.spring.json.value.default.type=com.udemy.kafka.wepapp.consumer.dto.ProductCreatedEvent
+spring.kafka.consumer.properties.spring.json.trusted.packages=com.udemy.kafka.wepapp.producer.dto,com.udemy.kafka.wepapp.consumer.dto
+spring.kafka.consumer.properties.spring.json.use.type.headers=false
+spring.kafka.consumer.group-id=product-created-events
+product-kafka-topic=product-created-events-topic
+
+Q) Kafka Consumer By Spring Bean Configuration
+A) We have configure key and value deserializers, I need to type complete name of the class including package name.
+-> It is not very convenient to type the entire package name, and it is very easy to make a typo.
+-> And if I make a typo, there is no compile time warning from my development environment about it, and I will know about this type only when I run my application to see how it works. And because of a typo, it will not work.
+
+-> We can configure Kafka consumer in Java code using spring Bean. And this way we do not need to type package name in application.properties file.
+-> To configure Kafka consumer using Java Bean, we created new configuration class as "KafkaConsumerConfig".
+-> Will need to define a method that will create and return object that implements consumer factory interface. Below is the code,
+
+@Bean
+	ConsumerFactory<String, ProductCreatedEvent> consumerFactory() {
+		// Configure the JsonDeserializer
+	    JsonDeserializer<ProductCreatedEvent> jsonDeserializer = new JsonDeserializer<>(ProductCreatedEvent.class);
+	    jsonDeserializer.addTrustedPackages("com.udemy.kafka.wepapp.consumer.dto");
+	    // This is crucial: ignore type headers from producer
+	    jsonDeserializer.setUseTypeHeaders(false);
+
+	    // Wrap with ErrorHandlingDeserializer
+	    ErrorHandlingDeserializer<ProductCreatedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
+
+	    Map<String, Object> config = new HashMap<>();
+	    config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
+	    config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
+	    config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+	    config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, errorHandlingDeserializer.getClass());
+
+	    return new DefaultKafkaConsumerFactory<String, ProductCreatedEvent>(config, new StringDeserializer(), errorHandlingDeserializer);
+	}
+	
+	@Bean
+	ConcurrentKafkaListenerContainerFactory<String, ProductCreatedEvent> kafkaListenerContainerFactory(
+			ConsumerFactory<String, ProductCreatedEvent> consumerFactory) {
+
+		ConcurrentKafkaListenerContainerFactory<String, ProductCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(consumerFactory);
+		
+		return factory;
+	}
+
+-> Environment object is part of Spring framework and it is used to represent environment in which current application is running.
+-> We can use it to access configuration properties and other environment specific information.
+-> So once you have instance of your environment object, you can use it to access properties defined in Application properties file.
+
+Q) How and Why Kafka Consumer Works By Spring Bean Configuration
+1) JsonDeserializer Setup
+
+JsonDeserializer<ProductCreatedEvent> jsonDeserializer = new JsonDeserializer<>(ProductCreatedEvent.class);
+jsonDeserializer.addTrustedPackages("com.udemy.kafka.wepapp.consumer.dto");
+jsonDeserializer.setUseTypeHeaders(false);
+
+Purpose: This tells Spring Kafka how to turn the raw JSON messages from Kafka into Java objects of type ProductCreatedEvent.
+-> addTrustedPackages: For security, only classes in this package can be deserialized. This prevents malicious code injection.
+-> setUseTypeHeaders(false): This tells the deserializer to ignore any type information sent by the producer (in Kafka message headers). Instead, it always uses the type you specified (ProductCreatedEvent). This is crucial when producer and consumer use different DTO packages or when you want to avoid class not found errors.
+
+2) ErrorHandlingDeserializer
+
+ErrorHandlingDeserializer<ProductCreatedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
+
+Purpose: This wraps your JsonDeserializer and catches any deserialization errors (e.g., if a message is malformed). Instead of crashing the consumer, it allows you to handle these errors gracefully (e.g., by logging or sending to a dead-letter topic).
+
+3) Kafka Consumer Configuration
+
+Map<String, Object> config = new HashMap<>();
+config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
+config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
+config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, errorHandlingDeserializer.getClass());
+
+-> BOOTSTRAP_SERVERS_CONFIG: Tells the consumer where to find the Kafka cluster.
+-> GROUP_ID_CONFIG: Sets the consumer group ID.
+-> KEY_DESERIALIZER_CLASS_CONFIG: Tells Kafka how to deserialize the message key (as a String).
+-> VALUE_DESERIALIZER_CLASS_CONFIG: Tells Kafka to use ErrorHandlingDeserializer for the message value.
+
+4) DefaultKafkaConsumerFactory
+
+return new DefaultKafkaConsumerFactory<String, ProductCreatedEvent>(config, new StringDeserializer(), errorHandlingDeserializer);
+
+Purpose: This creates a factory that Spring will use to create Kafka consumers with the configuration and deserializers you set up.
+Type Parameters: <String, ProductCreatedEvent> means keys are Strings, values are ProductCreatedEvent objects.
+
+
+5) ConcurrentKafkaListenerContainerFactory
+
+@Bean
+ConcurrentKafkaListenerContainerFactory<String, ProductCreatedEvent> kafkaListenerContainerFactory(
+        ConsumerFactory<String, ProductCreatedEvent> consumerFactory) {
+
+    ConcurrentKafkaListenerContainerFactory<String, ProductCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(consumerFactory);
+
+    return factory;
+}
+
+Purpose: This sets up the infrastructure for your @KafkaListener methods. It tells Spring to use your custom consumer factory for all Kafka listeners.
+
+
+Why is this working?
+---------------------
+-> Type Safety: You explicitly specify that your consumer expects ProductCreatedEvent objects, so Spring knows how to deserialize incoming messages.
+-> Error Handling: By wrapping your deserializer in ErrorHandlingDeserializer, you avoid consumer crashes on bad messages.
+-> Security: By trusting only your DTO package, you prevent deserialization of unexpected or malicious classes.
+-> Type Header Ignoring: By setting setUseTypeHeaders(false), you avoid issues where the producer and consumer use different Java packages for the same DTO.
+
+
+Kafka Listener Container Factory
+---------------------------------
+-> We will create a new method that will use above configuration to create Kafka Listener Container.
+-> Kafka Listener Container will be responsible for receiving messages from Kafka topic and invoking the listener method in our Java code.
+-> Below is the code
+@Bean
+ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(ConsumerFactory<String, Object> consumerFactory) {
+
+		ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(consumerFactory);
+		
+		return factory;
+	}
+
+-> @Bean: This annotation tells Spring that this method returns an object (a "bean") that should be managed by the Spring container.
+-> ConcurrentKafkaListenerContainerFactory: This is a factory that creates containers for Kafka listeners. These containers are responsible for running the code that listens to Kafka topics.
+-> ConsumerFactory: This is used to create Kafka consumers, which are objects that read messages from Kafka topics.
+
+What happens inside the method
+------------------------------
+1) A new factory is created:
+ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+2) The factory is configured:
+factory.setConsumerFactory(consumerFactory); => This tells the factory how to create Kafka consumers (using the provided consumerFactory).
+
+3) The factory is returned:
+return factory;
+Now, Spring knows how to create and configure listener containers for Kafka.
+
+Why is this useful?
+------------------
+-> When you use @KafkaListener in your code to listen to Kafka topics, Spring uses this factory to create and manage the background processes that actually listen for messages.
+-> This setup allows you to easily configure how your application consumes messages from Kafka, such as concurrency, error handling, etc.
+-> This method takes consumer factory object as method argument, which is the same object that we created in consumerFactory method, and this consumer factory object is then used to tell factory how to create a Kafka consumer object.
+
+Q) Trying If Kafka Consumer Spring Bean Configuration Works
+A) Run Zookeeper, all 3 Kafka Brokers, Product and Consumer MS. Once we publish data, we could see, Consumer MS reads same messages.
+
+Till Now we have configured Kafka Consumer By Both Props and Java Bean File. And In Both ways, Consumer is reading Messages.
+
+Q) Kafka Consumer Dead Letter Topic
+A) Dead letter topic is a place to handle messages that could not be processed successfully due to some error.
+-> we will configure our Kafka consumer so that a message that fails to be deserialized it is sent to a dead letter topic.
+-> So instead of silently forgetting about bad messages, we will send them to a dead letter topic so that
+-> we can look at these messages later and decide what we want to do with them later. You can inspect messages that are in the dead letter topic.
+-> You can identify the root cause of their problem, take corrective actions, and maybe even create a separate consumer microservice that will consume messages from dead letter topic and process them differently.
+Now, by default, the name of the dead letter topic is just the same as a name of the current topic, but it will have extension dot DLT. Like Below
+Topic Name:-             product-created-events-topic Then 
+Dead Letter Topic Name:- product-created-events-topic.DLT
+-> In New versions DLT Topic name will end with "-dlt" extension like below
+product-created-events-topic-dlt
+
+Q) Configure Dead Letter Topic By Spring Bean
+-> Below is the Bean Configuration we have in KafkaConsumerConfig.java file
+1. Kafka Listener Container Factory Bean
+@Bean
+ConcurrentKafkaListenerContainerFactory<String, ProductCreatedEvent> kafkaListenerContainerFactory(
+    ConsumerFactory<String, ProductCreatedEvent> consumerFactory,
+    KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate) 
+{
+    DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate));
+
+    ConcurrentKafkaListenerContainerFactory<String, ProductCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(consumerFactory);
+    factory.setCommonErrorHandler(errorHandler);
+
+    return factory;
+}
+
+Explanation:
+-> In ConsumerFactory, we are passing parameter as kafkaTemplate
+-> kafkaTemplate Used for producing messages to Kafka (needed for error handling).
+-> We are Using "DefaultErrorHandler" set up with a DeadLetterPublishingRecoverer, which means that if the consumer fails to process a message, the message will be sent to a "dead letter" topic using the provided kafkaTemplate.
+
+2. Kafka Template Bean
+@Bean
+KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate(ProducerFactory<String, ProductCreatedEvent> producerFactory){
+    return new KafkaTemplate<String, ProductCreatedEvent>(producerFactory);
+}
+
+Explanation:
+-> This kafkaTemplate bean creates a KafkaTemplate, which is the main class used to send messages to Kafka topics.
+Parameter:
+producerFactory: Used to create Kafka producers.
+Return: A new KafkaTemplate configured with the provided producer factory.
+
+3. Producer Factory Bean
+@Bean
+ProducerFactory<String, ProductCreatedEvent> producerFactory() {
+    Map<String, Object> config = new HashMap<>();
+    config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
+    config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+    config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    return new DefaultKafkaProducerFactory<>(config);
+}
+
+Explanation:
+Purpose: This bean creates a ProducerFactory, which is used by the KafkaTemplate to create Kafka producers.
+Configuration:
+BOOTSTRAP_SERVERS_CONFIG: Specifies the Kafka broker addresses. It is fetched from the application's environment properties.
+VALUE_SERIALIZER_CLASS_CONFIG: Specifies that message values (ProductCreatedEvent) will be serialized using JsonSerializer.
+KEY_SERIALIZER_CLASS_CONFIG: Specifies that message keys (String) will be serialized using StringSerializer.
+Return: A new DefaultKafkaProducerFactory with the given configuration.
+
+Note:- Dead Letter Publishing Recoverer: This is useful for handling messages that cannot be processed (e.g., due to deserialization errors or business logic failures). Instead of losing these messages, they are redirected to a special topic for further investigation.
+
+Scenario-1 (Sending InCorrect Messages)
+----------------------------------------
+-> Since, we are using "ProductCreatedEvent" to Publish and Consume Data, WIll try to send other format data which is not correct so that we could see messages failed to consume and these messages will get store in DLT Topic "product-created-events-topic-dlt"
+-> If Messages are failed to get Serialized the these messages will get store in DLT Topic and This Topic will get created automatically whenevr any messages failed to get consume.
+-> Below is CMD to produce error or incorrect format messages
+./bin/kafka-console-producer.sh  --topic product-created-events-topic --bootstrap-server localhost:9092,localhost:9094 --property parse.key=true --property key.separator=:
+>1:{abc}
+-> Once we publish above msgs, Below CMD is to check and consume the same error messages which has been published.
+-> But this time Topic Name will be created automatically and Topic Name will be {TopicName}-dlt where "-dlt" is the Extension. below is the cmd,
+./bin/kafka-console-consumer.sh --topic product-created-events-topic --bootstrap-server localhost:9092,localhost:9094 --from-beginning --property print.key=true --property print.value=true
+1 abc
+-> We could see, while consuming, same error msgs have been stored in DLT Topic "product-created-events-topic-dlt"
+-> Error Messages will get Stored in Original Topic and DLT Topic Both
+-> We dont see any error or exception msgs in consumer console since we have handled exceptions gracefully.
+
+Q) Kafka Consumer Exceptions and Retries
+A) Till Now, Retry Config has been done on Producer Side.
+-> What If Consumer MS could not able to process message due to some other error like Consumer MS is restarting and was temporarily unavailable.
+-> It could be that Consumer microservice was restarting and was temporarily unavailable.
+-> Now notice that in this case, Consumer microservice or Kafka consumer did consume message successfully.
+-> Message format was valid and message was successfully consumed from Kafka topic.
+-> It is just our microservice was not able to process this message due to some other errors.
+
+-> In this case, we need to identify If the error took place because of consumer MS was restarting, then this operation can be Retryable.
+-> But if error like NullPointerException, then retrying this operation again and again will not make sense. Store in DLT Topic
+-> In this case, if msg is InCorrect then we will publish message to a dead letter topic.
+
+Q) Creating Retryable and Not Retryable Exception By Java Code
+Not Retryable Exception  //Store Messages in DLT Topic
+-----------------------
+-> Since We are handling the Exceptions and Sending messages to DLT Topic, We will make use of this errorHandler to identify if Operation is Retryable or Not Retryable based on Exception, Below code
+DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate));  //Existing Code
+errorHandler.addNotRetryableExceptions(NoTRetryableException.class);
+-> NoTRetryableException.class is Custom Exception class created which extends RuntimeException
+
+-> Now Add Below line in @KafkaHandler handle() to throw NoTRetryableException. Below is the code,
+@KafkaHandler
+	public void handleProductCreated(ProductCreatedEvent productCreatedEvent) {
+		if(true) throw new NoTRetryableException("Error Occured. No Need to Consume this Message Again");
+	}
+	
+Scenario
+--------
+-> Once we Run all 3 Brokers and Hit HTTP Request to publish msg, since we are deliberately throwing Exception, Messages will get Stored in DLT Topic.
+-> It Wont Retry.
+
+Retryable Exception
+-------------------
+-> Since We are handling the Exceptions and Sending messages to DLT Topic, We will make use of this errorHandler to identify if Operation is Retryable or Not Retryable based on Exception, Below code
+DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate));  //Existing Code
+errorHandler.addRetryableExceptions(RetryableException.class);
+-> RetryableException.class is Custom Exception class created which extends RuntimeException
+
+-> In Order to configure Retry Behaviour, time gap between each Retry, we have to pass parameter in errorHandler as FixedBackOff class. Below is the code
+DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(5000, 3));
+Where FixedBackOff(5000, 3)// 5000 ms or 5 secs interval between each Attempts, 3 is max No. of Attempts
+-> If Message still could not be successful processed even after 3 Attempts, Then msgs will be sent to DLT.
+
+-> Will use @KafkaHandler handle() to call other MS Rest API.
+-> Based on Response of RestAPI, will decide if we have to retry or simply send msgs directly to DLT.
+Case:-1: If we get Response from RestAPI such as "ResourceAccessException", then will simply throw RetryableException(ex);
+This is cos, We are assuming that if other MS is down then will end up getting "ResourceAccessException, and will retry again.
+Case:-2: If Response from RestAPI is "HttpServerErrorException", then will simply throw NoTRetryableException" i.e send msgs to DLT directly. No Retry.
+This is cos, We are assuming that if Response if 500, then will get "HttpServerErrorException", and no use of Retry and store msgs to DLT Directly.
+-> If we get Response other than ResourceAccessException, then throw "NoTRetryableException". Since its of no use of Retrying if Response itself is 500.
+
+Changes for Retryable Exception in Java Code
+--------------------------------------------
+-> We created a MS called mockservice to make RestAPI Call to this MS from our Consumer MS.
+-> This mockservice contains 2 API's. "/response/200" and "/response/500"
+-> We need to pass FixedBackOff Parameter in errorHandler. Below is the code,
+DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(5000, 3));
+-> Below are the changes and conditions whether to Retry or not Retry in @KafkaHandler handleProductCreated(),
+@Component
+@Slf4j
+@KafkaListener(topics="product-created-events-topic")
+public class ProductCreatedEventHandler {
+	
+	@Value("${product-kafka-topic}")
+    String topicName;
+	
+	@Autowired
+	RestTemplate restTemplate;
+	
+	@KafkaHandler
+	public void handleProductCreated(ProductCreatedEvent productCreatedEvent) {
+		//NotRetryable Code:
+		//if(true) throw new NoTRetryableException("Error Occured. No Need to Consume this Message Again");
+		log.info("Consumed Messages from Topic:{}",topicName);
+		log.info("Messages are:{}",productCreatedEvent);
+		
+		String apiUrl = "http://localhost:8082/response/200";
+		
+		try {
+			ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, String.class);
+			if(response.getStatusCode().value() == HttpStatus.OK.value()) {
+				log.info("Received Response from mock Service: "+response.getBody());
+			}
+		} catch(ResourceAccessException ex) {
+			throw new RetryableException(ex);
+		} catch(HttpServerErrorException ex) {
+			throw new NoTRetryableException(ex);
+		} catch(Exception ex) {
+			throw new NoTRetryableException(ex);
+		}
+	}
+}
+
+Consumer:- ./bin/kafka-console-consumer.sh --topic product-created-events-topic-dlt --bootstrap-server localhost:9092,localhost:9094 --from-beginning --property print.key=true --property print.value=true
+
+Scenario-1
+----------
+-> Make All 3 Kafka Brokers UP, Producer, Consumer and mock MS Up and Running
+-> Once we publish data using Http Request, Messages will get consume as usual by consumer since mock service is Up
+
+Scenario-2
+----------
+-> Make All 3 Kafka Brokers UP, Producer and Consumer but make mock MS Down.
+-> Once we publish data using Http Request, since mock service is down, will get "ResourceAccessException".
+-> In this case, It will Retry for 3 times since we get "ResourceAccessException" as mock service is down.
+-> Message will get Publish to DLT. Above is Consumer cmd to monitor the DLT Topic.
+
+Scenario-3
+----------
+-> Make All 3 Kafka Brokers UP, Producer and Consumer but make mock MS Down.
+-> Once we publish data using Http Request, since mock service is down, will get "ResourceAccessException".
+-> In this case, It will Retry for 3 times since we get "ResourceAccessException" as mock service is down.
+-> But if we make mock service Up after 2 Attempts only, then HTTP Request will get successful in 3rd Attempt.
+-> In this case, Message will not get consumed in DLT Topic and get consumed in Actual Topic.
+
+Key Points-
+-----------
+-> Producer sends a message, The message is stored in the original topic immediately.
+-> Messages are always stored in the original topic first (when produced).
+-> If a message fails processing, it is copied to the DLT topic.
+-> The flow is always: Producer → Original Topic → (if failure) → DLT Topic
+
+Q) Kafka Consumer - Multiple Consumer Groups
+A) Let's assume we have 3 Consumer MS. Deposit, SMS Notification and Push notification microservices.
+-> Deposit MS is running on 4 Instances, Where as SMS and Push are running on 1 Instance each.
+-> In this case, when a new message is published to a topic, a SMS notification microservice will receive its own copy and push notification microservice will receive its own copy.
+-> But how about Deposit microservices ? We dont want same message will be processed by Deposit microservice 4 times since its running on 4 instances.
+-> Even though we have 4 instances of Deposit MS running, we want only 1 of them to receive a new message, and it does not matter which 1 of these instances will process the message. We want the message to be processed 1 time only.
+-> So to Scale up consumer microservice, Kafka allows us to run multiple consumers in a group, and this is called consumer group.
+-> Running multiple consumer microservices in a group is very helpful when you have lots of messages in the topic, and you need to process them faster.
+-> In this case, Up multiple instances of Deposit MS, group them into 1 consumer group, and have each group member pick 1 message from the topic.
+-> And in this case, messages that are stored in the topic will be processed much faster because instead of 1 microservice, you now have multiple copies of this microservice working.
+-> But even though you have multiple instances of the same microservice working, when a new message gets into the topic, it will be processed 1 time only by 1 of these Deposit MS instances in the consumer group.
+
+Q) How Group-ID Works in Kafka Consumer
+1. Deposit MS Running on 2 Instances
+-------------------------------------
+-> If Deposit is running on 2 Instances then we can define group-id. 
+-> Since 2 Instances are running on same MS, Both instances of Deposit MS must use the same group-id. 
+-> You do not change the group-id between instances. it must be the same for all instances of Deposit MS that are working together.
+-> Kafka will automatically distribute partitions of the topic between these two instances.
+-> Each instance will consume messages from its assigned partitions only.
+
+2. Deposit and Withdrawal MS (Different Consumer Microservices)
+----------------------------------------------------------------
+-> Deposit and Withdrawal are 2 Different Consumer MS.
+-> If you run 2 instances of Deposit MS, both instances uses the same group-id.
+-> If you run 2 instances of Withdrawal MS, both instances uses the same group-id (but different from Deposit’s).
+-> If 2 instances of same MS then group-id should be same, But Group-id will be different for Deposit and Withdrawal.
+
+Q) Rebalancing and Partition Assignment in Apache Kafka
+A) Till now we have worked on 3 Kafka Brokers, 1 Producer, 1 Topic with 3 Partitions and 1 Consumer. Topic Name:- product-created-events-topic
+-> All messages in this Kafka topic will be stored in this 3 separate partitions.
+-> When we have only 1 consumer microservice, then this consumer will read messages from all 3 partitions in a topic.
+-> Now We want to scale up our application, and we want to start up 1 more Consumer MS instance. Now we have 2 Consumer MS in Total.
+-> What will happen now is, Kafka will notice that we have 2 consumer applications running, and it will reassign partitions among these 2 consumers.
+-> Now it is not 1 consumer ms that reads from all 2 partitions.
+-> 1 instance of consumer ms reads messages from 1 partition and another instance of consumer ms reads data from other or 2nd partitions.
+-> This process of automatic partition reassignment is called "Rebalancing"
+-> It happens very quickly, but while partitions are being reassigned, consumers stop consuming messages from topic for a moment.
+-> And rebalancing takes place every time a new consumer joins a consumer group, and every time existing consumer leaves consumer group.
+
+-> If 1 more consumer is UP as 3rd consumer, then partition rebalancing will automatically take place again and partitions will be reassigned again.
+-> And during this partition reassignment, Kafka is trying to make sure that each partition is consumed by only 1 consumer in a group.
+-> Once Rebalancing is complete, all consumers in the group will continue to consume messages from their assigned partitions in parallel.
+
+-> If we scale and make 1 more consumer ms UP, Total 4 Consumers now. Unfortunately, this instance will sit idle, since we have 3 partitions only.
+-> 2 consumers from the same consumer group cannot read messages from the same partition.
+-> You cannot start more consumers than the number of partitions you have in the topic.
+-> If your topic has only one partition, then you can start only one consumer microservice.
+-> If you start more consumer instances than no. of partitions in your Kafka topic, then those extra instances will sit idle.
+
+-> Now when you start a new Kafka consumer application and it joins consumer group, this new Kafka consumer application starts sending signals to one of the brokers that is selected as a group coordinator.
+-> These signals, they are called "Heartbeats" and they are sent at irregular time intervals.
+-> This "Time interval" can be configured, but the default value is 3 seconds.
+-> So while your Kafka consumer ms are running, each of them will be sending heartbeat signals to Kafka Broker, letting Kafka Broker know that I'm running and I can consume new messages.
+-> If 1 of these Kafka consumers stops, then it also stops sending heartbeat signals to Kafka Broker.
+-> When Kafka Broker notices that there are no heartbeats coming from consumer, it will remove this consumer from consumer group and it will initiate Rebalancing.
+-> It will check how many consumers are running and how many partitions you have in Kafka topic, and it will reassign partitions, trying to make sure that each partition is read by 1 consumer only.
+-> Remember, 2 consumers from the same consumer group cannot read messages from the same partition, and when rebalancing completes, all consumers in the group will resume consuming messages from newly assigned partitions in parallel.
+
+Q) Assigning Consumer Microservice to a Consumer Group
+A) So 1 way to configure your Kafka consumer to join consumer group is to configure group ID using @KafkaListener annotation. Below is the code,
+@KafkaListener(topics="product-created-events-topic", groupId="product-created-events")
+
+2) Another way is to use consumerFactory configuration bean. Below is the example,
+config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
+
+3) And the 3 way is to use application properties file. Below is the Property
+spring.kafka.consumer.group-id=product-created-events
+
+-> "spring.kafka.consumer.group-id" key is the actual and correct key to configure group ID.
+-> So, Even if we dont configure in consumerFactory bean, it should still work because I already configured in application properties file.
+
+-> So, Out of 3 ways, We are going to use consumerFactory bean to configure consumer group Id.
+-> Since, this key is actual and correct "spring.kafka.consumer.group-id", will change it to our custom property like below,
+consumer.group-id=product-created-events
+-> And this custom group id "consumer.group-id" have to configure in consumerFactory bean like below
+config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("consumer.group-id"));
+
+-> By this, We have configured Kafka Consumer to join consumer group with a name "product-created-events"
+
+Q) Making Up and Running Multiple Instances of Consumer MS
+-> We have configured "server.port=0" in consumer application prop file.
+-> Open Terminal from Consumer MS Project Folder and type "ls", we should see list of files like pom.xml, sec, target, mnvw etc
+-> Execute cmd "mvn spring-boot:run". This will Run 1 Instance of MS.
+-> Open Other tab in same Terminal and execute cmd "mvn spring-boot:run" to run 2nd instance of consumer and same for 3rd instance as well.
+
+Verify Which Partitions Assigned to Which Consumer When Multiple Consumers are Running
+---------------------------------------------------------------------------------------
+-> As of now, 3 Kafka Brokers, Producer and 3 Consumers Instance Up and Running.
+-> When u make 1st Consumer Up, we could see in Consumer logs as below,
+KafkaMessageListenerContainer - product-created-events: partitions assigned: [product-created-events-topic-0, product-created-events-topic-1, product-created-events-topic-2]
+-> This states that, since we have 3 partition in Kafka Topic, When we made 1 consumer up and Running, All 3 Partitions has been assigned to 1 Consumer which is the only consumer Instance is running. This is called "Rebalancing".
+-> This Consumer is now allowed to read from across 3 Partitions, since this is the only Consumer Instance is Up and Running.
+
+-> When u make 2nd Consumer Up, we could see in 2nd Instance Consumer logs as below,
+KafkaMessageListenerContainer - product-created-events: partitions assigned: [product-created-events-topic-2]
+-> This states that, since we have 3 partition in Kafka Topic, when we made 2nd Instance consumer Up and running, Out of 3 Partitions, Partition-2 has been assigned to this Instance and Partition-0 and Partition-1 has been assigned and Rebalanced to 1st Consumer Instance.
+-> This 2nd Consumer is now allowed to read only from Partition-2
+
+-> When u make 3rd Consumer Up, we could see in 3rd Instance Consumer logs as below,
+KafkaMessageListenerContainer - product-created-events: partitions assigned: [product-created-events-topic-1]
+-> This states that, since we have 3 partition in Kafka Topic, when we made 3rd Instance consumer Up and running, Out of 3 Partitions, Partition-1 has been assigned to this Instance and Partition-0 and Partition-1 has been assigned and Rebalanced to 1st and 2nd Consumer Instance.
+-> This 3rd Consumer is now allowed to read only from Partition-1
+
+-> So, Since we have made 3 Consumers Up and Running, 3 Partitions ahs been divided between 3 consumers equally.
+-> If we down any 1 consumer ms, then Kafka will Rebalance and assign partitions to either 1st or 2nd Running Consumer Instance.
+-> In this case, 1 of Consumer will be reading from 2 Partitions and other consumer will be reading from 1 Partitions only.
+
+Q) Trying How Multiple Consumers are Consuming Messages from Kafka Topic
+A) Once U Run 1st Consumer Instance, All 3 Partitions are assigned to this Consumer Instance. like Below
+[product-created-events-topic-0, product-created-events-topic-1, product-created-events-topic-2]
+
+-> Once we make 2nd Consumer Instance Up, Kafka rebalances the topic partitions among all consumers in the group.
+1st Consumer:- [product-created-events-topic-0, product-created-events-topic-1]
+2nd Consumer:- [product-created-events-topic-2]  //Latest Instance
+
+-> Once we make 3rd Consumer Instance Up, Kafka rebalances the topic partitions among all consumers in the group.
+1st Consumer:- partitions assigned: [product-created-events-topic-1]
+2nd Consumer:- partitions assigned: [product-created-events-topic-2]
+3rd Consumer:- partitions assigned: [product-created-events-topic-0]  //Latest Instance
+
+Scenario
+--------
+-> All 3 instances of Consumer MS consume messages from the same topic.
+-> But even though I have 3 instances running, I expect only 1 instance to receive this message cos all 3 instances are part of same consumer group.
+-> Once we Publish Data using HTTP Request via Postman, We could see, only 2nd Consumer out of 3 Consumers have read message and other 2 Consumers have not read the same messages.
+-> This is cos, since we have 3 partitions and 3 consumers, each consumer will assigned to read messages from 1 Partition only.
+-> So in our case, only 2nd consumer have read the message but not 1st and 3rd consumer.
+-> Kafka manage message distribution to consumers within a consumer group by sending each message to only 1 consumer in the group.
+
+Q) What is Idempotent Consumer
+A) If Kafka producer sends the same message multiple times, idempotent consumer will process it only once.
+-> So Kafka Consumer will consume a message, it will start processing this message.
+-> While processing all these messages and doing all business operations, it is possible that this might takes a very long time to complete, and because it took a longer time to complete, it exceeded the time configured with Property "max.poll.interval.ms" in milliseconds.
+-> Now this configuration property, it controls how much time Kafka Consumer has to process full messages before it should pull a new batch of messages from Kafka topic.
+-> If Kafka Consumer does not pull new messages from Kafka Broker longer than the time configured with this property, then Kafka Broker will assume that this consumer has failed, or it stopped and it will remove it from consumer group, and then it will trigger rebalance to reassign partitions to other consumers
+-> so that other instance of Kafka consumer can consume and process this message.
+
+-> If this happens, then 1st instance of consumer microservice which failed to read data, it will not be able to update partition offset to Broker.
+-> So Kafka Broker will deliver the same msg to another instance of the same ms, or even to the same instance when this instance rejoins the group.
+-> But either way, the same message will be consumed again, and then Kafka Consumer will start processing the same message for the 2nd time.
+-> This time it will be able to complete all the business logic in time and it will update partition offset to Broker saying this message is consumed successfully.
+-> But look what happened. We processed only one message, but there are 2 records in the database and we published 2 messages to another topic.
+
+-> If Kafka producer is not idempotent, it can produce duplicate messages.
+-> So your Kafka consumer should be able to avoid processing the same message multiple times.
+-> And 1 of the steps on the way to avoid situations like this is to make your Kafka consumer idempotent, meaning that it can receive the same message multiple times but it will process it only 1 time.
+
+-> Ideally, to avoid duplicate messages in your application, you will use multiple techniques at the same time, and idempotent consumer is only part of the solution.
+-> Using idempotent consumer does help to avoid processing the same Kafka message twice, but it does not help inn all cases.
+-> There will still be edge cases when Idempotent Consumer alone is not enough.
+-> And another technique we can use to avoid processing the same message twice is to make your Kafka producer idempotent as well.
+-> Because that Idempotent producer helps you to prevent sending duplicate messages to Kafka.
+-> Consumer making producer and consumer idempotent is a good combination.
+
+Avoiding Duplicate Messages, Use Below techniques
+1) Idempotent Kafka Producer
+2) Idempotent Kafka Consumer
+3) Transaction
+
+Product MS - Include Message ID into Message Header
+---------------------------------------------------
+-> We will update products ms to make it include a unique ID into message header.
+-> This message ID will then be read by consumer microservice to check if message with this ID was already processed or not.
+-> If message with provided ID was already processed, then consumer microservice will simply skip this message.
+-> Now there are different ways how you can include a unique ID in a message.
+-> Will include a unique ID into message header before sending this message to Kafka topic.
+
+-> In Products MS, in com.udemy.kafka.wepapp.producer.service.impl->ProductServiceImpl::createProductSync(), we are using KafkaTemplate.send() to send a message, like below
+SendResult<String, ProductCreatedEvent> result = kafkaTemplate.send(productCreatedtopicName, productId, productCreatedEvent).get();
+-> Now, unfortunately, there is no version of a send method that accepts message headers as a parameter. Below is example
+@Override
+	public CompletableFuture<SendResult<K, V>> send(String topic, K key, @Nullable V data) {
+		ProducerRecord<K, V> producerRecord = new ProducerRecord<>(topic, key, data);
+		return observeSend(producerRecord);
+	}
+
+-> But inside ProducerRecord, it does accept message headers as a constructor argument here, like below
+public ProducerRecord(String topic, Integer partition, Long timestamp, K key, V value, Iterable<Header> headers) {}
+
+-> So if we want to work with message headers, we will need to use producer record class.
+-> Will simply create a ProducerRecord obj which will also include headers and this whole ProducerRecord obj then we can pass it to a send method as a parameter.
+-> We can use productId as messageID or we can create new Random UUID again for specific messageID. Below is the Update Code
+
+ProductCreatedEvent productCreatedEvent = new ProductCreatedEvent(
+productId, productRestModel.getTitle(), productRestModel.getPrice(), productRestModel.getQuantity());
+		
+ProducerRecord<String, ProductCreatedEvent> record = new ProducerRecord<>(productCreatedtopicName,productId,productCreatedEvent);
+record.headers().add("messageID", UUID.randomUUID().toString().getBytes());
+
+SendResult<String, ProductCreatedEvent> result = kafkaTemplate.send(record).get();
+
+
+Consumer MS - Read Message ID from Message Header
+--------------------------------------------------
+-> In Consumer MS, will add 2 parameters to read messageID and messageKey in @KafkaHandler handleProductCreated(). below is the code,
+@KafkaHandler
+public void handleProductCreated(@Payload ProductCreatedEvent productCreatedEvent,
+			@Header("messageID") String messageId,
+			@Header(KafkaHeaders.RECEIVED_KEY) String messageKey) {}
+			
+-> In Above Code, to differentiate between Payload and Headers, we are using "@Payload" and "@Header" to differentiate
+-> We are using "KafkaHeaders.RECEIVED_KEY", constant provided by Kafka headers to read messageKey.
+-> By Default @Header values are true. We get Exception if we wont send any data in headers while sending messages.
+-> So to avoid this, we can make use of "@Header(value="messageID", required=false) String messageId".
+-> But we want to send message along with message ID, so will not use "required=false" attribute.
+-> messageID is to verify if message is already present or consumed, whereas messageKey is a general UUID just to send along with message from producer.
+
+-> In Consumer MS, We created Entity and DB related queries, where we are storing messageID in DB and checking if messageID is already present.
+-> Once msgs Published with messageID, we are checking if messageID is present in DB and simply returning if messageID presents in DB in Consumer ms.
+-> We also annotated @Transactional on top of @KafkaHandler in case, if something goes wrong, rollback complete Transaction
+
+How Exactly Idempotent Works in Kafka Consumer MS
+--------------------------------------------------
+-> Once we Publish Data with messageID passed in Header, Kafka Broker Stores this Data in Topic.
+-> Consumers will read same data from Kafka Brokers.
+-> If a consumer fails to read messages or leaves the group, Kafka will rebalance partitions among remaining consumers.
+-> Kafka Broker Will not send the msgs again rather, partition ownership changes, and new consumer will read uncommitted messages from the partition.
+-> Once we publish, we are generating messageID and this messageID gets stored in Topic By Kafka Broker.
+-> Since Broker has copy of messageID, new consumer will read uncommitted messages from the partition in case any consumer fails to read in 1st Attempt.
+-> Since we are generating messageID with UUID, If something goes wrong from consumer end to read data, Its not like, messageID will be generated again.
+-> In Consumer By Logic, will check if messageID is present. based on true or false we are making sure Idempotent is working.
+
+====================================================================================================================================
+====================================================================================================================================
+
+Apache Kafka Transactions
+-------------------------
+
+Q) How Apache Kafka Works if we enable Transactions
+A) Transactions help us write to multiple topics atomically and transactions help us achieve all or nothing behavior.
+-> If we need to write to multiple topics, then it is either all writes are successful or none of them are successful.
+
+-> @Transactional annotation is provided by Spring Framework. It is not specific to Apache Kafka.
+-> When u use @Transactional on top of method, you tell Spring Framework that code in this method should be executed within 1 transaction.
+-> All operations in this method that support transactions, they should be treated as a single unit of work, meaning that they should either all succeed or none of them should succeed.
+-> If the method completes successfully, then transaction commits. Otherwise, transaction rolls back.
+
+Important Notes on @Transactional
+----------------------------------
+-> @Transactional without any parameters is a Default Transaction Manager.
+-> Spring will use the default transaction manager configured in your application context.
+-> If you have a single Datasource, Spring Boot will auto-configure usually named transactionManager.
+
+-> @Transactional("transactionManager"), When you use @Transactional with a value is Explicit Transaction Manager.
+-> You are explicitly specifying which transaction manager bean to use (by its name).
+-> This is useful when you have multiple DataSources and you want to control which one is used for a particular method or class.
+
+-> If i have Single DataSource and if i use @Transactional("transactionManager"), will behave same like @Transactional though i have explicitly defined.
+
+Transfer Microservice
+---------------------
+-> Transfer Microservice will act and configured as Kafka Producer Microservice.
+-> When this microservice application starts, it creates 2 Kafka topics with names "withdraw-money-topic" and "deposit-money-topic". Like Below
+@Bean
+	NewTopic createWithdrawTopic() {
+		return TopicBuilder.name(withdrawTopicName).partitions(3).replicas(3).build();
+}
+@Bean
+	NewTopic createDepositTopic() {
+		return TopicBuilder.name(depositTopicName).partitions(3).replicas(3).build();
+}
+
+-> "withdraw-money-topic" topic will be used for Kafka messages to withdraw money from user account
+-> "deposit-money-topic" topic will be used for Kafka messages to deposit money to user account.
+-> So Transfer Microservice is Kafka producer application that creates 2 topics.
+
+-> Transfer ms 1st sends 1 msg to "withdraw-money-topic" and then send HTTP Request to mock service and it sends another msg to a "deposit-money-topic"
+-> So in 1 single method, I'm sending Kafka messages to two different topics and making 1 HTTP Request Call. Below is the code,
+kafkaTemplate.send(withdrawMoneyTopic, withdrawalEvent);
+callRemoteServce();  // Business logic that causes and error
+kafkaTemplate.send(depositMoneyTopic, depositEvent);
+
+-> And I want these 2 send methods to be executed in a single transaction.
+-> I want both of these messages to be sent within one single transaction, so that it is either all messages are delivered or the transaction is aborted, and none of these messages are delivered to my consumer microservices.
+-> And to do that, I can annotate transfer method with @Transactional annotation. Like below
+
+@Transactional
+public boolean transfer(TransferRestModel transferRestModel) {}
+
+Withdrawal and Deposit Microservice
+-----------------------------------
+-> These Withdrawal and Deposit Microservice will act as Consumer Microservice.
+-> These Consumer Microservice will read msgs from "Transfer Microservice" i.e Will read msgs from "withdraw-money-topic" and "deposit-money-topic".
+-> And these microservices are configured to consume only those messages that have been marked as "committed"
+-> They will not see messages that have not been successfully committed.
+
+Q) Enable Kafka Transaction in Kafka Producer using Props File
+A) From Now on, Transfer Microservice will be our Producer and "Withdrawal and Deposit Microservice" will be our Consumers.
+-> To Enable Transaction in Producer, we have configured below property in props file
+spring.kafka.producer.transaction-id-prefix=transfer-service-${random.value}-  //${random.value} is dynamic like transfer-service-12345
+-> Each producer instance will have a unique transactional ID like transfer-service-12345-0, transfer-service-12345-1, etc.
+-> Transactional IDs uniquely identify a producer’s transactions. 
+-> Kafka uses these IDs to track and manage transactions, especially across restarts or failures.
+-> Incase if my application crashes in the middle of transaction, Kafka can use this transaction ID to identify which messages were part of incomplete transaction and make sure that these messages are not processed until transaction is complete.
+
+Note:- Above Property is not enough to enable Kafka transactions by itself. This property only enables transactional capability for your Kafka producer.
+-> You must use @Transactional on the method where you send Kafka messages.
+-> This ensures that all Kafka send operations within the method are executed within a single Kafka transaction. 
+-> If an exception occurs within the transactional method, none of the messages will be committed to Kafka.
+-> The transaction will be rolled back, and consumers will not see any of the messages sent within that transaction.
+
+Q) Kafka Transactions: End-to-End Flow
+Producer Side
+--------------
+-> The producer is configured with a transactional ID (from the above property).
+-> The producer starts a transaction (beginTransaction()).
+-> The producer sends multiple messages to one or more topics/partitions as part of this transaction.
+-> The producer commits (commitTransaction()) or aborts (abortTransaction()) the transaction.
+-> If the application crashes before committing: The transaction is left in an "incomplete" or "open" state.
+
+Broker Side
+-----------
+-> The Kafka broker keeps track of all ongoing transactions using the transactional ID.
+-> If a producer with the same transactional ID reconnects (e.g., after a crash), the broker knows if there was an incomplete transaction.
+-> The broker ensures that:
+1) Messages from incomplete transactions are not visible to consumers.
+2) Only messages from committed transactions are delivered to consumers.
+
+Consumer Side
+-------------
+-> Consumers that are configured for read_committed isolation (the default in Spring Kafka when using transactions) will only see messages from committed transactions.
+-> Messages from incomplete or aborted transactions are not delivered to consumers.
+
+Q) Enable Kafka Transaction in Kafka Producer using Java Bean
+A) just read the property from props file like below
+@Value("${spring.kafka.producer.transaction-id-prefix}")
+private String transactionalIdPrefix;
+
+props.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionalIdPrefix);
+
+Q) What is @Transactional("kafkaTransactionManager")
+A) For Kafka, Spring Kafka provides a transaction manager called KafkaTransactionManager.
+-> If you define a bean named kafkaTransactionManager in your Spring context, you can use @Transactional("kafkaTransactionManager") to indicate that the method should run within a Kafka transaction.
+
+When to Use
+-----------
+-> Use @Transactional("kafkaTransactionManager") when you want to ensure that your Kafka operations (and any other transactional resources managed by this transaction manager) are executed within a Kafka transaction.
+-> This is especially useful if you have multiple transaction managers (for example, one for your DB and 1 for Kafka).
+
+Important Notes
+----------------
+-> Kafka transactions are only supported when using a transactional producer (transactional.id property set and transactions enabled in your Kafka configuration).
+-> You must ensure that your KafkaTemplate and producer factory are properly configured for transactions.
+
+Note:-
+------
+-> @Transactional("kafkaTransactionManager") will manage only Kafka related Transactions whereas
+-> @Transactional("transactionManager") will manage both DB and Kafka related Transactions. Certainly All Transactions.
+
+Q) Rollback only Specific Transactions
+A) By default transactional annotation will roll back transaction for any runtime exception, but it does not roll back transaction on checked exceptions
+-> Below is the code where we can define which Exceptions to RollBack and Which are Exceptions to Not RollBack,
+@Transactional(rollbackFor = {TransferServiceException.class, ConnectException.class}, noRollbackFor = {NullPointerException.class})
+public boolean transfer(TransferRestModel transferRestModel) {}
+
+Q) Read Committed Messages only in Kafka Consumer
+A) Withdrawal and Deposit Microservice will be our Consumers.
+-> To configure this consumer microservice to read only those messages that were committed during successful transaction, below is the property
+spring.kafka.consumer.isolation-level=READ_COMMITTED //Default Value is READ_UNCOMMITTED
+-> This configuration property acts as a filter that controls what kind of messages your Kafka consumer can read.
+-> The default value of this configuration property is "READ_UNCOMMITTED" which will read all msgs including msgs that have been aborted.
+-> Same Configuration can also be done in Bean Method by jus reading property key from props file. Below is the code
+config.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, environment.getProperty("spring.kafka.consumer.isolation-level", "READ_COMMITTED").toLowerCase());
+
+Q) If We already made Producer as Synchronized Transaction then what is the use of "READ_COMMITTED" property in Consumer MS
+A) Setting "spring.kafka.producer.transaction-id-prefix" makes your Kafka producer transactional.
+-> By Above Property, Producer is only going to publish Committed msgs only.
+-> But there are scenario where we also need to configure our consumer to read committed msgs only.
+
+Scenario 1: Transactional Producer, Consumer with Default Isolation Level (read_uncommitted)
+---------------------------------------------------------------------------------------------
+Flow:
+-> Producer publishes (with transactions enabled):
+-> Producer sends messages to the Kafka topic (these messages are not yet committed).
+-> Consumer configured to read uncommitted messages as well (isolation level not set, so defaults to read_uncommitted):
+-> Consumer can see and process these messages even though the transaction is not yet committed.
+-> Exception arises (in producer or in the transaction):
+-> Producer rolls back (aborts) the transaction with "UNCOMMITTED"
+-> Messages are discarded by Kafka and will not be visible to consumers with read_committed.
+-> But consumers with read_uncommitted have already seen and possibly processed these messages!
+
+Key Point:
+----------
+With read_uncommitted, consumers can read messages that are part of transactions that are later aborted. This can lead to data inconsistencies.
+
+Scenario 2: Transactional Producer, Consumer with Isolation Level (read_committed)
+-----------------------------------------------------------------------------------
+Flow:
+-> Producer publishes (with transactions enabled):
+-> Producer sends messages to the Kafka topic (not yet committed).
+-> Consumer configured to read only committed messages (isolation.level=read_committed):
+-> Consumer cannot see these messages until the transaction is committed.
+-> Exception arises (in producer or in the transaction):
+-> Producer rolls back (aborts) the transaction with "UNCOMMITTED"
+-> Messages are never visible to the consumer since consumers only allowed to see "COMMITTED" msgs only
+-> No risk of processing uncommitted or aborted messages.
+
+Q) Java Code Changes for Transfer(Producer), Deposit(Consumer) and Withdrawal(Consumer Microservices)
+1) Transfer Microservice
+application.properties
+----------------------
+spring.application.name=TransferKafaService
+spring.profiles.active=local
+server.port=0
+spring.kafka.producer.bootstrap-servers=localhost:9092
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+spring.kafka.producer.acks=all
+
+spring.kafka.producer.properties.delivery.timeout.ms=120000
+spring.kafka.producer.properties.linger.ms=0
+spring.kafka.producer.properties.request.timeout.ms=30000
+
+spring.kafka.producer.properties.max.in.flight.requests.per.connection=5
+spring.kafka.producer.properties.enable.idempotence=true
+
+withdraw-money-topic=withdraw-money-topic
+deposit-money-topic=deposit-money-topic
+
+spring.kafka.producer.transaction-id-prefix=transfer-service-${random.value}-
+
+logging.level.org.springframework.kafka.transaction=TRACE
+logging.level.org.springframework.transaction=TRACE
+
+KafkaTransferConsumerConfig Bean Class
+---------------------------------------
+@Configuration
+public class KafkaTransferConsumerConfig {
+
+	public Map<String, Object> producerConfigs() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
+		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
+		props.put(ProducerConfig.ACKS_CONFIG, acks);
+		props.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, deliveryTimeout);
+		props.put(ProducerConfig.LINGER_MS_CONFIG, linger);
+		props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, requestTimeout);
+
+		props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, idempotence);
+		props.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, inflightRequests);
+		
+		props.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionalIdPrefix);
+
+		return props;
+	}
+
+	@Bean
+	ProducerFactory<String, Object> producerFactory() {
+		return new DefaultKafkaProducerFactory<>(producerConfigs());
+	}
+
+	@Bean
+	KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+		return new KafkaTemplate<>(producerFactory);
+	}
+
+	@Bean
+	KafkaTransactionManager<String, Object> kafkaTransactionManager(ProducerFactory<String, Object> producerFactory) {
+		return new KafkaTransactionManager<>(producerFactory);
+	}
+	
+	@Bean
+	NewTopic createWithdrawTopic() {
+		return TopicBuilder.name(withdrawTopicName).partitions(3).replicas(3).build();
+	}
+
+	@Bean
+	NewTopic createDepositTopic() {
+		return TopicBuilder.name(depositTopicName).partitions(3).replicas(3).build();
+	}
+}
+
+2) Deposit Microservice
+application.properties
+----------------------
+spring.application.name=DepositKafaService
+
+spring.profiles.active=local
+server.port=0
+
+spring.kafka.consumer.bootstrap-servers=localhost:9092,localhost:9094
+
+
+spring.kafka.consumer.key-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+spring.kafka.consumer.properties.spring.deserializer.key.delegate.class=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.consumer.properties.spring.deserializer.value.delegate.class=org.springframework.kafka.support.serializer.JsonDeserializer
+
+
+spring.kafka.consumer.properties.spring.json.value.default.type=com.udemy.kafka.webapp.deposit.dto.DepositRequestedEvent
+spring.kafka.consumer.properties.spring.json.trusted.packages=com.udemy.kafka.webapp.transfer.dto,com.udemy.kafka.webapp.deposit.dto
+spring.kafka.consumer.properties.spring.json.use.type.headers=false
+
+deposit-kafka-topic=deposit-money-topic
+spring.kafka.consumer.group-id=amount-deposit-event
+
+spring.kafka.consumer.isolation-level=READ_COMMITTED
+
+KafkaDepositConsumerConfig Bean Class
+--------------------------------------
+@Configuration
+public class KafkaDepositConsumerConfig {
+	
+	@Autowired
+	Environment environment;
+
+	@Bean
+	ConsumerFactory<String, DepositRequestedEvent> consumerFactory() {
+		// Configure the JsonDeserializer
+	    JsonDeserializer<DepositRequestedEvent> jsonDeserializer = new JsonDeserializer<>(DepositRequestedEvent.class);
+	    jsonDeserializer.addTrustedPackages("com.udemy.kafka.webapp.deposit.dto");
+	    // This is crucial: ignore type headers from producer
+	    jsonDeserializer.setUseTypeHeaders(false);
+
+	    // Wrap with ErrorHandlingDeserializer
+	    ErrorHandlingDeserializer<DepositRequestedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
+
+	    Map<String, Object> config = new HashMap<>();
+	    config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
+	    config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+	    config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, errorHandlingDeserializer.getClass());
+	    config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
+	    config.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, 
+				environment.getProperty("spring.kafka.consumer.isolation-level", "READ_COMMITTED").toLowerCase());
+
+	    return new DefaultKafkaConsumerFactory<String, DepositRequestedEvent>(config, new StringDeserializer(), errorHandlingDeserializer);
+	}
+	
+	@Bean
+	ConcurrentKafkaListenerContainerFactory<String, DepositRequestedEvent> kafkaListenerContainerFactory(
+			ConsumerFactory<String, DepositRequestedEvent> consumerFactory, KafkaTemplate<String, DepositRequestedEvent> kafkaTemplate) {
+		
+		DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(5000, 3));
+		errorHandler.addNotRetryableExceptions(NoTRetryableException.class);
+		errorHandler.addRetryableExceptions(RetryableException.class);
+		
+		ConcurrentKafkaListenerContainerFactory<String, DepositRequestedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(consumerFactory);
+		factory.setCommonErrorHandler(errorHandler);
+		
+		return factory;
+	}
+	
+	@Bean
+	KafkaTemplate<String, DepositRequestedEvent> kafkaTemplate(ProducerFactory<String, DepositRequestedEvent> producerFactory){
+		return new KafkaTemplate<String, DepositRequestedEvent>(producerFactory);
+	}
+	
+	@Bean
+	ProducerFactory<String, DepositRequestedEvent> producerFactory() {
+		Map<String, Object> config = new HashMap<>();
+		config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
+		config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+		config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+		return new DefaultKafkaProducerFactory<>(config);
+	}
+}
+
+3) Withdrawal Microservice
+application.properties
+----------------------
+spring.application.name=WithdrawlKafaService
+
+spring.profiles.active=local
+server.port=0
+
+spring.kafka.consumer.bootstrap-servers=localhost:9092,localhost:9094
+
+
+spring.kafka.consumer.key-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+spring.kafka.consumer.properties.spring.deserializer.key.delegate.class=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.consumer.properties.spring.deserializer.value.delegate.class=org.springframework.kafka.support.serializer.JsonDeserializer
+
+
+spring.kafka.consumer.properties.spring.json.value.default.type=com.udemy.kafka.webapp.withdrwal.dto.WithdrawalRequestedEvent
+spring.kafka.consumer.properties.spring.json.trusted.packages=com.udemy.kafka.webapp.transfer.dto,com.udemy.kafka.webapp.withdrwal.dto
+spring.kafka.consumer.properties.spring.json.use.type.headers=false
+
+spring.kafka.consumer.group-id=amount-widthrawal-event
+spring.kafka.consumer.isolation-level=READ_COMMITTED
+
+
+KafkaWithdrawlConsumerConfig Bean Class
+----------------------------------------
+@Configuration
+public class KafkaWithdrawlConsumerConfig {
+
+	@Autowired
+	Environment environment;
+
+	@Bean
+	ConsumerFactory<String, WithdrawalRequestedEvent> consumerFactory() {
+		// Configure the JsonDeserializer
+	    JsonDeserializer<WithdrawalRequestedEvent> jsonDeserializer = new JsonDeserializer<>(WithdrawalRequestedEvent.class);
+	    jsonDeserializer.addTrustedPackages("com.udemy.kafka.webapp.withdrwal.dto");
+	    // This is crucial: ignore type headers from producer
+	    jsonDeserializer.setUseTypeHeaders(false);
+
+	    // Wrap with ErrorHandlingDeserializer
+	    ErrorHandlingDeserializer<WithdrawalRequestedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
+	    
+		Map<String, Object> config = new HashMap<>();
+		config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
+		config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, errorHandlingDeserializer.getClass());
+		config.put(ConsumerConfig.GROUP_ID_CONFIG, environment.getProperty("spring.kafka.consumer.group-id"));
+		config.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, 
+				environment.getProperty("spring.kafka.consumer.isolation-level", "READ_COMMITED").toLowerCase());
+		
+		return new DefaultKafkaConsumerFactory<String, WithdrawalRequestedEvent>(config, new StringDeserializer(), errorHandlingDeserializer);
+	}
+
+	@Bean
+	ConcurrentKafkaListenerContainerFactory<String, WithdrawalRequestedEvent> kafkaListenerContainerFactory(
+			ConsumerFactory<String, WithdrawalRequestedEvent> consumerFactory, KafkaTemplate<String, WithdrawalRequestedEvent> kafkaTemplate) {
+		
+		DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(5000, 3));
+		errorHandler.addNotRetryableExceptions(NoTRetryableException.class);
+		errorHandler.addRetryableExceptions(RetryableException.class);
+		
+		ConcurrentKafkaListenerContainerFactory<String, WithdrawalRequestedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(consumerFactory);
+		factory.setCommonErrorHandler(errorHandler);
+		
+		return factory;
+	}
+	
+	@Bean
+	KafkaTemplate<String, WithdrawalRequestedEvent> kafkaTemplate(ProducerFactory<String, WithdrawalRequestedEvent> producerFactory){
+		return new KafkaTemplate<String, WithdrawalRequestedEvent>(producerFactory);
+	}
+	
+	@Bean
+	ProducerFactory<String, WithdrawalRequestedEvent> producerFactory() {
+		Map<String, Object> config = new HashMap<>();
+		config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
+		config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+		config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+		return new DefaultKafkaProducerFactory<>(config);
+	}
+
+}
+
+Q) Trying How Kafka Transactions Works After Configurations
+Scenario-1
+----------
+-> Run Zookeeper, All 3 Brokers and Start Transfer, Deposit, Withdrawal and Mock Microservice.
+-> Use Below HTTP POST request to Publish Messages from Transfer Microservice(Producer),
+POST URL:- http://localhost:52418/transfers
+Body:- { "senderId":"124", "recepientId":"124", "amount":124 }
+-> Once we send above http request from Postman, We could see Deposit and Withdrawal Consumer MS will read the data.
+-> Since, Request is Successfully process, we could see below logs in Transfer MS Console,
+KafkaTransactionManager - Initiating transaction commit
+
+Scenario-2
+----------
+-> Run Zookeeper, All 3 Brokers and Make Up Transfer, Deposit and Withdrawal Microservice but Stop Mock Microservice.
+-> Use Below HTTP POST request to Publish Messages from Transfer Microservice(Producer),
+POST URL:- http://localhost:52418/transfers
+Body:- { "senderId":"124", "recepientId":"124", "amount":124 }
+-> Once we send above http request from Postman, We will see that msgs are not read by Deposit and Withdrawal Consumer MS.
+-> Since, Request is Failed due to mock service was down, we could see below logs in Transfer MS Console,
+KafkaTransactionManager - Initiating transaction rollback
+-> Because this exception took place within Kafka transaction, this transaction will be aborted and none of the messages that are published within this transaction will be committed.
+->And Consumer microservices that are configured to read committed messages only will not receive these messages.
+
+Q) Apache Kafka Local Transactions with Kafka Template
+A) Earlier we used KafkaTemplate object to send single Kafka message, but will use this KafkaTemplate to send multiple messages in 1 single transaction.
+-> We use below Kafka Template ExecuteInTransaction to send 2 Kafka Messages. Below is the syntax
+public boolean transfer(TransferRestModel transferRestModel) {
+  boolean returnValue = kafkaTemplate.executeInTransaction(t->{
+
+	kafkaTemplate.send(withdrawMoneyTopic, withdrawalEvent);
+	callRemoteServce();
+    kafkaTemplate.send(depositMoneyTopic, depositEvent);
+    
+})
+}
+
+Difference between @Transaction and kafkaTemplate.executeInTransaction
+------------------------------------------------------------------------
+@Transaction
+------------
+-> Main difference is a scope of a transaction. When you annotate a method with @Transactional, all business logic that you have in the method, is executed within the same transaction.
+-> And this means that if exception is thrown anywhere in this method, then Kafka transaction will be rolled back and it doesn't matter where exception has been thrown in the method.
+-> If exception is thrown even in the middle or end of the method, Whole Operation will be Rolled Back.
+
+Local Transaction
+-----------------
+-> But if you use local transactions and then throw exception in the same method after the local transaction, then this local transaction will not roll back.
+-> And this is because this exception did not take place within local transaction. It took place outside of the local transaction. Like below
+
+public boolean transfer(TransferRestModel transferRestModel) {
+  boolean returnValue = kafkaTemplate.executeInTransaction(t->{  //local transaction starts
+
+	kafkaTemplate.send(withdrawMoneyTopic, withdrawalEvent);
+	callRemoteServce();
+    kafkaTemplate.send(depositMoneyTopic, depositEvent);
+    
+  })  //local transaction ends
+  if(true) throw new Exception("Forcing Exception");  //Exception Occurs But Kafka messages are already committed
+}
+
+-> Even If you annotate transfer() with @Transactional, local transaction will not be rolled back cos this is a separate transaction. Below Example
+@Transactional
+public boolean transfer(TransferRestModel transferRestModel) {
+	boolean returnValue = kafkaTemplate.executeInTransaction(t->{})  //local transaction
+	if(true) throw new Exception("Forcing Exception");  //Exception Occurs But Kafka messages are already committed
+}
+
+Q) Apache Kafka and Database Transactions
+A) From Now on, Will work with 2 Different Transaction Managers.
+1) Kafka Transaction Manager:- Will Manage Kafka related Transactions. It wont manage DB related transactions.
+2) JPA Transaction Manager:- Will Manage DB Operations related Transactions.
+
+-> Within a transfer() method, if we want to publish msgs to Kafka topic and also want to perform Database Operations, we can use @Transactional.
+-> Though we are performing Kafka and DB operations in the same method, they can still participate in the same transaction with @Transactional.
+-> In this case, If exception takes place in the transfer() method, then both Kafka transaction and database transaction will roll back.
+
+-> @Transactional("kafkaTransactionManager") will manage only Kafka related Transactions whereas
+-> @Transactional("transactionManager") will manage both DB and Kafka related Transactions. Certainly All Transactions.
+
+Q) Apache Kafka and Database Transactions Configurations By Java Code
+A) Till now we have use @Transactional on top of transfer(), to send msgs on multiple Kafka Topics and if something goes wrong in between then whole transaction will be roll back.
+-> We have configured 2 Different Transaction Managers. 1 is for Kafka and another is for DB related transactions.
+-> We have configured both Transaction Manager by creating and using @Bean in KafkaTransferConsumerConfig class. Below is the syntax,
+@Configuration
+public class KafkaTransferConsumerConfig {
+	
+	@Bean("kafkaTransactionManager")
+	KafkaTransactionManager<String, Object> kafkaTransactionManager(ProducerFactory<String, Object> producerFactory) {
+		return new KafkaTransactionManager<>(producerFactory);
+	}
+	
+	@Bean("transactionManager")
+	JpaTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory) {
+		return new JpaTransactionManager(entityManagerFactory);
+	}
+}
+
+-> We have TransferEntity class to store data in DB
+-> We are creating obj for TransferEntity and Copying data from TransferRestModel class which is actually we are using to Publish or Send Messages to Kafka Topic from Transfer Microservice by using HTTP Request.
+-> By using below library, we are copying data from TransferRestModel to TransferEntity class. (Source to Destination Class)
+BeanUtils.copyProperties(transferRestModel, transferEntity);  //(source, destination)
+
+Enable Logging for Kafka and JPA Transaction Managers
+-----------------------------------------------------
+logging.level.org.springframework.kafka.transaction.KafkaTransactionManager=DEBUG	// Detailed logs for Kafka transaction manager
+logging.level.org.springframework.transaction=TRACE	                                // Very detailed logs for all Spring transaction management
+logging.level.org.springframework.orm.jpa.JpaTransactionManager=DEBUG	            // Detailed logs for JPA (DB) transaction manager
+logging.level.org.apache.kafka.clients.producer.internals.TransactionManager=DEBUG	// Detailed logs for Kafka client’s internal transaction manager
+
+-> If i wont use above 4 properties then You may see some general startup and error logs.
+-> You will NOT see:
+1) When a transaction starts or ends
+2) Which transaction manager is being used
+3) Transaction propagation details
+4) Internal Kafka transaction state changes
+
+Q) Trying How Synchronized Transaction Works
+A) Below is the Code for Test Scenarios,
+@Transactional("transactionManager")
+public boolean transfer(TransferRestModel transferRestModel) {
+	
+			//Save record to a transfer_kafka_events Table
+			transferRepo.save(transferEntity);
+			
+			//Send msgs to Kafka Topic
+			kafkaTemplate.send(withdrawMoneyTopic, withdrawalEvent);
+
+			// Business logic that causes and error
+			callRemoteServce();
+
+			//Send msgs to Kafka Topic
+			kafkaTemplate.send(depositMoneyTopic, depositEvent);
+			
+		return true;
+}
+
+Senario-1
+---------
+-> Run Zookeeper and All 3 Brokers. Start Transfer, Deposit, Withdrawal and Mock Microservices.
+-> Sequence is DB Save -> send Withdrawal Kafka Topic -> Call External HTTP Request.....
+-> So once we publish data, we could see, Data have been stored in DB and msgs also been consumed by both Deposit and Withdrawal Consumers.
+
+Senario-2
+---------
+-> Run Zookeeper and All 3 Brokers. Start Transfer, Deposit and Withdrawal Microservices. Stop Mock Microservice
+-> Sequence is DB Save -> send Withdrawal Kafka Topic -> Call External HTTP Request which will throw Exception in this scenario
+Expectation:-
+-------------
+-> When Exception occurs, Ideally it should rollback only DB Operations and Not Kafka Related Operations.
+-> Because, we have used @Transactional("transactionManager") which is set to rollback only DB Operations and Not Kafka Operations.
+Reality:-
+---------
+-> But since we have used "spring.kafka.producer.transaction-id-prefix" property, It makes your Kafka producer transactional.
+-> And When you use a transactional Kafka producer inside any Spring-managed transaction (even if it’s a JPA transaction), Spring Kafka will synchronize the Kafka transaction with the outer transaction.
+-> It will wait for Outside Transaction i.e DB Transaction(@Transactional("transactionManager")) to be committed, and this property is responsilble why both DB and Kafka are roll back.
+-> And Since, Exception has Occurred and Outer or DB transaction is not committed, Kafka transaction is also not committed.
+-> If the outer transaction is rolled back (because of an exception), the Kafka transaction is also rolled back.
+
+Key Point
+----------
+-> "spring.kafka.producer.transaction-id-prefix" is what enables our Producer as Synchronized Transaction.
+-> Without this property, Kafka Operations would not participate in the rollback.
+
+Senario-3
+---------
+-> Run Zookeeper and All 3 Brokers. Start Transfer, Deposit and Withdrawal Microservices. Stop Mock Microservice
+-> Sequence is DB Save -> send Withdrawal Kafka Topic -> Call External HTTP Request which will throw Exception in this scenario
+-> Remove property "spring.kafka.producer.transaction-id-prefix" from Transfer Props file.
+-> If we remove above Property then we also have to remove KafkaTransactionManager Bean from KafkaTransferConsumerConfig class, Like Below
+@Bean("kafkaTransactionManager")
+	KafkaTransactionManager<String, Object> kafkaTransactionManager(ProducerFactory<String, Object> producerFactory) {
+	return new KafkaTransactionManager<>(producerFactory);
+}
+-> This is because, You cannot have a KafkaTransactionManager Bean without a transactional producer.
+-> In our case, Transactional Producer is configured using property "spring.kafka.producer.transaction-id-prefix"
+-> So, If you remove this property "spring.kafka.producer.transaction-id-prefix", you must also remove the KafkaTransactionManager bean.
+-> If you want to keep the KafkaTransactionManager, you must configure the producer to be transactional.
+
+-> This time, when Exception Occurs, Only DB Operations have been roll back and Not Kafka Operations.
+-> Though Exception occurred, Withdrawal Kafka Consumer have read msgs cos we are only handled DB related Transactions and not Kafka Transactions.
+
+===============================================================================================================================================
+===============================================================================================================================================
+ Saga Design Patterns
+ --------------------
+-> When 1 of the steps in Saga flow fails, microservices start performing compensating transactions.
+-> Compensating transactions are operations that are microservices need to perform to undo the modifying changes that were done in our system, and compensating transactions are performed in a reverse order to Undo All the Operations
+-> If any of the steps in the flow did not do any changes in our system, then we do not need to undo or no need to perform a compensating transaction.
+
+Saga Choreography Design Pattern
+---------------------------------
+
+Q) When to Use Which Saga Pattern
+Order Microservice Flow:-
+-------------------------
+PlaceOrder -> save Order in DB -> send Placed Order Details on Kafka "orders-events".
+Consume Order Placed Data vian Kafka "orders-events" -> Send same Order Data as ReserveProductCommand on Kafka "products-commands"
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,74 @@
+Q) What is Caching and Its Mechanism
+A) Caching is storing frequently accessed data in fast storage (memory).
+-> Redis stores data in RAM (memory), which makes reads and writes extremely fast compared to disk-based databases.
+
+Why We Use Caching?
+--------------------
+Reduce latency (faster response)
+Reduce database load
+Improve scalability
+Handle high traffic
+Improve user experience
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Redis is Single-Threaded. so how does it still handle millions of requests per second without becoming a bottleneck?
+1️⃣ Redis uses Event-driven architecture to handle thousands of concurrent connections asynchronously — no thread-per-request overhead.
+2️⃣ All data is in RAM. Microsecond response times.
+3️⃣ Redis executes one command at a time using a single main thread. no locks, no thread contention, no synchronization overhead.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) When does Redis become a bottleneck ?
+A) If many requests hit the same key (hot key problem), one node gets overloaded.
+-> If too many requests hit one instance, the single thread gets overloaded.
+-> Operation Like sorting and scans can block Redis and slow everything.
+-> If Redis is in another region or far from the app → network delay becomes the bottleneck.
+-> When RAM is full. Performance drops.
+
+One-line:- Redis becomes a bottleneck when CPU is saturated, large operations block the single thread, network latency is high, or poor key design causes uneven load.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Your Redis cache just crashed. how does your system stay alive ?
+1️⃣ Fallback to DB:- When Redis is down, all reads temporarily go directly to the database.
+2️⃣ Add Rate Limiting:- Instead of 50K hits/sec, only a safe number reaches DB.
+3️⃣ Use a Circuit Breaker:- Stop calling Redis after repeated failures to avoid slow timeouts. After 3–4 Redis errors, service directly queries DB.
+4️⃣ Use Local In-Memory Cache:- Like Concurrent Hash Map for Simple Purpose
+
+One-line:- If Redis crashes, I fall back to DB, protect it with rate limiting, bypass Redis using circuit breaker, and use a local cache to reduce load.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Your cache expired and suddenly your database crashed. Explain what just happened.
+A) When Cache Expires, Suddenly All Requests go to DB for Response.
+-> This causes a massive Overload in database queries. The database cannot handle the sudden load.
+-> This problem is called: Cache Stampede (or Thundering Herd).
+
+Large systems prevent this using:
+• Staggered TTLs (not all cache expires together)
+• Background cache refresh
+• Rate limiting
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) If cache is much faster than a database, why don't we just store everything in cache instead of using a database ?
+1️⃣ Cache stores data temporarily
+-> Cache usually stores data in RAM (memory), which is volatile. If the cache server crashes or restarts, the data can be lost.
+
+2️⃣ Database is the source of truth:
+-> The database is the main system where original and accurate data is stored.
+-> Cache only keeps a copy of frequently used data to improve performance.
+
+3️⃣ Cache size is limited and expensive:
+-> Cache uses RAM, which is costly and limited. 
+-> Databases store data on disk, which is cheaper and can handle very large amounts of data.
+
+4️⃣ Data consistency and reliability:
+-> Databases provide strong guarantees like ACID properties (Atomicity, Consistency, Isolation, Durability) to ensure data correctness. 
+-> Cache may sometimes contain stale or outdated data.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+

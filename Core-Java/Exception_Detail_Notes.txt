@@ -1,0 +1,180 @@
+Exception key Points:-
+---------------------
+Checked Exceptions:- These are exceptions that must be either caught or declared using the throws keyword in method signatures.
+Examples: IOException, SQLException, ClassNotFoundException
+
+Scenarios:-
+-----------
+What If Super Class is Throwing Checked Exception. So Do Child Class also need to follow same signature ?
+
+For Checked Exceptions:
+
+-> The child class has the option to either:
+1) Declare the same or a subclass of the exception thrown by the superclass, or
+2) Opt not to declare any exception at all, meaning it does not have to throw anything in its method signature, even if the superclass throws a checked exception.
+
+Example
+-------
+class SuperClass {
+    void method() throws IOException {
+        // Some code that might throw IOException
+    }
+}
+
+class ChildClass extends SuperClass {
+    @Override
+    void method() {
+        // No need to throw anything or declare 'throws'
+        System.out.println("No exception thrown here");
+    }
+}
+
+class ChildClass extends SuperClass {
+    @Override
+    void method() throws FileNotFoundException {  // OK: FileNotFoundException is a subclass of IOException
+        // Some code that might throw FileNotFoundException
+    }
+}
+
+class ChildClass extends SuperClass {
+    @Override
+    void method() throws Exception {  // ❌ Not allowed: Exception is broader than IOException
+        // Some code
+    }
+}
+
+Final Answer:- In Checked Exception case, If Super class is throwing any Checked Exception like IOException, Then Child Class need not to follow same signature
+or need not to use "Throws" keyword as used by Super class. It Can opt not to throw anything.
+Although, It can throw Same or Lower Level Exception of what Super class has thrown.
+
+
+Unchecked Exceptions:- These are exceptions that do not have to be declared with throws in the method signature.
+Examples: RuntimeException, NullPointerException, ArrayIndexOutOfBoundsException, IllegalArgumentException
+
+Scenarios:-
+-----------
+What If Super Class is Throwing UnChecked Exception. So Do Child Class also need to follow same signature ?
+
+For Unchecked Exceptions (like RuntimeException and its subclasses):
+-> The child class does not have to declare any exceptions, whether the superclass throws unchecked exceptions or not.
+-> The child class can choose not to throw any exception in its method signature, even if the superclass throws an unchecked exception.
+
+Example:-
+---------
+class SuperClass {
+    void method() throws RuntimeException {
+        throw new RuntimeException("Unchecked exception");
+    }
+}
+
+class ChildClass extends SuperClass {
+    @Override
+    void method() {
+        // No need to declare throws, and no need to throw anything
+        System.out.println("Child method doesn't throw any exception");
+    }
+}
+
+
+The child class can throw an unchecked exception, but it is not forced to declare it with the throws keyword on method signature
+
+class ChildClass extends SuperClass {
+    @Override
+    void method() {
+        throw new IllegalArgumentException("Unchecked exception thrown by child");
+    }
+}
+
+Final Answer:- For both checked and unchecked exceptions: The child class does not have to throw anything if it chooses not to, 
+whether or not the superclass throws an exception.
+
+
+Q) What is Exception Propagation ?
+A) Exception propagation refers to the process of an exception being thrown from one method and being "propagated" (or passed) up through the call stack until 
+it is either:
+
+1) Caught by a try-catch block in a method, or
+2) Uncaught, in which case the program may terminate (depending on the type of exception).
+
+When an exception occurs in a method, it can either be caught and handled locally, or it can propagate to the method that called it (the calling method). 
+This process continues up the call stack until the exception is handled, or the program reaches the top level (e.g., the main method).
+
+Propagation in Checked Exceptions
+---------------------------------
+If a method throws a checked exception i.e IOException, it must either:
+1) Catch the exception inside the method using try/catch Block.
+2) Declare the exception using the "throws" keyword so it gets propagated to the calling method.
+
+Example
+-------
+class SuperClass {
+    void method() throws IOException {
+        // Code that throws IOException
+        throw new IOException("Checked exception");
+    }
+}
+
+class ChildClass extends SuperClass {
+    @Override
+    void method() throws IOException { // Declaring exception for propagation
+        super.method(); // Propagates IOException
+    }
+}
+
+class MainClass {
+    public static void main(String[] args) {
+        try {
+            new ChildClass().method(); // Propagated IOException must be caught
+        } catch (IOException e) {
+            System.out.println("Caught Exception: " + e.getMessage());
+        }
+    }
+}
+
+Explanation on Above Example:- Once we start the Programs, Execution starts from Main Method, It will invoke method() of Child class and from Child class, again
+it will invoke method() of Super Class.
+-> Now in method() of Super Class, We are throwing a Checked Exception.
+-> Since we have used throws declaration on method() of Super Class, Exception will propagate to method() of Child Class.
+-> Again, Since we have used throws declaration on method() of Child Class, Exception will propagate to Main Method.
+-> Since Main Method is Using try/Catch Block, Exception will is caught in Main Method.
+
+Note:- Since its throwing Checked Exception, We have to use either try/Catch Block to Catch/Handle Exception or "throws" Keyword to propagate the exception.
+
+
+
+Propagation in UnChecked Exceptions
+-----------------------------------
+If a method throws a UnChecked exception i.e NullPointerException, then,
+
+Child class is not required to use the throws keyword or try-catch block to handle the exception. 
+Unchecked exceptions propagate automatically.
+
+Example:-
+---------
+class SuperClass {
+    void method() {
+        throw new NullPointerException("Unchecked exception");
+    }
+}
+
+class ChildClass extends SuperClass {
+    @Override
+    void method() {
+        // No need to declare 'throws' or catch the exception
+        super.method();  // Unchecked exception propagates automatically
+    }
+}
+
+public class MainClass {
+    public static void main(String[] args) {
+        try {
+            new ChildClass().method(); // Unchecked exception is automatically propagated
+        } catch (NullPointerException e) {
+            System.out.println("Caught: " + e.getMessage());
+        }
+    }
+}
+
+Explanation on Above Example:- Child Class is not using any throws keyword to propagate nor using try/Catch Block to handle Exception.
+-> Cos, In UnChecked Exceptions, Exception automatically propagates. No Need to use throws or try/Catch.
+-> Child class is free and opt not to use any.

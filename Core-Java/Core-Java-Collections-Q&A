@@ -159,3 +159,59 @@ A) ConcurrentHashMap is a thread-safe implementation of the Map interface in Jav
 It’s part of the java.util.concurrent package and was introduced in Java 5 as a scalable alternative to the traditional HashMap class.
 -> One of the key features of the ConcurrentHashMap is that it provides Segment level locking, meaning that it locks only the portion of the map being modified, rather than the entire map.
 This makes it highly scalable and efficient for concurrent operations. Additionally, the ConcurrentHashMap provides various methods for atomic operations such as putIfAbsent(), replace(), and remove().
+
+Q) Why HashMap is Not Thread-Safe. What problems can occur in Multi-Threaded Environment.
+A) 1️⃣ No synchronization mechanism:- Methods like put() and get() are not synchronized. Multiple threads can update the map at the same time.
+2️⃣ Unsafe resize (rehashing) operation:- During resize, the bucket array is restructured. Concurrent updates can corrupt bucket links.
+3️⃣ Non-atomic operations:- put() involves multiple steps (hashing, indexing, insertion)Thread interleaving breaks operation consistency.
+
+⚠️ Problems in Multi-Threaded Environments
+--------------------------------------------
+4️⃣ Data inconsistency:- Updates from one thread may overwrite or lose another thread’s data.
+5️⃣ Infinite loop / high CPU usage:- In older Java versions, concurrent rehashing could create cyclic lists. Threads may get stuck in endless loops.
+6️⃣ Unexpected null values:- get() may return null even when the key exists.
+
+🎯 One-Line Interview Summary
+HashMap is not thread-safe because it allows concurrent structural modifications without synchronization, which can corrupt the internal data structure during resizing and lead to data loss or infinite loops.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Can we Perform Dependency Injection(DI) Using Java
+A) Yes. You can perform Dependency Injection (DI) using Core Java.
+In Core Java, DI is done manually using:
+1️⃣ Constructor Injection
+2️⃣ Setter Injection
+
+Note: We don’t create dependencies using the new keyword inside the class. Instead, we inject them from outside using constructor or setter methods.
+
+One Liner:- Yes, in Core Java we can implement DI manually using constructor or setter injection, following the IoC principle, while frameworks like Spring automate it. This improves loose coupling, testability, and maintainability.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Why String is Immutable in Java
+A) String is immutable, which means once we create a String, we cannot change its value. If we try to modify it, a new String object will be created.
+
+Why Java Made String Immutable
+-------------------------------
+1) For Security Reasons:- 
+-> Strings are used in things like file paths, database connections, and user logins.
+-> If Strings were changeable, someone could easily tamper with these values, that would be dangerous.
+
+2) To work properly in HashMaps and Sets:-
+-> We often use Strings as keys in HashMap, HashSet. These collections depend on the hashCodel) of the key.
+-> If the String changes after adding it to the map, its hash code will also change, and the map won't be able to find it again.
+
+3) Memory efficiency using String Pool:-
+-> Java stores common String values in a special memory area called the String Constant Pool Area(SCPA).
+-> As Strings are immutable, Java can reuse them safely by saving memory and improving performance.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How to make a Map Object Thread-Safe without using ConcurrentHashMap ?
+A) Map<Integer,Integer> map = new HashMap<>();
+-> To Make above map Object Thread-Safe without using ConcurrentHashMap, we can use below methods,
+1) Map<Integer, Integer> map = Collections.synchronizedMap(new HashMap<>());     // For Map Object
+2) List<Integer> list = Collections.synchronizedList(new ArrayList<>());         // For List Object
+3) Set<Integer> set = Collections.synchronizedSet(new HashSet<>());              // For Set Object
+
+--------------------------------------------------------------------------------------------------------------------------------------------

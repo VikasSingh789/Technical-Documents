@@ -1,0 +1,38 @@
+DB Structure
+-------------
+MySQL:-    RDBMS. Schema Needs to have Tables. Relation between the Tables
+MongoDB:-  Non-Relational
+
+Data Structure
+--------------
+MySQL:-    store the Data as Row and Column. Represents Data in a Table.
+MongoDB:-  store the Data as Key value pair as JSON or as an Document Oriented. Document means Represents Hierarchal relationship using Single Record.
+
+Languages
+----------
+MySQL:-    To Query or to Perform Action like Create, Fetch etc in DB, We write SQL Queries.
+MongoDB:-  To Query, we write JQL(Json Query Language)/Bson
+
+Foreign Key:-
+-------------
+MySQL:-    Supports the usage of Foreign Keys. This make Data Retrieval Easy when multiple Table linked with one another.
+MongoDB:-  Doesn't Support Foreign Key.
+
+Performance:-
+-------------
+MySQL:-    Optimized for High Performance Joins across multiple tables. (Fetching Data)
+MongoDB:-  Optimized for Write Performance. (Writing Data)
+
+Scalability:-
+-------------
+MySQL:-    Only Vertically Scalable. We can add more RAM, Hard Disk and CPU to scale MySQL DB. But we can't Scale Horizontally. (DisAdvantage)
+MongoDB:-  Horizontally Scalable. We can create Multiple Instances / Servers to Scale (Advantage)
+
+MySQL:-    Static Schema. Structured. Can't add any Extra Data. For this we have to create Columns 1st. (Disadvantage)
+MongoDB:-  Dynamic Schema. Un-Structured. Can Add Extra Data. (Advantage)
+
+MySQL:-    Follows ACID Property. (Advantage)
+MongoDB:-  Follows CAP (Consistency Availability Partition Tolerance). (DisAdvantage)
+
+MySQL:-    To Handle Transaction Management or Multiple Row Transaction. Use if you have Lots of Transaction or Requests to Perform.
+MongoDB:-  Can Handle. But Preferred MySQL over MongoDB to perform Transaction Management. Well Suited for RealTime Analytics.

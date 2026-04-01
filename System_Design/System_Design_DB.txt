@@ -1,0 +1,68 @@
+Q) You Need to Design a Table to keep the History of 10 Million Transactions. What factors will you consider
+1️⃣ Efficient Schema Design:- Keep the table lean with only required fields. Use appropriate data types to reduce storage and improve performance.
+2️⃣ Primary Key Strategy:- Use sequential BIGINT or time-based IDs to avoid index fragmentation and ensure fast inserts.
+3️⃣ Time-Based Partitioning:- Partition the table by date (daily or monthly) to enable faster queries, easy archival, and partition pruning.
+4️⃣ Indexing Strategy:- Create minimal and query-driven indexes (e.g., account_id + created_at). Avoid over-indexing to maintain high write throughput.
+5️⃣ Write Performance Optimization:- Use batch inserts, async processing, and optimized transaction sizes to handle heavy write loads efficiently.
+6️⃣ Read & Query Optimization:- Design queries around common access patterns like recent transactions and date ranges. Always leverage partition keys.
+7️⃣ Archival & Retention Policy:- Move old data to cold storage or data warehouses and keep only recent data in hot tables for faster access.
+
+Summary:-
+To handle 10 million daily transactions, focus on lean schema design, time-based partitioning, minimal indexing, optimized writes, and a clear data retention strategy to ensure high performance and scalability.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) If indexes improve performance… why not add them on every column ?
+A) Indexes use data structures like B-Trees.
+-> Instead of scanning entire table, 
+• Database searches through sorted index
+• Finds exact location
+• Retrieves row quickly
+-> Time complexity improves drastically.
+
+Why Writes Are Slower
+---------------------
+-> Every INSERT, UPDATE, DELETE must also update indexes -> increases write latency.
+-> Indexes consume additional disk space, sometimes even more than the table itself.
+-> Too many indexes make query planning slower and increase database maintenance
+-> More indexes = more maintenance work.
+
+We don’t index every column because indexes improve reads but slow down writes, consume space, and may not be useful for all queries. So they should be added selectively based on query patterns.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How did you handle a situation where two threads are updating the same record in the database.
+A) We Need to Use Technique Called Optimistic Locking.
+-> In Spring, we have Annotation Called @Version Annotation.
+
+@Entity
+public class Product {
+
+@Id
+private Long id;
+
+@Version
+private Integer versions; //Hibernate Manages This Field Whenever Updated Happens
+
+How it works?
+1) Each record maintains a version number.
+2) When two threads (Thread A and Thread B) read the same record, both get the same version (e.g., version = 1).
+3) Thread A updates the record → version becomes 2.
+4) Thread B tries to update using version 1.
+Hibernate detects the mismatch and throws an OptimisticLockException.
+
+How I handle it:
+-----------------
+-> Catch the exception.
+Either:
+Retry the transaction with fresh data, or
+Inform the user that the record was modified by someone else.
+
+One Liner:- I use optimistic locking with @Version to prevent lost updates and handle conflicts using retries or user notification.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) You normalized your database But why did performance drop. Joins vs Denormalization ?
+A) Normalization reduces redundancy but increases JOIN complexity, which can degrade read performance at scale, while denormalization trades redundancy for faster query performance.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
