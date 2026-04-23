@@ -1,0 +1,119 @@
+Youtube:- https://www.youtube.com/watch?v=WGI_ciUa3FE
+GitHub:- https://github.com/JavaaTechSolutions/distributed-transaction
+
+-> SAGA Design Pattern can be used to handle distributed Transactions SpringBoot. Objective is to All the Tasks/Transaction across MS, should Fail or complete Successfully.
+-> Roll Back the Transaction in case of Failure Scenarios.
+-> @Transaction works only with in a Single Transaction or Monolithic Applications.
+
+Flow of Order Management Microservice:- Order -> Payment -> Stock -> Delivery (MS's).
+
+Flow:- 
+------
+-> We have to create 4 tasks and create Compensating tasks for each task except the last task, since we have 4 Microservices. we have 4 tasks and 3 compensating tasks.
+-> If any task is failed, then we can run compensating task of the previous tasks to rollback the transaction.
+-> If Transaction T1 and T2 succeeded but T3 fails, then we have to run Compensating Task C2 and C1, to rollback the effect of Transaction T1 and T2. (Last in First out order).
+-> We dont need Compensating Task C4 because if the last task T4 fails, then we just need to rollback the previous task. This is called Backword Recovery Mechanism.
+-> To Implement this, we have Saga Pattern.
+
+Saga Pattern can be implemented in 2 ways:- 
+1) Choreography :- In This, Tasks Execute Independently. Once 1 task is completed, it invokes the next tasks in the sequence. In case if the next task fails, then it invokes the Compensating task for the previous task.
+2) Orchestration:- 
+
+
+Business UseCase:- 6:21
+------------------
+
+Implementation approach:- 7:17
+-------------------------
+
+Updated Flow of Order Management Service:- 8:02
+-----------------------------------------
+
+Technology used:-
+-----------------
+Spring Boot 3, Java 17
+Kafka for Event Management (Producer/Consumer)
+
+Order Service:-
+---------------
+Below are the Dependencies added for this Order Service,
+-> Spring Data JPA
+-> Spring Web
+-> Lombok
+-> H2 Database
+-> Spring for Apache Kafka
+
+-> From Order Service Controller, we are sending the OrderRequest and Setting the OrderRequest in Order Entity with Status "Created".
+-> We are Saving the Order Data in H2 DB and fetching Order ID after Saving Order Data in DB.
+-> We are also setting OrderRequest into OrderEvent with type "ORDER_CREATED" and sending this OrderEvent Data over Kafka Topic "new-orders". Below is Example
+Ex:- OrderEvent event = new OrderEvent();
+	 event.setOrderRequest(orderRequest);
+	 event.setType(OrderConstants.KAFKA_STATUS_ORDER_CREATED);
+     kafkaTemplate.send("new-orders", event);
+     
+-> In Order Service, we are writing "reverseOrder()" in case any failed order and to do reveres the Order Transaction.
+-> This "reverseOrder()" method is Listening with "KafkaListener" with Topic Name as "reversed-orders" and group-id is "orders-group".
+
+Payment Service:-
+-----------------
+-> Payment Controller will be a Listener and will listen from the Topic.
+-> "processPayment()" is the method in controller and will be listening From Topic "new-orders" and group-id "orders-group".
+-> Topic "new-orders" is the same topic, Where Order Service is sending/Publishing the OrderData.
+-> Once it receives the data, it will map to OrderEvent. And from OrderEvent to OrderRequest (Fetches the Payload).
+-> This OrderRequest we are setting and saving to Payment DB with status as "Success".
+-> Post saving Data in Payment DB, we are setting the OrderRequest to PaymentRequest and sending this "PaymentRequest" on Kafka Topic "new-payments". (to the Stock Service.)
+
+-> Incase any Exception while saving Payment Data, we are updating Payment status as "Failed" with OrderID and saving this update in Payment DB in Catch Block.
+-> And Sends the reverse Order Request with type as "ORDERED_REVERSED" on Kafka Topic "reversed-orders".
+
+-> From Payment, we are sending data to Stock Service.
+-> Any Fail occurs from Stock Service, it will call the Payment to reverse the Payment and from payment it will call the Order service to reverse the order.
+-> This Mechanism also we have handled by creating "PaymentService.reversePayment(String event)".
+-> This "reversePayment()" will listen to Topic "reversed-payments" and group-id "payments-group" to reverse the Payments.
+-> Will save the "reversePayment()" data in payment with status as "Failed" in Payment DB.
+-> And also send the OrderEvent Data with type as "ORDERED_REVERSED" and sends the data on Topic "reversed-orders".
+
+====================================================================================================================================
+
+-> We have to run kafka Zookeeper and Kafka Server from Kafka folder
+-> To Connect with DB Console:(For Orders):- http://localhost:8080/h2-console (Run in Chrome and provide DB details from .yml file)
+
+Payload:-
+--------
+http://localhost:8080/api/orders (POST)
+{
+    "item": "books",
+    "quantity": 10,
+    "amount": 1000,
+    "address": "Bombay",
+    "paymentMethod": "Credit Card"
+}
+
+http://localhost:8083/api/addItems (POST)
+{
+    "item":"books",
+    "quantity": 100
+}
+
+Note:- This API "http://localhost:8083/api/addItem", we have to run 1st to add quantity in DB, then other API calls should be followed.
+
+Flow:- From Order -> Payment -> Stock -> Delivery.
+-> From order, will request to purchase the items with quantity, amount and Payment Method.
+-> IF Order is successfully placed, the request goes to Payment MS.
+-> If Payment is success, then request/orderRequest goes to Stock Service.
+-> In Stock, 1st will check in DB, If requested item is available with the requested quantity. if available then will update the Stock in DB.
+-> If Stock is Successfully updated with leftover quantity then request goes to Delivery.
+-> Will Check and Save Delivery Details based on OrderRequest. If its Success then will make the Delivery.
+
+Fail Cases:-
+------------
+-> If Payment then will reverse the Order.
+-> If Stock Fails then will reverse the Payment and Order.
+-> If Delivery Fails then will reverse the Stock, Payment and Order.
+
+
+
+
+
+
+

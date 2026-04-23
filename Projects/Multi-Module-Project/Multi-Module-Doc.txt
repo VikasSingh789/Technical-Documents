@@ -1,0 +1,20 @@
+Common-Utils
+------------
+-> Only Includes @Entity, Repository, DTO's, Enum's, Constants and Utility/helper classes.
+-> No main() method
+-> Majorly Used as a Shared Resource or Jar like DB related classes.
+-> Acts as a JAR library, not a runnable Spring Boot application.
+-> We dont need to defile DB Related Properties in this MS
+-> Build and Plugin as Dependency in Pom.xml are Optional (Better Not to Include)
+
+Machine-MS
+----------
+-> Actual Ms which uses Common-Utils as a Dependency in pom.xml.
+-> Machine MS using Common-Utils as Shared Library so that DB related classes we dont have to define in this MS.
+-> We have to add DB Related Properties in this MS
+-> Below is the Syntax, how we can add Common-Utils as Dependency in pom.xml of Machine-MS
+<dependency>
+  <groupId>com.wipro.jcb.livelink.app</groupId>
+  <artifactId>JCB-Common-Util</artifactId>
+  <version>1.0</version>
+</dependency>
