@@ -1,0 +1,179 @@
+Q) What are Possible return Types of @Async
+A) It can return
+1) void
+2) Future<T>
+3) CompletableFuture<T>
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+Q) How Spring manages Threads in @Async
+A) Core Concept
+Spring handles @Async using a TaskExecutor (thread pool)
+The method runs in a separate thread, not the main thread
+Execution is asynchronous (background execution)
+
+-> Spring uses SimpleAsyncTaskExecutor by default when we use @Async. This happens if no custom Executor is configured
+-> SimpleAsyncTaskExecutor is Default Behaviour if we dont configure Anything or If we dont have any Executor. 
+-> SimpleAsyncTaskExecutor creates a new thread for every task and does not reuse threads
+
+Before Configuration
+--------------------
+@Async
+public void process() {
+    System.out.println(Thread.currentThread().getName());
+}
+
+for (int i = 0; i < 5; i++) {
+    service.process();
+}
+
+What happens:
+-> Spring sends or submits the task to the TaskExecutor i.e. SimpleAsyncTaskExecutor (default)
+-> For every call → new thread is created ❌
+-> Threads are not reused
+-> This can lead to performance and memory issues
+
+After Configuration
+--------------------
+@Bean(name = "taskExecutor")
+public Executor taskExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(2);
+    executor.setMaxPoolSize(2);
+    executor.setQueueCapacity(10);
+    executor.setThreadNamePrefix("MyPool-");
+    executor.initialize();
+    return executor;
+}
+
+@Async("taskExecutor")
+public void process() {
+    System.out.println(Thread.currentThread().getName());
+}
+
+What happens:
+-> Only 2 threads created
+-> Threads are reused
+
+Flow in Simple Terms
+-> Method is called
+-> Spring sends it to the executor (thread pool)
+-> A free thread executes it
+-> If all threads are busy -> task goes to queue
+
+Interview One-Liner:- By default, Spring uses SimpleAsyncTaskExecutor, which creates a new thread for each task. After configuring ThreadPoolTaskExecutor, it reuses a fixed number of threads, improving performance and scalability.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Your Spring Boot has a Memory Leak. How Do you Find it ?
+A) 1st Check Whether Its Actually a Memory leak.
+-> Check if Heap memory is growing consistently and never drops even after Garbage Collection.
+-> We can monitor this with help of Springboot Actuator.
+-> Take Dump of Heap from server to analyze. Take this Dump before Application Crashes.
+
+Common Spring Boot Memory leak Culprits
+---------------------------------------
+-> Entity Manager / Session Not Closed. (Streams from JPA Left Open)
+-> Caching Data But not Evicting (Removing).
+-> Static Collections Keep Growing.
+-> @Scope("singleton") beans loading file or data into Memory on Startup but never released.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How to check that 2 conditions are satisfied while creating a bean based on application properties values
+A) In application.properties, Based on Below 2 properties, I want to create beans.
+controller.enabled = true  //Boolean
+some.value = 15  //Integer
+
+-> We can use @ConditionalOnExpression. Below is the Example
+@RestController
+@ConditionalOnExpression("${controller.enabled} and ${some.value} > 10")
+public class OrderController{}
+
+-> If Both property is Boolean, Then we can use @ConditionalOnProperty. Below is the Example
+property1 = true
+property2 = true
+
+@RestController
+@ConditionalOnProperty({"property1", "property2"})
+public class OrderController{}
+
+Note:- For Non Boolean, we use @ConditionalOnExpression
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How to Optimize Spring Boot Startup Time
+1) Lazy Initialization:- Load beans only when required, not at startup.
+ex:- spring.main.lazy-initialization=true
+
+2) Profile Based Configuration Loading:- Load only environment-specific configs
+ex:- spring.profiles.active=dev
+
+3) Reduce Auto-Configuration:- Disable unused auto-configs
+ex:- @SpringBootApplication(
+        exclude = {DataSourceAutoConfiguration.class}
+     )
+
+5) Use spring-context-indexer:- Speeds up component scanning
+
+4) Limit Component Scanning:- Avoid scanning entire project
+ex:- @ComponentScan(basePackages = "com.myapp.service")
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) What is Spring-Context-Indexer and What Problem Does it Solves ?
+A) Normally, Spring Scans entire classpath to find:
+@Component
+@Service
+@Repository
+@Configuration
+-> These scannings are slow, especially in large projects.
+
+Add Dependency
+---------------
+<dependency>
+  <groupId>org.springframework</groupId>
+  <artifactId>spring-context-indexer</artifactId>
+  <optional>true</optional>
+</dependency>
+
+What spring-context-indexer does
+---------------------------------
+👉 It creates a file at build time:
+META-INF/spring.components
+
+This file contains:
+--------------------
+com.example.service.UserService=org.springframework.stereotype.Component
+com.example.repo.UserRepository=org.springframework.stereotype.Repository
+
+👉 So at runtime:
+------------------
+❌ No heavy scanning
+✅ Direct lookup from this file
+
+🔥 Important Notes
+--------------------
+✔ Works only for: @Component, @Service, @Repository, @Controller
+
+❌ Does NOT help for:
+-----------------------
+@Bean methods inside @Configuration
+
+What actually changes?
+Without Indexer:- Classpath scanning (slow) → find @Component, @Configuration, etc.
+With Indexer:- Read spring.components file → directly know component classes
+
+-> At runtime, Spring uses this metadata instead of scanning the entire classpath.
+
+Interview One-Liner:- spring-context-indexer reduces startup time by generating a metadata file (spring.components) at build time, allowing Spring to skip classpath scanning and directly register beans.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+

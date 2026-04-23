@@ -66,3 +66,22 @@ Q) You normalized your database But why did performance drop. Joins vs Denormali
 A) Normalization reduces redundancy but increases JOIN complexity, which can degrade read performance at scale, while denormalization trades redundancy for faster query performance.
 
 --------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Types of Indexes in DB
+Index-1: B-Tree Index
+----------------------
+-> Its also called as Default Index. Works on Where and Join Condition.
+-> But Adding indexes on Every Columns, will also slows down write Queries.
+
+Index-2: Composite Index
+-------------------------
+-> When we apply indexes on 2 Columns. Like "age" and "City".
+-> Follow Left to Right Order. Order in which Indexes has been created, same order we have to write where condition in query.
+-> While Filtering or writing where condition, order needs to be followed like where age="" and city = ""
+-> Composite Index may not work if we revers the Order.
+
+Index-3: Full-Text Index
+-------------------------
+-> Use Match and not Like keyword.
+
+--------------------------------------------------------------------------------------------------------------------------------------------

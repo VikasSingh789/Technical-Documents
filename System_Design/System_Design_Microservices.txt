@@ -4,28 +4,12 @@ A) Both control traffic - but they solve different problems
 1️⃣ Rate Limiting (Hard Stop)
 👉 Limits how many requests a user can make in a time window.
 Use when: You want to block abuse completely.
-Example:
-User allowed 100 requests/min → 101st request gets rejected (429)
+Example:- User allowed 100 requests/min → 101st request gets rejected (429)
 
 2️⃣ Throttling (Slow Down)
 👉 Slows requests instead of blocking them.
 Use when: You want to protect the system without breaking users.
-Example:
-User refreshes a page rapidly → app still works, but responses get slower each time.
-⸻
-
-When to Use What
-👉 Rate limit → Stop bots, scrapers, brute-force attacks.
-👉 Throttle → Handle traffic spikes, bursty clients, peak hours.
-
-Real-World Use Together
-👉 Most systems use both.
-Example:
-• Throttle normal users during peak traffic
-• Rate limit suspicious users aggressively
-
-One-Liner:- Rate limiting protects fairness. Throttling protects stability.
-
+Example:- if a user refreshes a page rapidly, the system may respond more slowly instead of blocking the requests.
 --------------------------------------------------------------------------------------------------------------------------------------------
 
 Q) How do you Trace a single User Request across Multiple Microservices
@@ -62,7 +46,7 @@ Steps :
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 
-Q) Since you are Reading Data and Not Inserting ot Updating. What Technique You use to Improve API Performance.
+Q) Since you are Reading Data and Not Inserting or Updating. What Technique You use to Improve API Performance.
 A) We use the "readOnly" property inside the Transactional annotation and set it to true. Below is Example,
 Example:-
 @Transactional (readOnly = true)
@@ -179,43 +163,6 @@ A) 1️⃣ Service is Down:- Target microservice is not running or crashed.
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 
-Q) Your Spring Boot has a Memory Leak. How Do you Find it ?
-A) 1st Check Whether Its Actually a Memory leak.
--> Check if Heap memory is growing consistently and never drops even after Garbage Collection.
--> We can monitor this with help of Springboot Actuator.
--> Take Dump of Heap from server to analyze. Take this Dump before Application Crashes.
-
-Common Spring Boot Memory leak Culprits
----------------------------------------
--> Entity Manager / Session Not Closed. (Streams from JPA Left Open)
--> Caching Data But not Evicting (Removing).
--> Static Collections Keep Growing.
--> @Scope("singleton") beans loading file or data into Memory on Startup but never released.
-
---------------------------------------------------------------------------------------------------------------------------------------------
-
-Q) How to check that 2 conditions are satistied while creating a bean based on application properties values
-A) In application.properties, Based on Below 2 properties, I want to create beans. Below are the properties,
-controller.enabled = true  //Boolean
-some.value = 15  //Integer
-
--> We can use @ConditionalOnExpression. Below is the Example
-@RestController
-@ConditionalOnExpression("${controller.enabled} and ${some.value} > 10")
-public class OrderController{}
-
--> If Both property is Boolean, Then we can use @ConditionalOnProperty. Below is the Example
-property1 = true
-property2 = true
-
-@RestController
-@ConditionalOnProperty({"property1", "property2"})
-public class OrderController{}
-
-Note:- For Non Boolean, we use @ConditionalOnExpression
-
---------------------------------------------------------------------------------------------------------------------------------------------
-
 Q) Why do most large companies place an API Gateway in front of their microservices ?
 A) Single entry point for all services
 • Centralized auth & security
@@ -276,6 +223,21 @@ How to decide?
 👉 Need real-time response → go sync
 👉 Need scalability & loose coupling → go async
 👉 High traffic systems → prefer event-driven (async)
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Why do Microservices make System Slow
+1️⃣ Network Calls Everywhere
+-> Every microservice talks over the network. More services → more travel time.
+-> Example: Your order service calls inventory, payment, and delivery → each adds milliseconds.
+
+2️⃣ Too Many Small Requests (Chatty APIs)
+-> Sending multiple tiny requests back and forth slows the system.
+-> Example: User logs in → 5 services check profile, settings, notifications, preferences, and messages.
+
+3️⃣ Data Conversion Takes Time (Serialization/Deserialization)
+-> Every call converts data to JSON → adds processing time.
+-> Example: Sending a product catalog from catalog service to recommendation service.
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 

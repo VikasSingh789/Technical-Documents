@@ -218,7 +218,49 @@ m3();
 -> If we are using both "throws" and "try catch" on m3() as above Example, then Exception will not be Propagated and will get caught in m3() itself. So no use of using Both.
 
 Q) What is Volatile in java
-A) Volatile keyword is used to modify the value of a variable by different threads. It is also used to make classes thread safe. It means that multiple threads can use a method and instance of the classes at the same time without any problem. The volatile keyword can be used either with primitive type or objects.
+A) volatile is a keyword used in multithreading to ensure visibility of changes across threads
+-> When a variable is declared as volatile, any update by one thread is immediately visible to all other threads
+-> It prevents thread-local caching, so threads always read the latest value from main memory.
+When to Use
+-----------
+-> When only visibility is required, not complex operations
+Example: flags, status variables
+volatile boolean flag = true;
+
+Q) What are atomic variables in Java?
+A) Atomic variables are used in multithreading to perform thread-safe operations
+-> They ensure that an operation is done in one single step (atomic)
+-> They do not require synchronized or locks
+-> When multiple threads update a value, it prevents data inconsistency (race condition)
+
+Example
+-------
+AtomicInteger count = new AtomicInteger(0);
+count.incrementAndGet(); // thread-safe
+
+Important Point
+---------------
+Atomic variables provide both visibility and atomicity
+Unlike volatile, which provides only visibility
+
+Q) What is Thread-Safe
+A) Multiple threads can access and modify shared data without causing data inconsistency or unexpected behavior
+-> Thread-safe means a resource or code can be accessed by multiple threads safely without race conditions or incorrect results.
+Thread safety ensures:
+----------------------
+✅ No data inconsistency
+✅ No race conditions
+✅ Predictable behavior
+
+Example 
+--------
+int count = 0;
+count++; // Not thread-safe. Multiple threads can overwrite each other’s updates
+
+Example (Thread-safe)
+---------------------
+AtomicInteger count = new AtomicInteger(0);
+count.incrementAndGet();
 
 Q) What is Synchronization
 A) Synchronization in java is the capability to control the access of multiple threads to any shared resource. In the Multithreading concept, multiple threads try to access the shared resources at a time to produce inconsistent results. The synchronization is necessary for reliable communication between threads.
@@ -358,7 +400,7 @@ Integer a = null;
 5) Serialization can allow only object data.
 
 Q) Which one is good to store password in Java ? String or char[] & why
-A)  a)If we store our "passwords" in String, it may get stored in memory untill GC clears the memory.
+a)If we store our "passwords" in String, it may get stored in memory untill GC clears the memory.
 b)SCPA is used for reusability, there is a pretty  high chance that it will remain in memory for long duration.
 c)The 1 who have access to Memory Dump, can find the password in clear text
 d)Since Strings are Immutable, there are no way, contents of Strings can be changed because any change will produce new String.
@@ -403,3 +445,45 @@ A) -> Excessive use of static members
 -> poorly written custome data structure.
 
 static members:- These are not associated with any objects. Static Members have lifespan of almost application. whenever class is loaded in JVM at that time all static members allocated memory. It will remain in the memory untill the class loader become eligible for garbage collection.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Can we Perform Dependency Injection(DI) Using Java
+A) Yes. You can perform Dependency Injection (DI) using Core Java.
+In Core Java, DI is done manually using:
+1️⃣ Constructor Injection
+2️⃣ Setter Injection
+
+Note: We don’t create dependencies using the new keyword inside the class. Instead, we inject them from outside using constructor or setter methods.
+
+One Liner:- Yes, in Core Java we can implement DI manually using constructor or setter injection, following the IoC principle, while frameworks like Spring automate it. This improves loose coupling, testability, and maintainability.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Why String is Immutable in Java
+A) String is immutable, which means once we create a String, we cannot change its value. If we try to modify it, a new String object will be created.
+
+Why Java Made String Immutable
+-------------------------------
+1) For Security Reasons:- 
+-> Strings are used in things like file paths, database connections, and user logins.
+-> If Strings were changeable, someone could easily tamper with these values, that would be dangerous.
+
+2) To work properly in HashMaps and Sets:-
+-> We often use Strings as keys in HashMap, HashSet. These collections depend on the hashCode of the key.
+-> If the String changes after adding it to the map, its hash code will also change, and the map won't be able to find it again.
+
+3) Memory efficiency using String Pool:-
+-> Java stores common String values in a special memory area called the String Constant Pool Area(SCPA).
+-> As Strings are immutable, Java can reuse them safely by saving memory and improving performance.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) How to make a Map Object Thread-Safe without using ConcurrentHashMap ?
+A) Map<Integer,Integer> map = new HashMap<>();
+-> To Make above map Object Thread-Safe without using ConcurrentHashMap, we can use below methods,
+1) Map<Integer, Integer> map = Collections.synchronizedMap(new HashMap<>());     // For Map Object
+2) List<Integer> list = Collections.synchronizedList(new ArrayList<>());         // For List Object
+3) Set<Integer> set = Collections.synchronizedSet(new HashSet<>());              // For Set Object
+
+--------------------------------------------------------------------------------------------------------------------------------------------

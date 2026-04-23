@@ -68,7 +68,64 @@ Q) If cache is much faster than a database, why don't we just store everything i
 -> Databases provide strong guarantees like ACID properties (Atomicity, Consistency, Isolation, Durability) to ensure data correctness. 
 -> Cache may sometimes contain stale or outdated data.
 
+5️⃣ Cache is volatile , database is durable
+-> Cache usually lives in RAM. If the machine reboots or crashes, whole data is gone. 
+-> Database store data on disk so it survives restarts , outages and power loss.
+
 --------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Can you explain how you have implemented Redis in your project? Please walk me through a real use case, including the methods, data structures, and approach you used ?
+A) In my project, I used Redis primarily for caching and performance optimization in high-traffic APIs.
+-> For example, in "/reports" API, frequently accessed data was causing repeated database hits and latency.
+-> To solve this, I implemented Redis as a cache layer between the application and the database.
+
+⚙️ Implementation Approach
+--------------------------
+1️⃣ Cache-Aside Pattern (Lazy Loading)
+First check Redis → if data exists (cache hit), return it
+If not (cache miss), fetch from DB → store in Redis → return response
+
+Methods / Operations in Spring Data Redis
+-----------------------------------------
+@Cacheable:- GET (Read from Cache)
+@CachePut:- SET (Create / Add to Cache)
+@CacheEvict:- DELETE (Remove from Cache)
+@CacheEvict(value = "users", allEntries = true):- Clear Entire Cache
+
+⏱️ TTL (Time To Live)
+----------------------
+-> Set expiry (e.g., 5–10 mins) to avoid stale data
+-> Helps maintain data freshness + performance balance
+
+Cache Invalidation
+-------------------
+-> On DB update → explicitly remove/update Redis key
+-> Ensures consistency between cache and database
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

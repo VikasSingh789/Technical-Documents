@@ -209,6 +209,19 @@ Summary:- When messages are produced but not visible to consumers, I systematica
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 
+Q) How do you Manage Transactions across Kafka and DB
+1️⃣ Commit Kafka Offset Only After DB Success
+-> Process the Kafka message and update the database first.
+-> Commit the Kafka offset only after the database transaction completes successfully.
+-> If the DB operation fails, the offset is not committed, and the message is reprocessed.
+-> This ensures at-least-once delivery and prevents data loss.
+
+2️⃣ Make Database Operations Idempotent
+-> Kafka can re-deliver messages, so duplicate processing is possible.
+-> Design DB operations to be idempotent using unique business keys or deduplication logic.
+-> This guarantees data consistency even if the same message is processed multiple times.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
