@@ -241,6 +241,82 @@ Q) Why do Microservices make System Slow
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 
+Q) Your Java service is slow but CPU usage is low - what do you investigate first ?
+Q) A thread pool is configured correctly, yet tasks are getting delayed. Why?
+1️⃣ External Dependencies (Top Priority)
+-> Database (slow queries, locks, connection pool exhaustion)
+-> REST API calls (timeouts, retries)
+-> File I/O or network latency
+
+2️⃣ Connection Pool Issues
+-> DB pool exhausted (e.g., HikariCP max connections reached)
+-> Threads waiting for a connection
+
+3️⃣ Lock Contention
+-> synchronized blocks
+-> Static shared resources
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Production logs show no errors, but users face random failures. What could be wrong ?
+1️⃣ Logging Level Misconfigured
+-> Prod log level = INFO or WARN
+-> Actual error logged at DEBUG
+👉 Failure exists, but you’re not recording it
+
+2️⃣ Async / Background Failures
+-> @Async
+-> ExecutorService
+-> Messaging queues
+👉 Exceptions happen in another thread → not logged in main flow
+
+3️⃣ Data Issues (Edge Cases)
+-> Null values
+-> Unexpected input
+-> Corrupt data
+👉 Logic fails silently (no exception)
+
+Interview One-Liner:- If users see failures but logs are clean, I’d suspect swallowed exceptions, async failures, logging misconfiguration, or lack of observability like missing trace IDs.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) Multiple threads update shared data and results are inconsistent - how do you fix it ?
+A) Use Atomic variables
+-> Use synchronized (simple & reliable)
+-> Use Locks (ReentrantLock). More control than synchronized
+-> Use Concurrent Collections
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Q) One API call blocks others even though threads are available. Why ?
+1️⃣ Lock Contention (Most Common)
+synchronized void process() { ... }
+-> One request enters → others wait
+-> Threads are free, but blocked on the same lock
+
+2️⃣ Connection Pool Exhaustion
+-> 50 threads available
+-> DB pool size = 10
+👉 10 run, 40 wait → looks like blocking
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
